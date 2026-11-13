@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- Inicio de sesión institucional (personal CETS) — HU-6.1 conectada a LoginInstitucionalBean -->
+<!-- Inicio de sesión institucional (personal CETS) — HU-6.1 conectada a PanelCetsController -->
 <!DOCTYPE html>
 <ui:composition xmlns="http://www.w3.org/1999/xhtml"
                 xmlns:h="jakarta.faces.html"
@@ -45,14 +45,14 @@
 
                         <div class="campo">
                             <p:outputLabel for="correo">Correo electrónico institucional <span class="requerido">*</span></p:outputLabel>
-                            <p:inputText id="correo" type="email" value="#{loginInstitucionalBean.correoInstitucional}"
+                            <p:inputText id="correo" type="email" value="#{panelCetsController.personal.correoInstitucional}"
                                          required="true" requiredMessage="Escribe tu correo institucional"
                                          placeholder="usuario@cets-oaxaca.gob.mx"/>
                             <span class="ayuda"><i class="pi pi-info-circle"></i> Usa la cuenta asignada por el CETS.</span>
                         </div>
                         <div class="campo">
                             <p:outputLabel for="contrasena">Contraseña <span class="requerido">*</span></p:outputLabel>
-                            <p:password id="contrasena" value="#{loginInstitucionalBean.password}"
+                            <p:password id="contrasena" value="#{panelCetsController.personal.usuario.passwordHash}"
                                         required="true" requiredMessage="Escribe tu contraseña"
                                         placeholder="••••••••" toggleMask="true"/>
                         </div>
@@ -62,7 +62,7 @@
                         </div>
                         <p:commandButton value="Ingresar al portal institucional" icon="pi pi-sign-in"
                                          styleClass="boton-bloque"
-                                         action="#{loginInstitucionalBean.ingresarCredenciales}" ajax="false"/>
+                                         action="#{panelCetsController.iniciarSesionInstitucional}" ajax="false"/>
                     </h:form>
 
                     <div class="division-texto">¿Eres ciudadano?</div>

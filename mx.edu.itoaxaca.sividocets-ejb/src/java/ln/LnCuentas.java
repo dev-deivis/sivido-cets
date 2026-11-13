@@ -47,7 +47,9 @@ public class LnCuentas {
         return autenticado ? usuario : null;
     }
 
-    private boolean autenticarse(Usuario usuario, String password) {
+    // Compara el hash de la contraseña en texto plano con el guardado.
+    // Público porque LnPanelCETS lo reutiliza (hash() vive solo aquí).
+    public boolean autenticarse(Usuario usuario, String password) {
         if (usuario == null) {
             return false;
         }

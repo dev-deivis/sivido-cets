@@ -8,10 +8,6 @@ import acceso_datos.PersonalCETSFacade;
 import jakarta.ejb.EJB;
 import jakarta.ejb.LocalBean;
 import jakarta.ejb.Stateless;
-import java.nio.charset.StandardCharsets;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
-import java.util.HexFormat;
 import modelo.PersonalCETS;
 
 
@@ -26,10 +22,15 @@ public class LnPanelCETS {
     @EJB
     private PersonalCETSFacade personalF;
 
-    // HU-6.1 Iniciar sesión como personal institucional
-    public PersonalCETS iniciarSesionInstitucional(String correoInstitucional, String password) {
-        PersonalCETS personal = personalF.buscarPorCorreoInstitucional(correoInstitucional);
-        boolean autenticado = autenticarse(personal, password);
+    @EJB
+    private LnCuentas lnCuentas;
+
+    // HU-6.1 Iniciar sesión como personal institucional.
+    // p trae correoInstitucional y usuario.passwordHash (texto plano) desde la vista.
+    // Regresa el PersonalCETS autenticado o null.
+    public PersonalCETS iniciarSesionInstitucional(PersonalCETS p) {
+        PersonalCETS personal = personalF.buscarPorCorreoInstitucional(p.getCorreoInstitucional());
+        boolean autenticado = autenticarse(personal, p.getUsuario().getPasswordHash());
         return autenticado ? personal : null;
     }
 
@@ -37,15 +38,6 @@ public class LnPanelCETS {
         if (personal == null || !personal.getActivo()) {
             return false;
         }
-        return personal.getUsuario().getPasswordHash().equals(hash(password));
-    }
-
-    private String hash(String password) {
-        try {
-            MessageDigest md = MessageDigest.getInstance("SHA-256");
-            return HexFormat.of().formatHex(md.digest(password.getBytes(StandardCharsets.UTF_8)));
-        } catch (NoSuchAlgorithmException e) {
-            throw new IllegalStateException(e);
-        }
+        return lnCuentas.autenticarse(personal.getUsuario(), password);
     }
 }
