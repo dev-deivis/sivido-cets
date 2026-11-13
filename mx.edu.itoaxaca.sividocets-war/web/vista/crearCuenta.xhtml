@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- Crear cuenta — HU-1.1 conectada a RegistroBean -->
+<!-- Crear cuenta — HU-1.1 conectada a CuentasController -->
 <!DOCTYPE html>
 <ui:composition xmlns="http://www.w3.org/1999/xhtml"
                 xmlns:h="jakarta.faces.html"
@@ -29,7 +29,7 @@
 
                     <div class="campo">
                         <p:outputLabel for="nombre">Nombre completo <span class="requerido">*</span></p:outputLabel>
-                        <p:inputText id="nombre" value="#{registroBean.nombreCompleto}" required="true"
+                        <p:inputText id="nombre" value="#{cuentasController.usuario.nombreCompleto}" required="true"
                                      requiredMessage="Escribe tu nombre completo"
                                      placeholder="Ej. María Elena Jiménez Bautista"/>
                         <span class="ayuda"><i class="pi pi-info-circle"></i> Escribe tu nombre tal como aparece en tu identificación oficial.</span>
@@ -37,14 +37,14 @@
                     <div class="grid grid-2" style="gap:0 1rem">
                         <div class="campo">
                             <p:outputLabel for="telefono">Teléfono de contacto <span class="requerido">*</span></p:outputLabel>
-                            <p:inputText id="telefono" value="#{registroBean.telefono}" required="true"
+                            <p:inputText id="telefono" value="#{cuentasController.usuario.telefono}" required="true"
                                          requiredMessage="Escribe tu teléfono"
                                          placeholder="951 123 4567" maxlength="10"/>
                             <span class="ayuda">10 dígitos</span>
                         </div>
                         <div class="campo">
                             <p:outputLabel for="correo">Correo electrónico <span class="requerido">*</span></p:outputLabel>
-                            <p:inputText id="correo" type="email" value="#{registroBean.correo}" required="true"
+                            <p:inputText id="correo" type="email" value="#{cuentasController.usuario.correo}" required="true"
                                          requiredMessage="Escribe tu correo"
                                          placeholder="ejemplo@correo.com"/>
                         </div>
@@ -52,13 +52,13 @@
                     <div class="grid grid-2" style="gap:0 1rem">
                         <div class="campo">
                             <p:outputLabel for="contrasena">Contraseña <span class="requerido">*</span></p:outputLabel>
-                            <p:password id="contrasena" value="#{registroBean.password}" required="true"
+                            <p:password id="contrasena" value="#{cuentasController.usuario.passwordHash}" required="true"
                                         requiredMessage="Escribe una contraseña"
                                         placeholder="••••••••" toggleMask="true"/>
                         </div>
                         <div class="campo">
                             <p:outputLabel for="confirmar">Confirmar contraseña <span class="requerido">*</span></p:outputLabel>
-                            <p:password id="confirmar" value="#{registroBean.confirmacion}" required="true"
+                            <p:password id="confirmar" value="#{cuentasController.confirmacion}" required="true"
                                         requiredMessage="Confirma tu contraseña"
                                         placeholder="••••••••" toggleMask="true"/>
                         </div>
@@ -74,13 +74,13 @@
                     </div>
 
                     <div class="check-linea mb-2">
-                        <p:selectBooleanCheckbox id="aviso" value="#{registroBean.aceptaAviso}"/>
+                        <p:selectBooleanCheckbox id="aviso" value="#{cuentasController.aceptaAviso}"/>
                         <p:outputLabel for="aviso">He leído y acepto el <strong>Aviso de privacidad</strong> y el consentimiento
                             informado del CETS Oaxaca para el tratamiento de mis datos personales en materia de salud.</p:outputLabel>
                     </div>
 
                     <p:commandButton value="Crear cuenta" icon="pi pi-user-plus" styleClass="boton-bloque"
-                                     action="#{registroBean.llenarFormulario}" ajax="false"/>
+                                     action="#{cuentasController.registrarUsuario}" ajax="false"/>
                 </h:form>
 
                 <div class="division-texto">¿Ya tienes cuenta?</div>

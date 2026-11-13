@@ -27,20 +27,16 @@ public class LnCuentas {
     @EJB
     private UsuarioFacade usuarioF;
 
-    // HU-1.1 Alta inicial
-    public boolean registrarUsuario(String nombreCompleto, String telefono,
-            String correo, String password) {
-        boolean valido = validarDatos(correo);
+    // HU-1.1 Alta inicial: la vista llena el Usuario completo;
+    // passwordHash llega en texto plano y aquí se reemplaza por su hash.
+    public boolean registrarUsuario(Usuario u) {
+        boolean valido = validarDatos(u.getCorreo());
         if (!valido) {
             return false;
         }
-        Usuario usuario = new Usuario();
-        usuario.setNombreCompleto(nombreCompleto);
-        usuario.setTelefono(telefono);
-        usuario.setCorreo(correo);
-        usuario.setPasswordHash(hash(password));
-        usuario.setFechaRegistro(new Date());
-        guardarUsuario(usuario);
+        u.setPasswordHash(hash(u.getPasswordHash()));
+        u.setFechaRegistro(new Date());
+        guardarUsuario(u);
         return true;
     }
     // HU-1.2 Autenticación
