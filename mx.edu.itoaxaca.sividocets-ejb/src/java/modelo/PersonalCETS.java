@@ -61,6 +61,8 @@ public class PersonalCETS implements Serializable {
     private List<UnidadSangre> unidadSangreList;
 
     public PersonalCETS() {
+        // Estado inicial (DEFAULT TRUE en BD)
+        this.activo = true;
     }
 
     public PersonalCETS(Integer usuarioid) {

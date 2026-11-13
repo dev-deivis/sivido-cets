@@ -91,6 +91,8 @@ public class SolicitudReposicion implements Serializable {
     private List<UnidadSangre> unidadSangreList;
 
     public SolicitudReposicion() {
+        // Estado inicial (DEFAULT 'Activa' en BD)
+        this.estatus = "Activa";
     }
 
     public SolicitudReposicion(Integer id) {

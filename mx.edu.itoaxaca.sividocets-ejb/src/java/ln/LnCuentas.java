@@ -40,9 +40,6 @@ public class LnCuentas {
         usuario.setCorreo(correo);
         usuario.setPasswordHash(hash(password));
         usuario.setFechaRegistro(new Date());
-        usuario.setConsentimientoContacto(false);
-        usuario.setExclusionPermanente(false);
-        usuario.setConsentimientoInteroperabilidad(false);
         guardarUsuario(usuario);
         return true;
     }

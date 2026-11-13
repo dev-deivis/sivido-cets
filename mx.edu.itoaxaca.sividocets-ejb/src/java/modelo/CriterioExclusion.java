@@ -60,6 +60,9 @@ public class CriterioExclusion implements Serializable {
     private List<RespuestaCriterio> respuestaCriterioList;
 
     public CriterioExclusion() {
+        // Estado inicial (DEFAULTs de la BD)
+        this.tipoRespuesta = "SiNo";
+        this.activo = true;
     }
 
     public CriterioExclusion(Integer id) {

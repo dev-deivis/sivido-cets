@@ -54,6 +54,8 @@ public class InstitucionExterna implements Serializable {
     private List<HistorialExterno> historialExternoList;
 
     public InstitucionExterna() {
+        // Estado inicial (DEFAULT TRUE en BD)
+        this.activa = true;
     }
 
     public InstitucionExterna(Integer id) {

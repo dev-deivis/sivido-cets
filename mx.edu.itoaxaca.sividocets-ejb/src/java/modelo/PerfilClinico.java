@@ -61,6 +61,8 @@ public class PerfilClinico implements Serializable {
     private Usuario usuario;
 
     public PerfilClinico() {
+        // Estado inicial (DEFAULT 5 en BD; CHECK IN (3,5,10))
+        this.radioNotificacion = 5;
     }
 
     public PerfilClinico(Integer usuarioid) {
