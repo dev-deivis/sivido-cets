@@ -29,7 +29,7 @@ public class SesionController implements Serializable {
 
     public String cerrarSesion() {
         FacesContext.getCurrentInstance().getExternalContext().invalidateSession();
-        return "/vista/index?faces-redirect=true";
+        return "/vista/publico/index?faces-redirect=true";
     }
 
     public String cerrarSesionCETS() {

@@ -15,11 +15,11 @@
 
     <ui:define name="encabezado">
         <nav class="menu-superior">
-            <h:link outcome="/vista/index" value="Inicio"
+            <h:link outcome="/vista/publico/index" value="Inicio"
                     styleClass="#{menuActivo eq 'inicio' ? 'activo' : ''}"/>
-            <h:link outcome="/vista/requisitos" value="Requisitos"
+            <h:link outcome="/vista/publico/requisitos" value="Requisitos"
                     styleClass="#{menuActivo eq 'requisitos' ? 'activo' : ''}"/>
-            <h:link outcome="/vista/ayuda" value="Ayuda"
+            <h:link outcome="/vista/publico/ayuda" value="Ayuda"
                     styleClass="#{menuActivo eq 'ayuda' ? 'activo' : ''}"/>
             <span class="separador-menu"></span>
             <h:link outcome="/vista/cuentas/iniciarSesion" value="Iniciar sesión"
