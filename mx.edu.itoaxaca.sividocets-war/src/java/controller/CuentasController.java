@@ -55,7 +55,7 @@ public class CuentasController {
         Usuario autenticado = lnCuentas.iniciarSesion(usuario);
         if (autenticado != null) {
             sesion.iniciar(autenticado, "usuario");
-            return "/vista/notificaciones?faces-redirect=true";
+            return "/vista/notificaciones/notificaciones?faces-redirect=true";
         }
         error("Correo o contraseña incorrectos");
         return null;
