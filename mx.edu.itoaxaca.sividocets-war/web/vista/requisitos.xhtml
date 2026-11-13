@@ -1,0 +1,177 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Requisitos para donar — vista pública estática (diseño Stitch v3) -->
+<!DOCTYPE html>
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:h="jakarta.faces.html"
+                xmlns:ui="jakarta.faces.facelets"
+                xmlns:p="primefaces"
+                template="/plantillas/plantillaPublica.xhtml">
+
+    <ui:param name="menuActivo" value="requisitos"/>
+    <ui:define name="titulo">Requisitos para donar · SIVIDO</ui:define>
+
+    <ui:define name="content">
+        <section class="heroe">
+            <div class="contenedor">
+                <span class="etiqueta roja mono"><i class="pi pi-verified"></i> NOM-253-SSA1-2012</span>
+                <span class="sobretitulo mt-2" style="display:block">Criterios de elegibilidad del donante</span>
+                <h1>Requisitos oficiales para la donación de sangre</h1>
+                <p class="lead">Lineamientos técnicos y sanitarios conforme a la Norma Oficial Mexicana
+                    NOM-253-SSA1-2012 para la disposición de sangre humana en el Estado de Oaxaca.</p>
+
+                <div class="aviso ambar mt-2">
+                    <i class="pi pi-exclamation-triangle"></i>
+                    <div>
+                        <strong>Aviso de valoración médica obligatoria</strong>
+                        <p>Esta lista es orientativa. La determinación definitiva de aptitud la realiza presencialmente
+                            el personal médico del CETS Oaxaca antes de cada extracción.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="seccion">
+            <div class="contenedor">
+                <div class="seccion-titulo">
+                    <span class="sobretitulo">Condiciones invariables</span>
+                    <h2>Requisitos esenciales para donantes</h2>
+                    <p>Todos los requerimientos responden a la seguridad del receptor y del donante.</p>
+                </div>
+
+                <div class="grid grid-4">
+                    <div class="tarjeta tarjeta-borde-rojo">
+                        <div class="fila-entre"><span class="icono-caja"><i class="pi pi-id-card"></i></span><span class="mono texto-tenue">01 / 08</span></div>
+                        <span class="sobretitulo mt-1" style="display:block">Legal y edad</span>
+                        <h3>Identificación oficial</h3>
+                        <p class="texto-sec">Tener entre <strong>18 y 65 años</strong> y presentar documento vigente con fotografía (INE, pasaporte o cédula profesional).</p>
+                        <span class="texto-chico texto-tenue"><i class="pi pi-info-circle"></i> No se admiten copias</span>
+                    </div>
+                    <div class="tarjeta tarjeta-borde-rojo">
+                        <div class="fila-entre"><span class="icono-caja"><i class="pi pi-gauge"></i></span><span class="mono texto-tenue">02 / 08</span></div>
+                        <span class="sobretitulo mt-1" style="display:block">Peso</span>
+                        <h3>Peso corporal mínimo</h3>
+                        <p class="texto-sec">Pesar <strong>más de 50 kg</strong> para que la donación sea segura para tu organismo.</p>
+                        <span class="texto-chico texto-tenue"><i class="pi pi-shield"></i> Previene desvanecimientos</span>
+                    </div>
+                    <div class="tarjeta tarjeta-borde-rojo">
+                        <div class="fila-entre"><span class="icono-caja"><i class="pi pi-clock"></i></span><span class="mono texto-tenue">03 / 08</span></div>
+                        <span class="sobretitulo mt-1" style="display:block">Preparación</span>
+                        <h3>Ayuno ligero</h3>
+                        <p class="texto-sec">Ayuno breve de al menos <strong>4 horas libre de grasas</strong>, lácteos y carnes. Se recomiendan líquidos claros.</p>
+                        <span class="texto-chico texto-tenue"><i class="pi pi-info-circle"></i> La hidratación previa es vital</span>
+                    </div>
+                    <div class="tarjeta tarjeta-borde-rojo">
+                        <div class="fila-entre"><span class="icono-caja"><i class="pi pi-heart"></i></span><span class="mono texto-tenue">04 / 08</span></div>
+                        <span class="sobretitulo mt-1" style="display:block">Clínica</span>
+                        <h3>Estado de salud general</h3>
+                        <p class="texto-sec">Sin fiebre, resfriado, tos o diarrea en los últimos <strong>14 días</strong>.</p>
+                        <span class="texto-chico texto-tenue"><i class="pi pi-check-circle"></i> Evaluado en el CETS</span>
+                    </div>
+                    <div class="tarjeta tarjeta-borde-rojo">
+                        <div class="fila-entre"><span class="icono-caja"><i class="pi pi-calendar"></i></span><span class="mono texto-tenue">05 / 08</span></div>
+                        <span class="sobretitulo mt-1" style="display:block">Periodicidad</span>
+                        <h3>Intervalo entre donaciones</h3>
+                        <p class="texto-sec">Haber cumplido <strong>2 meses</strong> (hombres) o <strong>3 meses</strong> (mujeres) desde la última donación de sangre total.</p>
+                        <span class="texto-chico texto-tenue"><i class="pi pi-clock"></i> Recuperación del organismo</span>
+                    </div>
+                    <div class="tarjeta tarjeta-borde-rojo">
+                        <div class="fila-entre"><span class="icono-caja"><i class="pi pi-pencil"></i></span><span class="mono texto-tenue">06 / 08</span></div>
+                        <span class="sobretitulo mt-1" style="display:block">Seguridad</span>
+                        <h3>Tatuajes y perforaciones</h3>
+                        <p class="texto-sec">Haber transcurrido <strong>mínimo 12 meses</strong> tras tatuajes, micropigmentación, perforaciones o acupuntura.</p>
+                        <span class="texto-chico texto-tenue"><i class="pi pi-lock"></i> Periodo de ventana</span>
+                    </div>
+                    <div class="tarjeta tarjeta-borde-rojo">
+                        <div class="fila-entre"><span class="icono-caja"><i class="pi pi-box"></i></span><span class="mono texto-tenue">07 / 08</span></div>
+                        <span class="sobretitulo mt-1" style="display:block">Medicamentos</span>
+                        <h3>Medicamentos</h3>
+                        <p class="texto-sec">No haber consumido <strong>aspirina ni antiinflamatorios</strong> en las últimas 72 h, ni antibióticos en 7 a 14 días.</p>
+                        <span class="texto-chico texto-tenue"><i class="pi pi-info-circle"></i> Repórtalo en la entrevista</span>
+                    </div>
+                    <div class="tarjeta tarjeta-borde-rojo">
+                        <div class="fila-entre"><span class="icono-caja"><i class="pi pi-users"></i></span><span class="mono texto-tenue">08 / 08</span></div>
+                        <span class="sobretitulo mt-1" style="display:block">Protección clínica</span>
+                        <h3>Estilo de vida y cirugías</h3>
+                        <p class="texto-sec">No estar en <strong>embarazo o lactancia</strong>. Sin cirugías mayores en 6 meses ni alcohol en 48 horas.</p>
+                        <span class="texto-chico texto-tenue"><i class="pi pi-shield"></i> Prioridad a tu bienestar</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Mitos -->
+        <section class="seccion" style="background:var(--superficie);border-top:1px solid var(--borde);border-bottom:1px solid var(--borde)">
+            <div class="contenedor">
+                <div class="seccion-titulo">
+                    <span class="sobretitulo">Educación y cultura de la donación</span>
+                    <h2>Mitos frecuentes desmentidos</h2>
+                    <p>Conoce la realidad médica respaldada por las guías clínicas y la NOM-253.</p>
+                </div>
+                <div class="grid grid-3">
+                    <div class="tarjeta">
+                        <span class="etiqueta roja"><i class="pi pi-times-circle"></i> Mito popular</span>
+                        <p class="mito mt-1">"¿Si tengo tatuajes nunca más podré donar sangre?"</p>
+                        <hr class="separador"/>
+                        <span class="etiqueta verde"><i class="pi pi-check-circle"></i> Falso</span>
+                        <p class="texto-sec mt-1 mb-0">Solo debes esperar <strong>12 meses</strong> después de tatuarte o colocarte un piercing.</p>
+                    </div>
+                    <div class="tarjeta">
+                        <span class="etiqueta roja"><i class="pi pi-times-circle"></i> Mito popular</span>
+                        <p class="mito mt-1">"¿Debo presentarme en ayuno absoluto de 12 horas?"</p>
+                        <hr class="separador"/>
+                        <span class="etiqueta verde"><i class="pi pi-check-circle"></i> Falso</span>
+                        <p class="texto-sec mt-1 mb-0">El ayuno prolongado causa mareos. Solo requieres <strong>4 horas sin grasas ni lácteos</strong> y beber agua.</p>
+                    </div>
+                    <div class="tarjeta">
+                        <span class="etiqueta roja"><i class="pi pi-times-circle"></i> Mito popular</span>
+                        <p class="mito mt-1">"¿Donar sangre provoca aumento de peso o debilita?"</p>
+                        <hr class="separador"/>
+                        <span class="etiqueta verde"><i class="pi pi-check-circle"></i> Falso</span>
+                        <p class="texto-sec mt-1 mb-0">La donación no altera el metabolismo ni el apetito; el organismo se recupera en pocos días.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Qué traer y qué esperar -->
+        <section class="seccion">
+            <div class="contenedor grid grid-2">
+                <div class="tarjeta">
+                    <h3><i class="pi pi-briefcase texto-rojo"></i> Documentos obligatorios</h3>
+                    <p class="texto-sec">Presenta en recepción los siguientes elementos:</p>
+                    <ul class="lista-iconos">
+                        <li><i class="pi pi-id-card"></i><div><strong>Identificación oficial vigente</strong><span>INE original, pasaporte o cédula profesional con foto legible.</span></div></li>
+                        <li><i class="pi pi-file"></i><div><strong>Folio de la solicitud</strong><span>Si donas para un paciente, lleva el folio CETS de su solicitud.</span></div></li>
+                        <li><i class="pi pi-moon"></i><div><strong>Descanso previo</strong><span>Haber dormido al menos 6 horas la noche anterior.</span></div></li>
+                    </ul>
+                </div>
+                <div class="tarjeta">
+                    <h3><i class="pi pi-directions texto-rojo"></i> Pasos de atención en el banco de sangre</h3>
+                    <ol class="pasos mt-2">
+                        <li><span class="num">1</span><div><strong>Recepción y registro</strong><br/><span class="texto-sec">Cotejo de identificación y entrega de turno.</span></div></li>
+                        <li><span class="num">2</span><div><strong>Signos vitales</strong><br/><span class="texto-sec">Toma de presión, temperatura y peso.</span></div></li>
+                        <li><span class="num">3</span><div><strong>Entrevista médica</strong><br/><span class="texto-sec">Consulta privada con el médico del CETS.</span></div></li>
+                        <li><span class="num">4</span><div><strong>Extracción segura</strong><br/><span class="texto-sec">Con material estéril desechable.</span></div></li>
+                        <li><span class="num">5</span><div><strong>Refrigerio y constancia</strong><br/><span class="texto-sec">Descanso de recuperación y entrega del comprobante.</span></div></li>
+                    </ol>
+                </div>
+            </div>
+        </section>
+
+        <!-- CTA -->
+        <section class="seccion" style="padding-top:0">
+            <div class="contenedor">
+                <div class="banda-roja texto-centro">
+                    <h2>¿Listo para salvar vidas en Oaxaca?</h2>
+                    <p>Crea tu cuenta de donante en SIVIDO o consulta las preguntas frecuentes para resolver dudas adicionales.</p>
+                    <div class="fila" style="justify-content:center">
+                        <p:button outcome="/vista/crearCuenta" value="Crear cuenta para donar" icon="pi pi-user-plus" styleClass="boton-blanco"/>
+                        <h:link outcome="/vista/ayuda" styleClass="boton" style="background:transparent;border-color:#fff">
+                            <i class="pi pi-question-circle"></i> Preguntas frecuentes
+                        </h:link>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </ui:define>
+</ui:composition>

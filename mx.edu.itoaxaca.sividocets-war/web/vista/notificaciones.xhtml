@@ -1,0 +1,132 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Notificaciones y avisos compatibles — panel de usuario estático (diseño Stitch v3) -->
+<!DOCTYPE html>
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:h="jakarta.faces.html"
+                xmlns:f="jakarta.faces.core"
+                xmlns:ui="jakarta.faces.facelets"
+                xmlns:p="primefaces"
+                template="/plantillas/plantillaUsuario.xhtml">
+
+    <ui:param name="menuActivo" value="notificaciones"/>
+    <ui:define name="titulo">Notificaciones · SIVIDO</ui:define>
+
+    <ui:define name="content">
+        <div class="encabezado-pagina">
+            <span class="sobretitulo">Avisos de compatibilidad</span>
+            <h1>Avisos de solicitudes compatibles</h1>
+            <p>Solicitudes publicadas por el CETS Oaxaca que coinciden con tu grupo sanguíneo dentro de tu radio de aviso.</p>
+        </div>
+
+        <!-- Selector de radio de aviso -->
+        <div class="tarjeta mb-2">
+            <h:form id="formRadio" styleClass="fila-entre">
+                <div class="fila" style="flex-wrap:nowrap;max-width:620px">
+                    <span class="icono-caja"><i class="pi pi-map-marker"></i></span>
+                    <div>
+                        <strong>Radio de aviso</strong>
+                        <p class="texto-sec texto-chico mb-0">Recibe avisos según una distancia aproximada. Solo se calcula una
+                            cobertura estimada, sin geolocalización exacta.</p>
+                    </div>
+                </div>
+                <div class="fila">
+                    <span class="texto-chico negrita">Radio:</span>
+                    <p:selectOneButton id="radio" value="5">
+                        <f:selectItem itemLabel="3 km" itemValue="3"/>
+                        <f:selectItem itemLabel="5 km (recomendado)" itemValue="5"/>
+                        <f:selectItem itemLabel="10 km" itemValue="10"/>
+                    </p:selectOneButton>
+                </div>
+            </h:form>
+        </div>
+
+        <div class="grid grid-principal">
+            <!-- Avisos -->
+            <div class="columna">
+                <div class="tarjeta tarjeta-borde-izq">
+                    <div class="fila-entre">
+                        <div class="fila">
+                            <span class="grupo-sangre">O+</span>
+                            <span class="etiqueta roja"><i class="pi pi-bolt"></i> Urgente</span>
+                        </div>
+                        <span class="mono texto-chico texto-tenue">Folio CETS-OAX-2024-1102</span>
+                    </div>
+                    <h2 class="mt-2">Hospital General Dr. Aurelio Valdivieso</h2>
+                    <div class="fila-entre texto-chico texto-sec">
+                        <span><i class="pi pi-map-marker"></i> A menos de 3 km</span>
+                        <span><i class="pi pi-clock"></i> Hoy, hace 25 min</span>
+                    </div>
+                    <hr class="separador"/>
+                    <h:link outcome="/vista/cuestionario" styleClass="enlace-flecha">Ver solicitud y evaluar aptitud <i class="pi pi-arrow-right"></i></h:link>
+                </div>
+
+                <div class="tarjeta tarjeta-borde-izq">
+                    <div class="fila-entre">
+                        <div class="fila">
+                            <span class="grupo-sangre">O+</span>
+                            <span class="etiqueta ambar"><i class="pi pi-heart"></i> Pediátrica</span>
+                        </div>
+                        <span class="mono texto-chico texto-tenue">Folio CETS-OAX-2024-1108</span>
+                    </div>
+                    <h2 class="mt-2">Hospital de la Niñez Oaxaqueña</h2>
+                    <div class="fila-entre texto-chico texto-sec">
+                        <span><i class="pi pi-map-marker"></i> A menos de 5 km</span>
+                        <span><i class="pi pi-clock"></i> Ayer a las 18:30 hrs</span>
+                    </div>
+                    <hr class="separador"/>
+                    <h:link outcome="/vista/cuestionario" styleClass="enlace-flecha">Ver solicitud y evaluar aptitud <i class="pi pi-arrow-right"></i></h:link>
+                </div>
+
+                <div class="tarjeta tarjeta-borde-izq azul">
+                    <div class="fila-entre">
+                        <div class="fila">
+                            <span class="grupo-sangre claro">O+</span>
+                            <span class="etiqueta azul"><i class="pi pi-calendar"></i> Programada</span>
+                        </div>
+                        <span class="mono texto-chico texto-tenue">Folio CETS-OAX-2024-1115</span>
+                    </div>
+                    <h2 class="mt-2">Hospital Regional Presidente Juárez (ISSSTE)</h2>
+                    <div class="fila-entre texto-chico texto-sec">
+                        <span><i class="pi pi-map-marker"></i> A menos de 5 km</span>
+                        <span><i class="pi pi-clock"></i> Hace 2 días</span>
+                    </div>
+                    <hr class="separador"/>
+                    <h:link outcome="/vista/cuestionario" styleClass="enlace-flecha">Ver solicitud y evaluar aptitud <i class="pi pi-arrow-right"></i></h:link>
+                </div>
+            </div>
+
+            <!-- Columna lateral -->
+            <div class="columna">
+                <div class="tarjeta">
+                    <div class="tarjeta-cabecera roja"><h3><i class="pi pi-id-card"></i> Mi perfil de donante</h3></div>
+                    <div class="fila">
+                        <span class="grupo-sangre grande">O+<small>POSITIVO</small></span>
+                        <div>
+                            <strong>Donante altruista registrado</strong><br/>
+                            <span class="estatus activa">Puede donar</span>
+                        </div>
+                    </div>
+                    <dl class="datos mt-2">
+                        <dt>Última donación</dt><dd>20 mar 2024</dd>
+                        <dt>Región</dt><dd>Valles Centrales</dd>
+                    </dl>
+                </div>
+
+                <div class="tarjeta">
+                    <h3><i class="pi pi-shield texto-rojo"></i> Privacidad</h3>
+                    <ul class="lista-iconos">
+                        <li><i class="pi pi-lock"></i><span>Nadie puede ver tu teléfono o domicilio hasta que confirmes voluntariamente tu interés.</span></li>
+                        <li><i class="pi pi-heart"></i><span>La donación es voluntaria, gratuita y altruista.</span></li>
+                    </ul>
+                </div>
+
+                <div class="tarjeta tarjeta-plana">
+                    <h3><i class="pi pi-list-check texto-rojo"></i> Pre-evaluación digital</h3>
+                    <p class="texto-sec texto-chico">Ahorra tiempo contestando el cuestionario antes de acudir al CETS.</p>
+                    <p:button outcome="/vista/cuestionario" value="Cuestionario de elegibilidad" icon="pi pi-arrow-right"
+                              iconPos="right" styleClass="boton-bloque"/>
+                </div>
+            </div>
+        </div>
+    </ui:define>
+</ui:composition>

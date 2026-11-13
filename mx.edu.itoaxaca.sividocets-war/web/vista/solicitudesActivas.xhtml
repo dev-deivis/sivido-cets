@@ -1,0 +1,166 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Solicitudes activas — panel institucional CETS estático (diseño Stitch v2) -->
+<!DOCTYPE html>
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:h="jakarta.faces.html"
+                xmlns:f="jakarta.faces.core"
+                xmlns:ui="jakarta.faces.facelets"
+                xmlns:p="primefaces"
+                template="/plantillas/plantillaInstitucional.xhtml">
+
+    <ui:param name="menuActivo" value="solicitudesActivas"/>
+    <ui:define name="titulo">Solicitudes activas · SIVIDO CETS</ui:define>
+
+    <ui:define name="content">
+        <div class="encabezado-pagina">
+            <div class="fila mb-2">
+                <span class="etiqueta solida mono">NOM-253-SSA1-2012</span>
+                <span class="texto-chico texto-tenue">Actualizado: hace 2 min</span>
+            </div>
+            <h1>Gestión de solicitudes hospitalarias</h1>
+            <p>Seguimiento de las solicitudes de donación y de los donadores que confirmaron interés.</p>
+        </div>
+
+        <!-- Métricas -->
+        <div class="grid grid-3 mb-2">
+            <div class="tarjeta metrica" style="border-right:4px solid var(--rojo)">
+                <div class="fila-entre"><span class="metrica-titulo">Solicitudes activas</span><span class="icono-caja"><i class="pi pi-plus-circle"></i></span></div>
+                <div class="metrica-valor">15</div>
+                <span class="metrica-nota">De 24 registradas en total</span>
+            </div>
+            <div class="tarjeta metrica" style="border-right:4px solid var(--verde)">
+                <div class="fila-entre"><span class="metrica-titulo">Donadores interesados hoy</span><span class="icono-caja verde"><i class="pi pi-user-plus"></i></span></div>
+                <div class="metrica-valor">38</div>
+                <span class="metrica-nota" style="color:var(--verde)"><i class="pi pi-arrow-up"></i> 14% vs ayer</span>
+            </div>
+            <div class="tarjeta metrica" style="border-right:4px solid var(--azul)">
+                <div class="fila-entre"><span class="metrica-titulo">Sin donador interesado</span><span class="icono-caja azul"><i class="pi pi-exclamation-circle"></i></span></div>
+                <div class="metrica-valor">3</div>
+                <span class="metrica-nota">Requieren seguimiento del CETS</span>
+            </div>
+        </div>
+
+        <!-- Filtros -->
+        <div class="tarjeta mb-2">
+            <h:form id="formFiltros">
+                <div class="grid" style="grid-template-columns:2fr 1fr 1fr auto;align-items:end">
+                    <div class="campo mb-0">
+                        <p:outputLabel for="buscar">Buscar por folio u hospital</p:outputLabel>
+                        <p:inputText id="buscar" placeholder="Ej. CETS-OAX-2024-1102 o Hospital Civil..."/>
+                    </div>
+                    <div class="campo mb-0">
+                        <p:outputLabel for="estatus">Estatus</p:outputLabel>
+                        <p:selectOneMenu id="estatus" value="activa">
+                            <f:selectItem itemLabel="Todas (24)" itemValue="todas"/>
+                            <f:selectItem itemLabel="Activas (15)" itemValue="activa"/>
+                            <f:selectItem itemLabel="Atendidas (5)" itemValue="atendida"/>
+                            <f:selectItem itemLabel="Cerradas (3)" itemValue="cerrada"/>
+                            <f:selectItem itemLabel="Canceladas (1)" itemValue="cancelada"/>
+                        </p:selectOneMenu>
+                    </div>
+                    <div class="campo mb-0">
+                        <p:outputLabel for="grupo">Grupo y factor Rh</p:outputLabel>
+                        <p:selectOneMenu id="grupo" value="todos">
+                            <f:selectItem itemLabel="Todos los grupos" itemValue="todos"/>
+                            <f:selectItem itemLabel="O+" itemValue="O+"/>
+                            <f:selectItem itemLabel="O-" itemValue="O-"/>
+                            <f:selectItem itemLabel="A+" itemValue="A+"/>
+                            <f:selectItem itemLabel="A-" itemValue="A-"/>
+                            <f:selectItem itemLabel="B+" itemValue="B+"/>
+                            <f:selectItem itemLabel="B-" itemValue="B-"/>
+                            <f:selectItem itemLabel="AB+" itemValue="AB+"/>
+                            <f:selectItem itemLabel="AB-" itemValue="AB-"/>
+                        </p:selectOneMenu>
+                    </div>
+                    <p:button outcome="/vista/solicitudesActivas" value="Refrescar" icon="pi pi-refresh" styleClass="boton-suave"/>
+                </div>
+            </h:form>
+            <div class="fila mt-2 texto-chico">
+                <span class="negrita texto-sec">FILTROS APLICADOS:</span>
+                <span class="pildora">Estatus: <strong>Activa</strong> <i class="pi pi-times" style="font-size:10px"></i></span>
+                <h:link outcome="/vista/solicitudesActivas" value="Limpiar todos" styleClass="negrita" style="margin-left:auto"/>
+            </div>
+        </div>
+
+        <!-- Tabla -->
+        <div class="tabla-contenedor">
+            <div class="fila-entre" style="padding:.85rem 1rem;background:var(--sup);border-bottom:1px solid var(--borde)">
+                <strong><i class="pi pi-table texto-rojo"></i> Solicitudes registradas <span class="etiqueta roja mono">6 mostradas</span></strong>
+                <div class="fila texto-chico texto-sec">
+                    <span><i class="pi pi-circle-fill" style="color:var(--verde);font-size:9px"></i> Con donadores</span>
+                    <span><i class="pi pi-circle-fill" style="color:var(--rojo);font-size:9px"></i> Sin donador</span>
+                </div>
+            </div>
+            <table class="tabla">
+                <thead>
+                    <tr>
+                        <th>Folio</th>
+                        <th>Tipo</th>
+                        <th>Hospital solicitante</th>
+                        <th>Estatus</th>
+                        <th>Donadores interesados</th>
+                        <th style="text-align:right">Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><span class="folio">CETS-OAX-2024-1102</span><span class="sub">Hoy · 06:45 hrs</span></td>
+                        <td><span class="grupo-sangre">O-</span></td>
+                        <td><strong>Hospital General Dr. Aurelio Valdivieso</strong><span class="sub">Oaxaca de Juárez</span></td>
+                        <td><span class="estatus activa">Activa</span></td>
+                        <td><i class="pi pi-users" style="color:var(--verde)"></i> 4 interesados</td>
+                        <td style="text-align:right"><p:button outcome="/vista/detalleSolicitud" value="Ver solicitud" styleClass="boton-suave"/></td>
+                    </tr>
+                    <tr>
+                        <td><span class="folio">CETS-OAX-2024-1108</span><span class="sub">Hoy · 08:20 hrs</span></td>
+                        <td><span class="grupo-sangre" style="background:var(--texto)">A+</span></td>
+                        <td><strong>Hospital de la Niñez Oaxaqueña</strong><span class="sub">San Bartolo Coyotepec</span></td>
+                        <td><span class="estatus activa">Activa</span></td>
+                        <td><i class="pi pi-users" style="color:var(--azul)"></i> 2 interesados</td>
+                        <td style="text-align:right"><p:button outcome="/vista/detalleSolicitud" value="Ver solicitud" styleClass="boton-suave"/></td>
+                    </tr>
+                    <tr class="resaltada">
+                        <td><span class="folio">CETS-OAX-2024-1115</span><span class="sub texto-rojo">Hoy · 09:12 hrs</span></td>
+                        <td><span class="grupo-sangre">O+</span></td>
+                        <td><strong>Hospital Regional Presidente Juárez (ISSSTE)</strong><span class="sub">Oaxaca de Juárez</span></td>
+                        <td><span class="estatus activa">Activa</span></td>
+                        <td class="texto-rojo"><i class="pi pi-user-minus"></i> 0 interesados</td>
+                        <td style="text-align:right"><p:button outcome="/vista/detalleSolicitud" value="Ver solicitud"/></td>
+                    </tr>
+                    <tr>
+                        <td><span class="folio">CETS-OAX-2024-1094</span><span class="sub">Ayer · 16:30 hrs</span></td>
+                        <td><span class="grupo-sangre claro">B+</span></td>
+                        <td><strong>Hospital General de San Pedro Pochutla</strong><span class="sub">Costa</span></td>
+                        <td><span class="estatus atendida">Atendida</span></td>
+                        <td><i class="pi pi-users" style="color:var(--azul)"></i> 3 interesados</td>
+                        <td style="text-align:right"><p:button outcome="/vista/detalleSolicitud" value="Ver solicitud" styleClass="boton-suave"/></td>
+                    </tr>
+                    <tr>
+                        <td><span class="folio texto-tenue">CETS-OAX-2024-1081</span><span class="sub">22 nov</span></td>
+                        <td><span class="grupo-sangre claro">AB+</span></td>
+                        <td><strong>Hospital Básico Comunitario de Nochixtlán</strong><span class="sub">Mixteca</span></td>
+                        <td><span class="estatus cerrada">Cerrada</span></td>
+                        <td class="texto-tenue"><i class="pi pi-users"></i> 2 interesados</td>
+                        <td style="text-align:right"><p:button outcome="/vista/detalleSolicitud" value="Ver solicitud" styleClass="boton-suave"/></td>
+                    </tr>
+                    <tr>
+                        <td><span class="folio texto-tenue">CETS-OAX-2024-1077</span><span class="sub">21 nov</span></td>
+                        <td><span class="grupo-sangre claro">O-</span></td>
+                        <td><strong>Hospital General de Santo Domingo Tehuantepec</strong><span class="sub">Istmo</span></td>
+                        <td><span class="estatus cancelada">Cancelada</span></td>
+                        <td class="texto-tenue"><i class="pi pi-user-minus"></i> 0 interesados</td>
+                        <td style="text-align:right"><p:button outcome="/vista/detalleSolicitud" value="Ver solicitud" styleClass="boton-suave"/></td>
+                    </tr>
+                </tbody>
+            </table>
+            <div class="pie-tabla">
+                <span>Mostrando <strong>1</strong> a <strong>6</strong> de <strong>24</strong> registros</span>
+                <div class="paginador">
+                    <span><i class="pi pi-chevron-left"></i></span>
+                    <span class="actual">1</span><span>2</span><span>3</span><span>4</span>
+                    <span><i class="pi pi-chevron-right"></i></span>
+                </div>
+            </div>
+        </div>
+    </ui:define>
+</ui:composition>

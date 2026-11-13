@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Iniciar sesión (ciudadano) — HU-1.2 conectada a LoginBean -->
+<!DOCTYPE html>
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:h="jakarta.faces.html"
+                xmlns:ui="jakarta.faces.facelets"
+                xmlns:p="primefaces"
+                template="/plantillas/plantillaAcceso.xhtml">
+
+    <ui:define name="titulo">Iniciar sesión · SIVIDO</ui:define>
+
+    <ui:define name="content">
+        <div class="acceso">
+            <div class="tarjeta-acceso">
+                <span class="etiqueta azul mono">CETS · SIVIDO</span>
+                <h1 class="mt-1">Iniciar sesión</h1>
+                <p class="subtitulo">Plataforma estatal de vinculación de donantes de sangre</p>
+
+                <h:form id="formLogin">
+                    <p:messages id="mensajes" closable="true"/>
+
+                    <div class="campo">
+                        <p:outputLabel for="correo">Correo electrónico <span class="requerido">*</span></p:outputLabel>
+                        <p:inputText id="correo" type="email" value="#{loginBean.correo}" required="true"
+                                     requiredMessage="Escribe tu correo"
+                                     placeholder="ejemplo@correo.com"/>
+                    </div>
+                    <div class="campo">
+                        <div class="fila-campo">
+                            <p:outputLabel for="contrasena">Contraseña <span class="requerido">*</span></p:outputLabel>
+                            <h:link outcome="/vista/iniciarSesion" value="¿Olvidaste tu contraseña?" styleClass="texto-chico"/>
+                        </div>
+                        <p:password id="contrasena" value="#{loginBean.password}" required="true"
+                                    requiredMessage="Escribe tu contraseña"
+                                    placeholder="••••••••" toggleMask="true"/>
+                    </div>
+                    <div class="check-linea mb-2">
+                        <p:selectBooleanCheckbox id="recordar"/>
+                        <p:outputLabel for="recordar" value="Recordar mi sesión en este equipo"/>
+                    </div>
+                    <p:commandButton value="Entrar" icon="pi pi-sign-in" styleClass="boton-bloque"
+                                     action="#{loginBean.ingresarCredenciales}" ajax="false"/>
+                </h:form>
+
+                <div class="division-texto">Opciones de registro</div>
+                <div class="opcion-acceso">
+                    <span><i class="pi pi-user-plus texto-rojo"></i> ¿No tienes una cuenta?</span>
+                    <h:link outcome="/vista/crearCuenta" value="Crear cuenta de donante" styleClass="negrita"/>
+                </div>
+                <div class="opcion-acceso">
+                    <span><i class="pi pi-id-card texto-rojo"></i> Acceso personal CETS</span>
+                    <h:link outcome="/vista/loginInstitucional" styleClass="enlace-flecha">Entrar <i class="pi pi-lock"></i></h:link>
+                </div>
+
+                <div class="aviso mt-2">
+                    <i class="pi pi-heart"></i>
+                    <div>
+                        <strong>Una sola cuenta para todo</strong>
+                        <p>Sirve para <strong>donar voluntariamente</strong> y para <strong>solicitar donadores</strong>
+                            cuando un familiar está hospitalizado.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </ui:define>
+</ui:composition>

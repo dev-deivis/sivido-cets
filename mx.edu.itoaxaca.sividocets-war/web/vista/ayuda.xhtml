@@ -1,0 +1,110 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Ayuda y preguntas frecuentes — vista pública estática (diseño Stitch v3) -->
+<!DOCTYPE html>
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:h="jakarta.faces.html"
+                xmlns:ui="jakarta.faces.facelets"
+                xmlns:p="primefaces"
+                template="/plantillas/plantillaPublica.xhtml">
+
+    <ui:param name="menuActivo" value="ayuda"/>
+    <ui:define name="titulo">Ayuda y preguntas frecuentes · SIVIDO</ui:define>
+
+    <ui:define name="content">
+        <section class="heroe">
+            <div class="contenedor">
+                <span class="sobretitulo"><i class="pi pi-verified"></i> SIVIDO · Atención ciudadana</span>
+                <h1>Centro de ayuda y preguntas frecuentes</h1>
+                <p class="lead">Resuelve tus dudas sobre los requisitos de la NOM-253-SSA1-2012, el registro de donadores
+                    altruistas y las solicitudes de reposición hospitalaria en Oaxaca.</p>
+                <h:form id="formBuscar" styleClass="fila mt-2">
+                    <p:inputText placeholder="Buscar dudas sobre donación, requisitos o uso del sistema..."
+                                 style="flex:1;min-width:260px"/>
+                    <p:button value="Buscar" icon="pi pi-search" outcome="/vista/ayuda"/>
+                </h:form>
+            </div>
+        </section>
+
+        <section class="seccion">
+            <div class="contenedor">
+                <div class="fila-entre mb-2">
+                    <h2 class="mb-0">Categorías de consulta</h2>
+                    <span class="etiqueta mono">4 módulos</span>
+                </div>
+                <div class="grid grid-4 mb-2">
+                    <div class="tarjeta tarjeta-borde-izq">
+                        <div class="fila-entre"><span class="icono-caja solido"><i class="pi pi-th-large"></i></span><span class="etiqueta roja">Todas</span></div>
+                        <h3 class="mt-1">Vista global</h3>
+                        <p class="texto-sec mb-0">Las 5 preguntas frecuentes.</p>
+                    </div>
+                    <div class="tarjeta">
+                        <div class="fila-entre"><span class="icono-caja"><i class="pi pi-heart"></i></span><span class="etiqueta">2 FAQ</span></div>
+                        <h3 class="mt-1">Sobre la donación</h3>
+                        <p class="texto-sec mb-0">Requisitos, ayuno, edad y valoración médica.</p>
+                    </div>
+                    <div class="tarjeta">
+                        <div class="fila-entre"><span class="icono-caja"><i class="pi pi-shield"></i></span><span class="etiqueta">1 FAQ</span></div>
+                        <h3 class="mt-1">Privacidad y datos</h3>
+                        <p class="texto-sec mb-0">Protección de identidad y contacto.</p>
+                    </div>
+                    <div class="tarjeta">
+                        <div class="fila-entre"><span class="icono-caja"><i class="pi pi-building-columns"></i></span><span class="etiqueta">2 FAQ</span></div>
+                        <h3 class="mt-1">Cuentas y solicitudes</h3>
+                        <p class="texto-sec mb-0">Cuenta única donante/solicitante y ubicación del CETS.</p>
+                    </div>
+                </div>
+
+                <h2><i class="pi pi-question-circle texto-rojo"></i> Preguntas frecuentes</h2>
+                <p:accordionPanel multiple="true" activeIndex="0">
+                    <p:tab title="01 · ¿Quién puede donar sangre en el CETS Oaxaca?">
+                        <p>De conformidad con la <strong>NOM-253-SSA1-2012</strong>, para garantizar la seguridad del donante
+                            y del paciente es indispensable cumplir con los siguientes criterios básicos:</p>
+                        <div class="grid grid-2">
+                            <div class="tarjeta-plana"><strong><i class="pi pi-calendar texto-rojo"></i> Edad</strong><br/>Tener entre 18 y 65 años con identificación oficial vigente.</div>
+                            <div class="tarjeta-plana"><strong><i class="pi pi-gauge texto-rojo"></i> Peso</strong><br/>Peso corporal mínimo de 50 kg.</div>
+                            <div class="tarjeta-plana"><strong><i class="pi pi-clock texto-rojo"></i> Ayuno</strong><br/>Ayuno breve de 4 horas; se permite agua, café o té sin leche y fruta.</div>
+                            <div class="tarjeta-plana"><strong><i class="pi pi-heart texto-rojo"></i> Salud general</strong><br/>Sin síntomas respiratorios, sin cirugías en 6 meses y sin tatuajes en 12 meses.</div>
+                        </div>
+                        <div class="aviso mt-2"><i class="pi pi-info-circle"></i><p>No suspendas medicamentos prescritos sin consultarlo con el médico del CETS.</p></div>
+                    </p:tab>
+                    <p:tab title="02 · ¿Una misma cuenta sirve para donar y para solicitar donadores?">
+                        <p>Sí. SIVIDO usa una sola cuenta para ambas funciones:</p>
+                        <ul class="lista-iconos">
+                            <li><i class="pi pi-user-plus"></i><div><strong>Perfil de donante altruista</strong><span>Recibes avisos de solicitudes compatibles con tu grupo sanguíneo y confirmas tu interés.</span></div></li>
+                            <li><i class="pi pi-building"></i><div><strong>Captura de solicitud</strong><span>Si un familiar está hospitalizado, desde tu mismo panel capturas la solicitud con el folio que te dio el CETS.</span></div></li>
+                        </ul>
+                    </p:tab>
+                    <p:tab title="03 · ¿Cómo se protege mi información y privacidad?">
+                        <p>En el CETS Oaxaca aplicamos una política de <strong>cero exposición de contacto no consentido</strong>:</p>
+                        <ul class="lista-iconos">
+                            <li><i class="pi pi-check"></i><div><strong>Sin ubicación exacta</strong><span>El radio de aviso es aproximado; nadie puede ubicar tu domicilio.</span></div></li>
+                            <li><i class="pi pi-check"></i><div><strong>Contacto protegido</strong><span>Tu teléfono y correo nunca se muestran de forma abierta.</span></div></li>
+                            <li><i class="pi pi-check"></i><div><strong>Consentimiento expreso</strong><span>Tu contacto solo se comparte cuando confirmas tu interés en una solicitud.</span></div></li>
+                        </ul>
+                    </p:tab>
+                    <p:tab title="04 · ¿Qué significa que el resultado sea orientativo?">
+                        <p>El cuestionario de SIVIDO es un <strong>pre-filtro orientativo</strong> para agilizar tu atención,
+                            pero no es una certificación médica.</p>
+                        <div class="grid grid-2">
+                            <div class="tarjeta-plana"><strong>Paso 1: Plataforma digital</strong><br/>Respondes el cuestionario y confirmas tu interés.</div>
+                            <div class="tarjeta-plana"><strong>Paso 2: Banco de sangre</strong><br/>El personal del CETS realiza la valoración presencial y emite el dictamen.</div>
+                        </div>
+                    </p:tab>
+                    <p:tab title="05 · ¿Dónde se ubica el CETS Oaxaca y cuál es su horario?">
+                        <p>La donación se realiza en la sede central del CETS Oaxaca, en Oaxaca de Juárez.
+                            El horario de atención a donadores se indica en cada solicitud y en la ficha con código QR.</p>
+                    </p:tab>
+                </p:accordionPanel>
+
+                <div class="aviso rojo mt-3">
+                    <i class="pi pi-info-circle"></i>
+                    <div style="flex:1">
+                        <strong>¿No encontraste tu respuesta?</strong>
+                        <p>Consulta los requisitos completos o crea tu cuenta para recibir avisos compatibles.</p>
+                    </div>
+                    <p:button outcome="/vista/requisitos" value="Ver requisitos" styleClass="ui-button-outlined"/>
+                </div>
+            </div>
+        </section>
+    </ui:define>
+</ui:composition>

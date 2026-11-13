@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Publicación de solicitud con código QR — ficha pública estática (diseño Stitch v3) -->
+<!DOCTYPE html>
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:h="jakarta.faces.html"
+                xmlns:ui="jakarta.faces.facelets"
+                xmlns:p="primefaces"
+                template="/plantillas/plantillaPublica.xhtml">
+
+    <ui:param name="menuActivo" value="publicacion"/>
+    <ui:define name="titulo">Solicitud CETS-OAX-2024-1102 · SIVIDO</ui:define>
+
+    <ui:define name="content">
+        <section class="seccion">
+            <div class="contenedor">
+                <div class="fila mb-2">
+                    <span class="etiqueta verde"><i class="pi pi-circle-fill" style="font-size:8px"></i> Solicitud activa</span>
+                    <span class="etiqueta">SIVIDO · Red estatal Oaxaca</span>
+                </div>
+
+                <div class="grid grid-principal">
+                    <!-- Ficha principal -->
+                    <div class="tarjeta tarjeta-borde-rojo">
+                        <span class="etiqueta solida"><i class="pi pi-exclamation-triangle"></i> Solicitud de reposición</span>
+                        <h1 class="mt-2">Convocatoria solidaria de donación</h1>
+                        <p class="texto-sec">Centro Estatal de la Transfusión Sanguínea de Oaxaca (CETS) · Servicios de Salud de Oaxaca</p>
+
+                        <div class="fila mt-2" style="gap:1.25rem">
+                            <span class="grupo-sangre grande">O+<small>POSITIVO</small></span>
+                            <dl class="datos">
+                                <dt>Folio CETS</dt><dd class="mono texto-rojo">CETS-OAX-2024-1102</dd>
+                                <dt>Publicada</dt><dd>Hoy a las 06:30 hrs</dd>
+                                <dt>Grupo requerido</dt><dd>O positivo (O+)</dd>
+                            </dl>
+                        </div>
+
+                        <hr class="separador"/>
+                        <div class="fila" style="align-items:flex-start">
+                            <span class="icono-caja"><i class="pi pi-building"></i></span>
+                            <div>
+                                <span class="sobretitulo">Hospital</span>
+                                <h3 class="mb-0">Hospital General Dr. Aurelio Valdivieso</h3>
+                                <span class="texto-sec">Hospital Civil de Oaxaca</span>
+                            </div>
+                        </div>
+
+                        <div class="tarjeta-plana mt-2">
+                            <strong><i class="pi pi-info-circle texto-rojo"></i> Descripción</strong>
+                            <p class="mt-1 mb-0">Convocatoria solidaria de reposición para el soporte transfusional de la unidad
+                                hospitalaria. Se invita a donadores voluntarios a presentarse en el CETS con ayuno de 4 horas.</p>
+                        </div>
+
+                        <div class="aviso mt-2">
+                            <i class="pi pi-lock"></i>
+                            <p><strong>Protección de datos.</strong> Por normativa NOM-253-SSA1-2012, la identidad del paciente permanece reservada.</p>
+                        </div>
+
+                        <div class="fila mt-3">
+                            <p:button outcome="/vista/iniciarSesion" value="Quiero donar para esta solicitud" icon="pi pi-heart-fill"/>
+                            <p:button outcome="/vista/requisitos" value="Ver requisitos" icon="pi pi-list-check"
+                                      styleClass="ui-button-secondary"/>
+                        </div>
+
+                        <hr class="separador mt-3"/>
+                        <h3><i class="pi pi-list-check texto-rojo"></i> Criterios básicos para presentarse</h3>
+                        <div class="grid grid-4">
+                            <div class="tarjeta-plana"><i class="pi pi-id-card texto-rojo"></i><br/><strong>18 a 65 años</strong><br/><span class="texto-chico texto-sec">INE o pasaporte</span></div>
+                            <div class="tarjeta-plana"><i class="pi pi-gauge texto-rojo"></i><br/><strong>Peso mínimo</strong><br/><span class="texto-chico texto-sec">Más de 50 kg</span></div>
+                            <div class="tarjeta-plana"><i class="pi pi-clock texto-rojo"></i><br/><strong>Ayuno 4 h</strong><br/><span class="texto-chico texto-sec">Sin grasas ni lácteos</span></div>
+                            <div class="tarjeta-plana"><i class="pi pi-heart texto-rojo"></i><br/><strong>Buena salud</strong><br/><span class="texto-chico texto-sec">Sin fiebre o gripa</span></div>
+                        </div>
+                    </div>
+
+                    <!-- QR -->
+                    <div class="columna">
+                        <div class="tarjeta texto-centro">
+                            <span class="sobretitulo">Código QR oficial</span>
+                            <h3>Validación SIVIDO</h3>
+                            <div class="qr mt-1"><i class="pi pi-qrcode"></i></div>
+                            <p class="texto-sec texto-chico mt-2">Escanea este código con tu teléfono para abrir esta solicitud en SIVIDO.</p>
+                            <div class="columna">
+                                <p:button value="Copiar enlace" icon="pi pi-copy" styleClass="boton-suave boton-bloque" outcome="/vista/publicacion"/>
+                                <p:button value="Descargar imagen" icon="pi pi-download" styleClass="ui-button-secondary boton-bloque" outcome="/vista/publicacion"/>
+                                <p:button value="Imprimir ficha" icon="pi pi-print" styleClass="ui-button-secondary boton-bloque" outcome="/vista/publicacion"/>
+                            </div>
+                        </div>
+                        <div class="tarjeta">
+                            <h3><i class="pi pi-map-marker texto-rojo"></i> Dónde donar</h3>
+                            <p class="mb-0"><strong>Sede central CETS Oaxaca</strong></p>
+                            <p class="texto-sec texto-chico mb-0">Oaxaca de Juárez · Lunes a domingo, 07:00 a 13:00 hrs</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </ui:define>
+</ui:composition>

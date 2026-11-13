@@ -1,0 +1,167 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Padrón de donadores — panel institucional CETS estático (diseño Stitch v2) -->
+<!DOCTYPE html>
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:h="jakarta.faces.html"
+                xmlns:f="jakarta.faces.core"
+                xmlns:ui="jakarta.faces.facelets"
+                xmlns:p="primefaces"
+                template="/plantillas/plantillaInstitucional.xhtml">
+
+    <ui:param name="menuActivo" value="donadores"/>
+    <ui:define name="titulo">Padrón de donadores · SIVIDO CETS</ui:define>
+
+    <ui:define name="content">
+        <div class="encabezado-pagina fila-entre">
+            <div class="fila" style="flex-wrap:nowrap;align-items:flex-start">
+                <span class="icono-caja"><i class="pi pi-folder-open"></i></span>
+                <div>
+                    <h1>Padrón de donadores</h1>
+                    <p>Consulta de expedientes de donadores registrados en SIVIDO.</p>
+                </div>
+            </div>
+            <div class="fila">
+                <span class="pildora"><i class="pi pi-circle-fill" style="color:var(--verde);font-size:9px"></i> Pueden donar: <strong class="mono">1,482</strong></span>
+                <span class="pildora"><i class="pi pi-circle-fill" style="color:var(--rojo);font-size:9px"></i> En espera: <strong class="mono">319</strong></span>
+            </div>
+        </div>
+
+        <!-- Buscador -->
+        <div class="tarjeta mb-2">
+            <div class="fila-entre mb-2">
+                <h2 class="mb-0"><i class="pi pi-search texto-rojo"></i> Buscar expediente</h2>
+            </div>
+            <h:form id="formBuscar">
+                <div class="grid" style="grid-template-columns:2fr 1fr auto;align-items:end">
+                    <div class="campo mb-0">
+                        <p:outputLabel for="termino">Nombre, ID CETS o correo <span class="requerido">*</span></p:outputLabel>
+                        <p:inputText id="termino" value="DON-OAX-2024-984" placeholder="Ej. DON-OAX-2024-984 o Mateo Vásquez..."/>
+                    </div>
+                    <div class="campo mb-0">
+                        <p:outputLabel for="grupo">Grupo / factor Rh</p:outputLabel>
+                        <p:selectOneMenu id="grupo" value="O+">
+                            <f:selectItem itemLabel="Todos" itemValue="todos"/>
+                            <f:selectItem itemLabel="O+" itemValue="O+"/>
+                            <f:selectItem itemLabel="O-" itemValue="O-"/>
+                            <f:selectItem itemLabel="A+" itemValue="A+"/>
+                            <f:selectItem itemLabel="A-" itemValue="A-"/>
+                            <f:selectItem itemLabel="B+" itemValue="B+"/>
+                            <f:selectItem itemLabel="B-" itemValue="B-"/>
+                            <f:selectItem itemLabel="AB+" itemValue="AB+"/>
+                            <f:selectItem itemLabel="AB-" itemValue="AB-"/>
+                        </p:selectOneMenu>
+                    </div>
+                    <p:button outcome="/vista/donadores" value="Consultar padrón" icon="pi pi-search"/>
+                </div>
+            </h:form>
+            <div class="fila mt-2 texto-chico">
+                <span class="texto-tenue">Búsquedas recientes:</span>
+                <span class="etiqueta mono">DON-OAX-2024-984</span>
+                <span class="etiqueta mono">DON-OAX-2023-112</span>
+            </div>
+        </div>
+
+        <div class="grid grid-lateral">
+            <!-- Expediente -->
+            <div class="columna">
+                <div class="tarjeta" style="padding-top:0">
+                    <div class="tarjeta-cabecera roja" style="margin-top:0">
+                        <h3><i class="pi pi-verified"></i> Expediente de donador</h3>
+                        <span class="etiqueta" style="background:var(--rojo-oscuro);color:#fff">Activo</span>
+                    </div>
+                    <span class="sobretitulo">ID CETS</span>
+                    <h2 class="mono texto-rojo mb-0">DON-OAX-2024-984</h2>
+                    <h3 class="mt-1 mb-0">Mateo Vásquez Ramos</h3>
+                    <span class="texto-sec texto-chico">Valles Centrales</span>
+
+                    <div class="tarjeta-plana fila mt-2">
+                        <span class="grupo-sangre grande" style="min-width:56px;height:52px;font-size:20px">O+</span>
+                        <div style="flex:1"><strong>Grupo y factor Rh</strong><br/><span class="texto-chico texto-sec">O positivo</span></div>
+                        <span class="estatus activa">Puede donar</span>
+                    </div>
+
+                    <span class="sobretitulo mt-2" style="display:block">Datos de contacto</span>
+                    <dl class="datos">
+                        <dt>Correo</dt><dd class="mono" style="word-break:break-all">m.vasquez@correo.com</dd>
+                        <dt><i class="pi pi-lock"></i> Teléfono</dt><dd class="mono">951 ••• ••84</dd>
+                    </dl>
+                    <div class="aviso mt-2"><i class="pi pi-shield"></i><p class="texto-chico">El teléfono solo se muestra completo a quien creó una solicitud con interés confirmado.</p></div>
+                </div>
+
+                <div class="tarjeta">
+                    <div class="fila-entre mb-2">
+                        <h3 class="mb-0"><i class="pi pi-calendar texto-azul" style="color:var(--azul)"></i> Próxima fecha para donar</h3>
+                        <span class="etiqueta mono">NOM-253</span>
+                    </div>
+                    <div class="tarjeta-plana">
+                        <div class="fila-entre texto-chico"><span class="sobretitulo mb-0">Fecha autorizada</span><span class="mono negrita">Faltan 14 días</span></div>
+                        <span class="numero-grande" style="font-size:26px">15 de mayo de 2024</span>
+                        <p class="texto-chico texto-sec mt-1 mb-0">Intervalo reglamentario entre donaciones conforme a la NOM-253-SSA1-2012.</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="columna">
+            <!-- Historial de donaciones del CETS -->
+            <div class="tarjeta tarjeta-borde-izq">
+                <div class="fila-entre mb-2">
+                    <div class="fila" style="flex-wrap:nowrap">
+                        <span class="icono-caja solido"><i class="pi pi-heart-fill"></i></span>
+                        <div>
+                            <h3 class="mb-0">Historial de donaciones en el CETS <span class="etiqueta roja">Registro CETS</span></h3>
+                            <span class="texto-chico texto-sec">Donaciones registradas por el personal del CETS Oaxaca.</span>
+                        </div>
+                    </div>
+                    <p:button outcome="/vista/capturarDonacion" value="Registrar donación" icon="pi pi-plus" styleClass="boton-suave"/>
+                </div>
+                <div class="tabla-contenedor">
+                    <table class="tabla">
+                        <thead><tr><th>Fecha de la donación</th><th>Hospital / unidad</th><th>Solicitud asociada</th></tr></thead>
+                        <tbody>
+                            <tr>
+                                <td><div class="fila" style="flex-wrap:nowrap"><i class="pi pi-check-circle" style="color:var(--verde)"></i><div><strong class="mono">20-FEB-2024</strong><span class="sub">08:15 hrs</span></div></div></td>
+                                <td><strong>Hospital General Dr. Aurelio Valdivieso</strong></td>
+                                <td><span class="folio">CETS-OAX-2024-0891</span></td>
+                            </tr>
+                            <tr>
+                                <td><div class="fila" style="flex-wrap:nowrap"><i class="pi pi-check-circle" style="color:var(--verde)"></i><div><strong class="mono">11-NOV-2023</strong><span class="sub">10:40 hrs</span></div></div></td>
+                                <td><strong>Hospital Regional de Alta Especialidad de Oaxaca</strong></td>
+                                <td><span class="folio">CETS-OAX-2023-4410</span></td>
+                            </tr>
+                            <tr>
+                                <td><div class="fila" style="flex-wrap:nowrap"><i class="pi pi-check-circle" style="color:var(--verde)"></i><div><strong class="mono">14-AGO-2023</strong><span class="sub">07:50 hrs</span></div></div></td>
+                                <td><strong>Centro Estatal de la Transfusión Sanguínea</strong></td>
+                                <td><span class="texto-tenue">Donación voluntaria general</span></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    <div class="pie-tabla">
+                        <span>Mostrando 3 de 12 donaciones</span>
+                        <div class="paginador"><span><i class="pi pi-chevron-left"></i></span><span class="actual">1</span><span>2</span><span>3</span><span>4</span><span><i class="pi pi-chevron-right"></i></span></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Historial compartido por instituciones externas (HistorialExterno, HU-7.3) -->
+            <div class="tarjeta tarjeta-borde-izq azul" style="background:var(--sup-baja)">
+                <div class="fila-entre mb-2">
+                    <div class="fila" style="flex-wrap:nowrap">
+                        <span class="icono-caja azul"><i class="pi pi-share-alt"></i></span>
+                        <div>
+                            <h3 class="mb-0">Historial compartido por instituciones externas <span class="etiqueta azul">Externo</span></h3>
+                            <span class="texto-chico texto-sec">Donaciones que otras instituciones de salud reportaron para este donador.
+                                Se muestran aparte y no forman parte del registro del CETS.</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="tarjeta texto-centro" style="padding:2rem 1.5rem;border-style:dashed;box-shadow:none">
+                    <span class="icono-caja azul" style="width:56px;height:56px"><i class="pi pi-inbox" style="font-size:24px"></i></span>
+                    <h4 class="mt-2">Ninguna institución ha compartido información</h4>
+                    <p class="texto-chico texto-sec mb-0">El expediente <span class="mono">DON-OAX-2024-984</span> no tiene
+                        donaciones reportadas por instituciones externas.</p>
+                </div>
+            </div>
+            </div>
+        </div>
+    </ui:define>
+</ui:composition>

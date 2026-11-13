@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Confirmar interés de donación — panel de usuario estático (diseño Stitch v3) -->
+<!DOCTYPE html>
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:h="jakarta.faces.html"
+                xmlns:ui="jakarta.faces.facelets"
+                xmlns:p="primefaces"
+                template="/plantillas/plantillaUsuario.xhtml">
+
+    <ui:param name="menuActivo" value="notificaciones"/>
+    <ui:define name="titulo">Confirmar interés · SIVIDO</ui:define>
+
+    <ui:define name="content">
+        <div class="fila texto-chico texto-sec mb-2">
+            <h:link outcome="/vista/notificaciones" styleClass="enlace-flecha"><i class="pi pi-arrow-left"></i> Notificaciones</h:link>
+            <span>/</span>
+            <span class="mono">Folio CETS-OAX-2024-1102</span>
+        </div>
+
+        <div class="encabezado-pagina fila-entre">
+            <div>
+                <span class="sobretitulo"><i class="pi pi-heart"></i> Vincular donación altruista</span>
+                <h1>Confirmación de asistencia a donar</h1>
+                <p>Paso final para vincularte con la solicitud y acudir al CETS Oaxaca.</p>
+            </div>
+            <div class="fila">
+                <span class="grupo-sangre grande">O+<small>TU GRUPO</small></span>
+                <span class="etiqueta verde">Compatible</span>
+            </div>
+        </div>
+
+        <div class="grid grid-principal">
+            <div class="columna">
+                <div class="tarjeta">
+                    <div class="tarjeta-cabecera">
+                        <h3><i class="pi pi-file-check texto-rojo"></i> Detalles de la solicitud</h3>
+                        <span class="etiqueta roja"><i class="pi pi-bolt"></i> Urgente</span>
+                    </div>
+                    <div class="grid grid-2">
+                        <dl class="datos">
+                            <dt>Folio CETS</dt><dd class="mono texto-rojo">CETS-OAX-2024-1102</dd>
+                            <dt>Tipo de sangre</dt><dd>O+ (O positivo)</dd>
+                            <dt>Estatus</dt><dd><span class="estatus activa">Activa</span></dd>
+                        </dl>
+                        <dl class="datos">
+                            <dt>Hospital</dt><dd>Hospital General Dr. Aurelio Valdivieso</dd>
+                            <dt>Distancia</dt><dd>A menos de 3 km</dd>
+                            <dt>Horario CETS</dt><dd>Lun a Dom, 07:00 a 13:00 hrs</dd>
+                        </dl>
+                    </div>
+                </div>
+
+                <div class="tarjeta">
+                    <h3><i class="pi pi-shield texto-rojo"></i> Consentimiento y protección de datos</h3>
+                    <div class="aviso mb-2">
+                        <i class="pi pi-info-circle"></i>
+                        <p>Al confirmar tu interés, tus datos de contacto (nombre y teléfono) se compartirán
+                            <strong>únicamente</strong> con la persona que creó la solicitud para coordinar tu asistencia al
+                            CETS Oaxaca. Tu información nunca será pública.</p>
+                    </div>
+                    <h:form id="formConfirmar">
+                        <div class="check-linea mb-2">
+                            <p:selectBooleanCheckbox id="acepto" value="true"/>
+                            <p:outputLabel for="acepto">Acepto compartir mis datos de contacto con el solicitante y coordinar mi
+                                asistencia al CETS Oaxaca.</p:outputLabel>
+                        </div>
+                        <div class="acciones-formulario">
+                            <p:button outcome="/vista/notificaciones" value="Cancelar" icon="pi pi-times"
+                                      styleClass="ui-button-secondary"/>
+                            <p:button outcome="/vista/notificaciones" value="Confirmo que iré a donar" icon="pi pi-heart-fill"/>
+                        </div>
+                    </h:form>
+                </div>
+            </div>
+
+            <div class="columna">
+                <div class="tarjeta">
+                    <h3><i class="pi pi-list-check texto-rojo"></i> Recomendaciones clave</h3>
+                    <ul class="lista-iconos">
+                        <li><i class="pi pi-moon"></i><div><strong>Descanso previo</strong><span>Dormir de 6 a 8 horas la noche anterior.</span></div></li>
+                        <li><i class="pi pi-sun"></i><div><strong>Hidratación</strong><span>Beber agua simple antes de salir de casa.</span></div></li>
+                        <li><i class="pi pi-id-card"></i><div><strong>Identificación oficial</strong><span>INE, pasaporte o cédula profesional en original.</span></div></li>
+                        <li><i class="pi pi-clock"></i><div><strong>Ayuno de grasas (4 h)</strong><span>Puedes consumir fruta, té o café sin leche.</span></div></li>
+                    </ul>
+                </div>
+                <div class="tarjeta tarjeta-plana">
+                    <h3><i class="pi pi-map texto-rojo"></i> Al llegar al CETS</h3>
+                    <ol class="pasos">
+                        <li><span class="num">1</span><span>Acude a la ventanilla de donación.</span></li>
+                        <li><span class="num">2</span><span>Presenta el folio <span class="mono">CETS-OAX-2024-1102</span>.</span></li>
+                        <li><span class="num">3</span><span>Sigue las indicaciones del personal del CETS.</span></li>
+                    </ol>
+                </div>
+            </div>
+        </div>
+    </ui:define>
+</ui:composition>

@@ -1,0 +1,125 @@
+/*
+    layout.css — Estructura general de SIVIDO
+    Encabezado rojo, menú superior (público), menú lateral (usuario / CETS),
+    contenido y pie de página.
+*/
+
+/* ===================== Encabezado ===================== */
+#top {
+    position: sticky; top: 0; z-index: 50;
+    display: flex; align-items: center; justify-content: space-between; gap: 1rem;
+    min-height: 64px; padding: .6rem 1.5rem;
+    background: var(--rojo); color: #fff;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, .12);
+}
+.marca { display: flex; align-items: center; gap: .75rem; color: #fff; text-decoration: none; }
+.marca:hover { text-decoration: none; }
+.marca-icono {
+    width: 40px; height: 40px; border-radius: var(--radio); background: #fff; color: var(--rojo);
+    display: inline-flex; align-items: center; justify-content: center; flex-shrink: 0;
+}
+.marca-icono .pi { font-size: 18px; }
+.marca-texto { display: flex; flex-direction: column; line-height: 1.2; }
+.marca-nombre { font-size: 18px; font-weight: 700; letter-spacing: .02em; }
+.marca-sub { font-size: 12px; color: #ffe3df; }
+
+.encabezado-derecha { display: flex; align-items: center; gap: .75rem; flex-wrap: wrap; }
+.etiqueta-encabezado {
+    display: inline-flex; align-items: center; gap: .4rem;
+    padding: .3rem .8rem; border-radius: 999px; background: var(--rojo-oscuro); color: #fff;
+    font-size: 11px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase;
+}
+.usuario-encabezado { display: flex; align-items: center; gap: .6rem; font-size: 13px; }
+.usuario-encabezado .avatar { background: rgba(255, 255, 255, .18); color: #fff; }
+
+/* Menú superior (plantilla pública) */
+.menu-superior { display: flex; align-items: center; gap: .25rem; flex-wrap: wrap; }
+.menu-superior a {
+    color: #fff; padding: .45rem .85rem; border-radius: var(--radio); font-weight: 600; font-size: 14px;
+    text-decoration: none;
+}
+.menu-superior a:hover { background: rgba(255, 255, 255, .14); text-decoration: none; }
+.menu-superior a.activo { background: #fff; color: var(--rojo); }
+.menu-superior .separador-menu { width: 1px; height: 22px; background: rgba(255, 255, 255, .35); margin: 0 .35rem; }
+.menu-superior a.cta { background: var(--rojo-oscuro); }
+.menu-superior a.cta.activo { background: #fff; color: var(--rojo); }
+
+/* ===================== Cuerpo ===================== */
+.cuerpo { display: flex; align-items: stretch; min-height: calc(100vh - 64px - 52px); }
+
+/* Menú lateral (usuario / institucional) */
+#left {
+    width: 250px; flex-shrink: 0;
+    background: var(--sup-baja); border-right: 1px solid var(--borde);
+    padding: 1.25rem .75rem;
+}
+.menu-lateral { position: sticky; top: 80px; display: flex; flex-direction: column; gap: .2rem; }
+.menu-lateral-titulo {
+    font-size: 11px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase;
+    color: var(--texto-sec); padding: 0 .75rem .6rem;
+}
+.menu-lateral-sub { font-size: 12px; color: var(--texto-tenue); padding: 0 .75rem .9rem; margin-top: -.45rem; }
+.menu-item {
+    display: flex; align-items: center; gap: .7rem;
+    padding: .6rem .75rem; border-radius: var(--radio);
+    color: var(--texto); font-weight: 500; font-size: 14px; text-decoration: none;
+}
+.menu-item .pi { width: 18px; text-align: center; color: var(--texto-sec); }
+.menu-item:hover { background: var(--sup-alta); text-decoration: none; }
+.menu-item.activo { background: var(--rojo); color: #fff; font-weight: 600; }
+.menu-item.activo .pi { color: #fff; }
+.menu-contador {
+    margin-left: auto; min-width: 20px; height: 20px; padding: 0 .35rem; border-radius: 999px;
+    background: var(--rojo); color: #fff; font-size: 11px; font-weight: 700;
+    display: inline-flex; align-items: center; justify-content: center;
+}
+.menu-item.activo .menu-contador { background: #fff; color: var(--rojo); }
+.menu-separador { border: 0; border-top: 1px solid var(--borde); margin: .75rem .5rem; }
+.menu-item.salir { color: var(--rojo); }
+.menu-item.salir .pi { color: var(--rojo); }
+
+/* Contenido */
+#content { flex: 1; min-width: 0; }
+.con-menu { padding: 1.5rem 2rem 2.5rem; }
+.contenido-publico { padding: 0; }
+.contenedor { max-width: 1200px; margin: 0 auto; padding: 0 1.5rem; }
+.contenido-publico .contenedor { padding-top: 0; }
+.sin-menu {
+    padding: 2.5rem 1rem;
+    display: flex; justify-content: center; align-items: flex-start;
+}
+.sin-menu > .acceso { width: 100%; max-width: 480px; }
+.sin-menu > .acceso.ancho { max-width: 980px; }
+
+/* Tarjeta de acceso (login, crear cuenta) */
+.tarjeta-acceso {
+    background: var(--superficie); border: 1px solid var(--borde); border-top: 5px solid var(--rojo);
+    border-radius: var(--radio-lg); box-shadow: var(--sombra-media); padding: 2rem;
+}
+.tarjeta-acceso h1 { font-size: 26px; margin-bottom: .25rem; }
+.tarjeta-acceso .subtitulo { color: var(--texto-sec); margin-bottom: 1.5rem; }
+.division-texto {
+    display: flex; align-items: center; gap: .75rem; margin: 1.25rem 0;
+    font-size: 11px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: var(--texto-sec);
+}
+.division-texto::before, .division-texto::after { content: ""; flex: 1; border-top: 1px solid var(--borde); }
+.opcion-acceso {
+    display: flex; align-items: center; justify-content: space-between; gap: .75rem;
+    padding: .8rem 1rem; border-radius: var(--radio); background: var(--sup-baja); margin-bottom: .6rem; font-size: 14px;
+}
+
+/* ===================== Pie ===================== */
+#pie {
+    min-height: 52px; display: flex; align-items: center; justify-content: center;
+    border-top: 1px solid var(--borde); background: var(--superficie);
+    color: var(--texto-sec); font-size: 13px; font-weight: 600; letter-spacing: .02em;
+}
+
+/* ===================== Responsivo ===================== */
+@media (max-width: 900px) {
+    #top { flex-direction: column; align-items: flex-start; position: static; }
+    .cuerpo { flex-direction: column; }
+    #left { width: 100%; border-right: 0; border-bottom: 1px solid var(--borde); }
+    .menu-lateral { position: static; }
+    .con-menu { padding: 1rem; }
+}

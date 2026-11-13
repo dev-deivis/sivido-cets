@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Capturar donación — panel institucional CETS estático (diseño Stitch v2) -->
+<!DOCTYPE html>
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:h="jakarta.faces.html"
+                xmlns:f="jakarta.faces.core"
+                xmlns:ui="jakarta.faces.facelets"
+                xmlns:p="primefaces"
+                template="/plantillas/plantillaInstitucional.xhtml">
+
+    <ui:param name="menuActivo" value="capturarDonacion"/>
+    <ui:define name="titulo">Capturar donación · SIVIDO CETS</ui:define>
+
+    <ui:define name="content">
+        <div style="max-width:760px">
+            <div class="tarjeta tarjeta-borde-rojo">
+                <div class="fila-entre mb-2">
+                    <div class="fila" style="flex-wrap:nowrap;align-items:flex-start">
+                        <span class="icono-caja solido"><i class="pi pi-heart-fill"></i></span>
+                        <div>
+                            <h1 style="font-size:22px">Registro de donación efectuada en el CETS</h1>
+                            <p class="texto-sec mb-0">Captura de la donación concluida para acreditarla al donador y vincularla a una solicitud.</p>
+                        </div>
+                    </div>
+                    <div class="tarjeta-plana" style="padding:.5rem .8rem">
+                        <span class="texto-chico texto-tenue">Folio de sesión</span><br/>
+                        <strong class="mono">CETS-DON-2024/0984</strong>
+                    </div>
+                </div>
+
+                <h:form id="formDonacion">
+                    <div class="campo">
+                        <div class="fila-campo">
+                            <p:outputLabel for="donador">Buscar donador (nombre o correo) <span class="requerido">*</span></p:outputLabel>
+                            <span class="ayuda">Padrón SIVIDO</span>
+                        </div>
+                        <p:inputText id="donador" value="Ernesto Valdivieso Morales - ernesto.valdivieso@email.com"
+                                     placeholder="Nombre o correo del donador..."/>
+                        <div class="aviso verde" style="padding:.6rem .9rem">
+                            <i class="pi pi-verified"></i>
+                            <p class="texto-chico"><strong>Validado.</strong> Donador activo en el padrón del CETS Oaxaca.</p>
+                        </div>
+                    </div>
+
+                    <div class="campo">
+                        <div class="fila-campo">
+                            <p:outputLabel for="fecha">Fecha y hora de la donación <span class="requerido">*</span></p:outputLabel>
+                            <span class="etiqueta azul">Actual</span>
+                        </div>
+                        <p:inputText id="fecha" type="datetime-local" value="2024-10-24T10:45"/>
+                        <span class="ayuda">Momento en que se realizó la extracción.</span>
+                    </div>
+
+                    <div class="campo">
+                        <p:outputLabel for="solicitud">Solicitud asociada <span class="texto-tenue">(opcional)</span></p:outputLabel>
+                        <p:selectOneMenu id="solicitud" value="1102">
+                            <f:selectItem itemLabel="CETS-OAX-2024-1102 - Hosp. Dr. Aurelio Valdivieso" itemValue="1102"/>
+                            <f:selectItem itemLabel="CETS-OAX-2024-1108 - Hospital de la Niñez Oaxaqueña" itemValue="1108"/>
+                            <f:selectItem itemLabel="CETS-OAX-2024-1115 - H. Regional Presidente Juárez (ISSSTE)" itemValue="1115"/>
+                            <f:selectItem itemLabel="Sin vincular / Donación voluntaria general" itemValue="ninguna"/>
+                        </p:selectOneMenu>
+                        <span class="ayuda">Vincula la donación a una solicitud o regístrala como donación general.</span>
+                    </div>
+
+                    <div class="acciones-formulario">
+                        <p:button outcome="/vista/capturarDonacion" value="Descartar" icon="pi pi-times" styleClass="ui-button-secondary"/>
+                        <p:button outcome="/vista/donadores" value="Registrar donación" icon="pi pi-check-circle"/>
+                    </div>
+                </h:form>
+            </div>
+        </div>
+    </ui:define>
+</ui:composition>

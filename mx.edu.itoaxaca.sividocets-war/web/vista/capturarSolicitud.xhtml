@@ -1,0 +1,144 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Capturar solicitud — panel de usuario estático (diseño Stitch v3) -->
+<!DOCTYPE html>
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:h="jakarta.faces.html"
+                xmlns:f="jakarta.faces.core"
+                xmlns:ui="jakarta.faces.facelets"
+                xmlns:p="primefaces"
+                template="/plantillas/plantillaUsuario.xhtml">
+
+    <ui:param name="menuActivo" value="capturarSolicitud"/>
+    <ui:define name="titulo">Capturar solicitud · SIVIDO</ui:define>
+
+    <ui:define name="content">
+        <div class="encabezado-pagina fila-entre">
+            <div>
+                <span class="sobretitulo">Solicitud de donación</span>
+                <h1>Capturar solicitud de donación altruista</h1>
+                <p>Publica una convocatoria de reposición con el folio que te entregó el hospital o el CETS.</p>
+            </div>
+            <span class="etiqueta azul mono"><i class="pi pi-verified"></i> NOM-253-SSA1-2012</span>
+        </div>
+
+        <div class="aviso mb-2">
+            <i class="pi pi-info-circle"></i>
+            <div>
+                <strong>Validación institucional requerida</strong>
+                <p>Toda solicitud debe contar con un <strong>folio emitido por la unidad médica o por el CETS</strong>.
+                    El CETS Oaxaca verifica cada solicitud antes de mostrarla a los donantes.</p>
+            </div>
+        </div>
+
+        <div class="grid grid-principal">
+            <!-- Formulario -->
+            <div class="tarjeta">
+                <div class="tarjeta-cabecera">
+                    <h2><i class="pi pi-file-edit texto-rojo"></i> Datos de la solicitud</h2>
+                    <span class="etiqueta roja">* Obligatorios</span>
+                </div>
+
+                <h:form id="formSolicitud">
+                    <div class="campo">
+                        <div class="fila-campo">
+                            <p:outputLabel for="folio">Folio CETS <span class="requerido">*</span></p:outputLabel>
+                            <span class="ayuda">Formato oficial</span>
+                        </div>
+                        <p:inputText id="folio" value="CETS-OAX-2024-0582" placeholder="Ej: CETS-OAX-2024-XXXX" styleClass="mono"/>
+                        <span class="ayuda" style="color:var(--verde)"><i class="pi pi-check-circle"></i> Formato de folio válido</span>
+                    </div>
+
+                    <div class="grid grid-2" style="gap:0 1rem">
+                        <div class="campo">
+                            <span class="etiqueta-campo">Grupo sanguíneo <span class="requerido">*</span></span>
+                            <p:selectOneButton id="grupo" value="O">
+                                <f:selectItem itemLabel="O" itemValue="O"/>
+                                <f:selectItem itemLabel="A" itemValue="A"/>
+                                <f:selectItem itemLabel="B" itemValue="B"/>
+                                <f:selectItem itemLabel="AB" itemValue="AB"/>
+                            </p:selectOneButton>
+                            <span class="ayuda">Sistema ABO</span>
+                        </div>
+                        <div class="campo">
+                            <span class="etiqueta-campo">Factor Rh <span class="requerido">*</span></span>
+                            <p:selectOneButton id="rh" value="+">
+                                <f:selectItem itemLabel="+ Positivo" itemValue="+"/>
+                                <f:selectItem itemLabel="− Negativo" itemValue="-"/>
+                            </p:selectOneButton>
+                            <span class="ayuda">Antígeno D</span>
+                        </div>
+                    </div>
+
+                    <div class="campo">
+                        <p:outputLabel for="hospital">Hospital / unidad médica de destino <span class="requerido">*</span></p:outputLabel>
+                        <p:selectOneMenu id="hospital" value="civil">
+                            <f:selectItem itemLabel="Hospital General 'Dr. Aurelio Valdivieso' (Hospital Civil)" itemValue="civil"/>
+                            <f:selectItem itemLabel="Hospital Regional de Alta Especialidad de Oaxaca (HRAEO)" itemValue="hraeo"/>
+                            <f:selectItem itemLabel="Hospital General de Zona No. 1 IMSS Oaxaca" itemValue="imss1"/>
+                            <f:selectItem itemLabel="Hospital Regional Presidente Juárez ISSSTE" itemValue="issste"/>
+                            <f:selectItem itemLabel="Hospital de la Niñez Oaxaqueña" itemValue="ninez"/>
+                        </p:selectOneMenu>
+                    </div>
+
+                    <div class="campo">
+                        <div class="fila-campo">
+                            <p:outputLabel for="descripcion">Descripción del caso <span class="texto-tenue">(opcional)</span></p:outputLabel>
+                            <span class="ayuda mono">74 / 250</span>
+                        </div>
+                        <p:inputTextarea id="descripcion" rows="4" maxlength="250" autoResize="false"
+                                         value="Requerimiento prioritario para soporte quirúrgico en sala de hematología."
+                                         placeholder="Observaciones para los donadores (ej. cirugía programada)..."/>
+                        <span class="ayuda"><i class="pi pi-exclamation-circle"></i> Evita incluir nombres de pacientes o datos de contacto.</span>
+                    </div>
+
+                    <div class="acciones-formulario">
+                        <p:button outcome="/vista/misSolicitudes" value="Cancelar" icon="pi pi-times" styleClass="ui-button-secondary"/>
+                        <p:button outcome="/vista/misSolicitudes" value="Publicar solicitud" icon="pi pi-megaphone"/>
+                    </div>
+                </h:form>
+            </div>
+
+            <!-- Vista previa -->
+            <div class="columna">
+                <div class="fila-entre">
+                    <h3 class="mb-0"><i class="pi pi-eye texto-azul" style="color:var(--azul)"></i> Vista previa de publicación</h3>
+                    <span class="etiqueta verde">Público</span>
+                </div>
+                <div class="tarjeta" style="border:2px solid var(--rojo-claro);padding-top:0">
+                    <div class="tarjeta-cabecera roja" style="margin-top:0">
+                        <h3><i class="pi pi-heart-fill"></i> CETS Oaxaca · Ficha de donación</h3>
+                    </div>
+                    <div class="tarjeta-plana fila">
+                        <span class="grupo-sangre grande">O+<small>POSITIVO</small></span>
+                        <div>
+                            <span class="texto-chico texto-tenue">Folio CETS</span><br/>
+                            <strong class="mono texto-rojo">CETS-OAX-2024-0582</strong><br/>
+                            <span class="texto-chico" style="color:var(--verde)"><i class="pi pi-check-circle"></i> Folio en regla</span>
+                        </div>
+                    </div>
+                    <span class="sobretitulo mt-2" style="display:block"><i class="pi pi-building"></i> Hospital / unidad asignada</span>
+                    <h3 class="mb-0">Hospital General 'Dr. Aurelio Valdivieso'</h3>
+                    <span class="texto-sec texto-chico">Oaxaca de Juárez, Valles Centrales</span>
+
+                    <div class="tarjeta-plana mt-2">
+                        <strong class="texto-chico"><i class="pi pi-align-left"></i> Descripción:</strong>
+                        <p class="mono mb-0 mt-1" style="font-style:italic">"Requerimiento prioritario para soporte quirúrgico en sala de hematología."</p>
+                    </div>
+
+                    <div class="fila mt-2" style="flex-wrap:nowrap">
+                        <div class="qr chico"><i class="pi pi-qrcode"></i></div>
+                        <div>
+                            <strong>Escanea para acudir al CETS</strong>
+                            <p class="texto-chico texto-sec mb-0">Los donantes escanean este código para vincular su donación al folio.</p>
+                        </div>
+                    </div>
+
+                    <div class="aviso verde mt-2">
+                        <i class="pi pi-shield"></i>
+                        <p class="texto-chico"><strong>Ficha anónima y protegida.</strong> SIVIDO no publica nombres de pacientes ni datos personales.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </ui:define>
+</ui:composition>

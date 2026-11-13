@@ -1,0 +1,111 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Detalle de solicitud — panel institucional CETS estático (diseño Stitch v2) -->
+<!DOCTYPE html>
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:h="jakarta.faces.html"
+                xmlns:f="jakarta.faces.core"
+                xmlns:ui="jakarta.faces.facelets"
+                xmlns:p="primefaces"
+                template="/plantillas/plantillaInstitucional.xhtml">
+
+    <ui:param name="menuActivo" value="solicitudesActivas"/>
+    <ui:define name="titulo">Detalle de solicitud · SIVIDO CETS</ui:define>
+
+    <ui:define name="content">
+        <div class="fila-entre mb-2">
+            <h:link outcome="/vista/solicitudesActivas" styleClass="enlace-flecha"><i class="pi pi-arrow-left"></i> Volver a solicitudes activas</h:link>
+            <span class="estatus activa">Estatus actual: Activa</span>
+        </div>
+
+        <div class="encabezado-pagina fila-entre">
+            <div>
+                <span class="sobretitulo"><i class="pi pi-receipt"></i> Folio</span>
+                <h1 class="mono texto-rojo">CETS-OAX-2024-1102</h1>
+                <div class="fila texto-sec texto-chico">
+                    <span><i class="pi pi-building"></i> Hospital General "Dr. Aurelio Valdivieso" (Hospital Civil)</span>
+                    <span><i class="pi pi-calendar"></i> Emitida: 24 octubre 2024 · 07:45 hrs</span>
+                </div>
+            </div>
+            <div class="fila">
+                <div style="text-align:right">
+                    <span class="texto-chico texto-tenue">Tipo de sangre</span><br/>
+                    <strong>O positivo</strong>
+                </div>
+                <span class="grupo-sangre grande">O+<small>RH POS</small></span>
+            </div>
+        </div>
+
+        <div class="grid grid-principal">
+            <div class="columna">
+                <div class="tarjeta">
+                    <h2><i class="pi pi-align-left texto-rojo"></i> Descripción de la solicitud</h2>
+                    <p class="texto-sec mb-0">Requerimiento de soporte transfusional para atención quirúrgica programada.
+                        Protocolo de coordinación activado conforme a los lineamientos del CETS Oaxaca.</p>
+                </div>
+
+                <div class="tarjeta">
+                    <div class="fila-entre mb-2">
+                        <div>
+                            <h2 class="mb-0"><i class="pi pi-users texto-rojo"></i> Donadores que confirmaron interés</h2>
+                            <span class="texto-chico texto-tenue">Identificadores anónimos para proteger la privacidad del donador.</span>
+                        </div>
+                        <span class="etiqueta azul"><i class="pi pi-lock"></i> Identidad protegida</span>
+                    </div>
+                    <div class="tarjeta-plana fila mb-2">
+                        <span class="numero-grande">4</span>
+                        <span class="texto-sec">donadores confirmaron interés en esta solicitud</span>
+                    </div>
+                    <div class="tabla-contenedor">
+                        <table class="tabla">
+                            <thead><tr><th>Identificador</th><th>Hora de confirmación</th></tr></thead>
+                            <tbody>
+                                <tr><td><div class="fila"><span class="avatar">D1</span><span class="mono">DON-OAX-9941</span></div></td><td class="mono">08:14 hrs</td></tr>
+                                <tr><td><div class="fila"><span class="avatar">D2</span><span class="mono">DON-OAX-8432</span></div></td><td class="mono">08:32 hrs</td></tr>
+                                <tr><td><div class="fila"><span class="avatar">D3</span><span class="mono">DON-OAX-7108</span></div></td><td class="mono">09:05 hrs</td></tr>
+                                <tr><td><div class="fila"><span class="avatar">D4</span><span class="mono">DON-OAX-6520</span></div></td><td class="mono">09:40 hrs</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <div class="columna">
+                <div class="tarjeta tarjeta-borde-rojo">
+                    <h2><i class="pi pi-arrow-right-arrow-left texto-rojo"></i> Actualizar estatus</h2>
+                    <h:form id="formEstatus">
+                        <div class="campo">
+                            <p:outputLabel for="nuevoEstatus">Nuevo estatus <span class="requerido">*</span></p:outputLabel>
+                            <p:selectOneMenu id="nuevoEstatus" value="Activa">
+                                <f:selectItem itemLabel="Activa" itemValue="Activa"/>
+                                <f:selectItem itemLabel="Atendida" itemValue="Atendida"/>
+                                <f:selectItem itemLabel="Cerrada" itemValue="Cerrada"/>
+                                <f:selectItem itemLabel="Cancelada" itemValue="Cancelada"/>
+                            </p:selectOneMenu>
+                            <span class="ayuda">Define si la solicitud sigue visible para los donadores.</span>
+                        </div>
+                        <p:button outcome="/vista/detalleSolicitud" value="Guardar cambio de estatus" icon="pi pi-save" styleClass="boton-bloque"/>
+                    </h:form>
+                </div>
+
+                <div class="tarjeta">
+                    <div class="fila-entre mb-2">
+                        <h3 class="mb-0"><i class="pi pi-history texto-rojo"></i> Historial de cambios</h3>
+                        <span class="etiqueta">Bitácora CETS</span>
+                    </div>
+                    <ul class="linea-tiempo">
+                        <li>
+                            <strong>Cambio de "Activa" a "Atendida"</strong><br/>
+                            <span class="cuando">24/10 · 09:15</span><br/>
+                            <span class="texto-chico texto-sec">Coordinación de donación · CETS Oaxaca</span>
+                        </li>
+                        <li>
+                            <strong>Creación de solicitud como "Activa"</strong><br/>
+                            <span class="cuando">24/10 · 07:45</span><br/>
+                            <span class="texto-chico texto-sec">Solicitante · cuenta ciudadana</span>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </ui:define>
+</ui:composition>

@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Inicio de sesión institucional (personal CETS) — HU-6.1 conectada a LoginInstitucionalBean -->
+<!DOCTYPE html>
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:h="jakarta.faces.html"
+                xmlns:ui="jakarta.faces.facelets"
+                xmlns:p="primefaces"
+                template="/plantillas/plantillaAcceso.xhtml">
+
+    <ui:define name="titulo">Acceso institucional · SIVIDO</ui:define>
+
+    <ui:define name="content">
+        <div class="acceso ancho">
+            <div class="grid grid-2" style="align-items:stretch;gap:0;border-radius:var(--radio-lg);overflow:hidden;box-shadow:var(--sombra-media)">
+                <!-- Panel informativo -->
+                <div class="banda-roja columna" style="border-radius:0;justify-content:center">
+                    <span class="etiqueta" style="background:rgba(255,255,255,.18);color:#fff;align-self:flex-start">
+                        <i class="pi pi-verified"></i> Acceso institucional
+                    </span>
+                    <h2 class="mt-1">Sistema Estatal de Vigilancia y Donación</h2>
+                    <p>Plataforma del CETS Oaxaca para gestionar solicitudes, registrar donaciones y mantener
+                        el catálogo de criterios de exclusión.</p>
+                    <span class="sobretitulo mt-1" style="color:#ffdad6">Perfiles habilitados</span>
+                    <div class="grid grid-3" style="gap:.5rem">
+                        <div class="tarjeta-plana texto-centro" style="background:rgba(255,255,255,.12);color:#fff">
+                            <i class="pi pi-user-edit"></i><br/><strong class="texto-chico">Médico</strong>
+                        </div>
+                        <div class="tarjeta-plana texto-centro" style="background:rgba(255,255,255,.12);color:#fff">
+                            <i class="pi pi-wave-pulse"></i><br/><strong class="texto-chico">Laboratorio</strong>
+                        </div>
+                        <div class="tarjeta-plana texto-centro" style="background:rgba(255,255,255,.12);color:#fff">
+                            <i class="pi pi-users"></i><br/><strong class="texto-chico">Trabajo social</strong>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Formulario -->
+                <div class="tarjeta-acceso" style="border-radius:0;box-shadow:none;border:0;border-top:5px solid var(--rojo)">
+                    <span class="etiqueta roja"><i class="pi pi-lock"></i> Acceso restringido</span>
+                    <h1 class="mt-1">Autenticación de personal CETS</h1>
+                    <p class="subtitulo">Ingresa con tus credenciales institucionales.</p>
+
+                    <h:form id="formLoginInstitucional">
+                        <p:messages id="mensajes" closable="true"/>
+
+                        <div class="campo">
+                            <p:outputLabel for="correo">Correo electrónico institucional <span class="requerido">*</span></p:outputLabel>
+                            <p:inputText id="correo" type="email" value="#{loginInstitucionalBean.correoInstitucional}"
+                                         required="true" requiredMessage="Escribe tu correo institucional"
+                                         placeholder="usuario@cets-oaxaca.gob.mx"/>
+                            <span class="ayuda"><i class="pi pi-info-circle"></i> Usa la cuenta asignada por el CETS.</span>
+                        </div>
+                        <div class="campo">
+                            <p:outputLabel for="contrasena">Contraseña <span class="requerido">*</span></p:outputLabel>
+                            <p:password id="contrasena" value="#{loginInstitucionalBean.password}"
+                                        required="true" requiredMessage="Escribe tu contraseña"
+                                        placeholder="••••••••" toggleMask="true"/>
+                        </div>
+                        <div class="check-linea mb-2">
+                            <p:selectBooleanCheckbox id="mantener"/>
+                            <p:outputLabel for="mantener" value="Mantener sesión activa en esta estación"/>
+                        </div>
+                        <p:commandButton value="Ingresar al portal institucional" icon="pi pi-sign-in"
+                                         styleClass="boton-bloque"
+                                         action="#{loginInstitucionalBean.ingresarCredenciales}" ajax="false"/>
+                    </h:form>
+
+                    <div class="division-texto">¿Eres ciudadano?</div>
+                    <div class="opcion-acceso">
+                        <span><i class="pi pi-user texto-rojo"></i> Acceso para donadores y solicitantes</span>
+                        <h:link outcome="/vista/iniciarSesion" styleClass="enlace-flecha">Ir <i class="pi pi-arrow-right"></i></h:link>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </ui:define>
+</ui:composition>

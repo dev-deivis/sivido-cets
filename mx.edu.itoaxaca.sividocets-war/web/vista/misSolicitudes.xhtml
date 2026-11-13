@@ -1,0 +1,129 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Mis solicitudes — panel de usuario estático (diseño Stitch v3) -->
+<!DOCTYPE html>
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:h="jakarta.faces.html"
+                xmlns:ui="jakarta.faces.facelets"
+                xmlns:p="primefaces"
+                template="/plantillas/plantillaUsuario.xhtml">
+
+    <ui:param name="menuActivo" value="misSolicitudes"/>
+    <ui:define name="titulo">Mis solicitudes · SIVIDO</ui:define>
+
+    <ui:define name="content">
+        <div class="encabezado-pagina fila-entre">
+            <div>
+                <span class="sobretitulo">CETS Oaxaca · Registro estatal</span>
+                <h1>Mis solicitudes de sangre</h1>
+                <p>Consulta el estado de las solicitudes que capturaste y comparte su ficha con código QR.</p>
+            </div>
+            <div class="fila">
+                <span class="etiqueta verde">Activas: 1</span>
+                <span class="etiqueta azul">Atendidas: 1</span>
+                <span class="etiqueta">Históricas: 2</span>
+            </div>
+        </div>
+
+        <div class="tarjeta mb-2">
+            <h:form id="formFiltros" styleClass="fila-entre">
+                <p:inputText placeholder="Buscar por folio u hospital..." style="min-width:260px"/>
+                <div class="pildoras">
+                    <span class="pildora activa">Todas (4)</span>
+                    <span class="pildora">Activa (1)</span>
+                    <span class="pildora">Atendida (1)</span>
+                    <span class="pildora">Cerrada (1)</span>
+                    <span class="pildora">Cancelada (1)</span>
+                </div>
+                <p:button outcome="/vista/capturarSolicitud" value="Capturar nueva solicitud" icon="pi pi-plus-circle"/>
+            </h:form>
+        </div>
+
+        <div class="tabla-contenedor">
+            <table class="tabla">
+                <thead>
+                    <tr>
+                        <th>Folio</th>
+                        <th>Fecha de registro</th>
+                        <th>Grupo / Rh</th>
+                        <th>Hospital</th>
+                        <th>Estatus</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><span class="folio">CETS-OAX-2024-1102</span></td>
+                        <td>12 mar 2024<span class="sub">08:42 hrs</span></td>
+                        <td><span class="grupo-sangre">O+</span></td>
+                        <td><strong>Hospital Civil Dr. Aurelio Valdivieso</strong><span class="sub">Oaxaca de Juárez</span></td>
+                        <td><span class="estatus activa">Activa</span></td>
+                        <td>
+                            <div class="fila" style="gap:.4rem">
+                                <h:link outcome="/vista/publicacion" styleClass="boton suave chico"><i class="pi pi-qrcode"></i> Ver QR</h:link>
+                                <h:link outcome="/vista/publicacion" styleClass="boton secundario chico"><i class="pi pi-share-alt"></i> Compartir</h:link>
+                            </div>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td><span class="folio">CETS-OAX-2024-0985</span></td>
+                        <td>08 mar 2024<span class="sub">11:15 hrs</span></td>
+                        <td><span class="grupo-sangre">A-</span></td>
+                        <td><strong>Hospital de la Niñez Oaxaqueña</strong><span class="sub">San Bartolo Coyotepec</span></td>
+                        <td><span class="estatus atendida">Atendida</span></td>
+                        <td>
+                            <div class="fila" style="gap:.4rem">
+                                <h:link outcome="/vista/publicacion" styleClass="boton suave chico"><i class="pi pi-qrcode"></i> Ver QR</h:link>
+                                <h:link outcome="/vista/publicacion" styleClass="boton secundario chico"><i class="pi pi-share-alt"></i> Compartir</h:link>
+                            </div>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td><span class="folio">CETS-OAX-2024-0741</span></td>
+                        <td>25 feb 2024<span class="sub">17:30 hrs</span></td>
+                        <td><span class="grupo-sangre claro">B+</span></td>
+                        <td><strong>H. Regional Pte. Juárez (ISSSTE)</strong><span class="sub">Oaxaca de Juárez</span></td>
+                        <td><span class="estatus cerrada">Cerrada</span></td>
+                        <td>
+                            <div class="fila" style="gap:.4rem">
+                                <h:link outcome="/vista/publicacion" styleClass="boton suave chico"><i class="pi pi-qrcode"></i> Ver QR</h:link>
+                                <h:link outcome="/vista/publicacion" styleClass="boton secundario chico"><i class="pi pi-share-alt"></i> Compartir</h:link>
+                            </div>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td><span class="folio">CETS-OAX-2023-4521</span></td>
+                        <td>15 nov 2023<span class="sub">14:05 hrs</span></td>
+                        <td><span class="grupo-sangre claro">O-</span></td>
+                        <td><strong>HGZ No. 1 IMSS</strong><span class="sub">Oaxaca de Juárez</span></td>
+                        <td><span class="estatus cancelada">Cancelada</span></td>
+                        <td>
+                            <div class="fila" style="gap:.4rem">
+                                <h:link outcome="/vista/publicacion" styleClass="boton suave chico"><i class="pi pi-qrcode"></i> Ver QR</h:link>
+                                <h:link outcome="/vista/publicacion" styleClass="boton secundario chico"><i class="pi pi-share-alt"></i> Compartir</h:link>
+                            </div>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+            <div class="pie-tabla">
+                <span>Mostrando 1 a 4 de 4 registros</span>
+                <div class="paginador"><span><i class="pi pi-chevron-left"></i></span><span class="actual">1</span><span><i class="pi pi-chevron-right"></i></span></div>
+            </div>
+        </div>
+
+        <div class="grid grid-3 mt-3">
+            <div class="tarjeta-plana fila" style="flex-wrap:nowrap;align-items:flex-start">
+                <span class="icono-caja"><i class="pi pi-verified"></i></span>
+                <div><h4 class="mb-0">Validación oficial</h4><span class="texto-chico texto-sec">El CETS verifica cada folio antes de publicarlo.</span></div>
+            </div>
+            <div class="tarjeta-plana fila" style="flex-wrap:nowrap;align-items:flex-start">
+                <span class="icono-caja"><i class="pi pi-qrcode"></i></span>
+                <div><h4 class="mb-0">Ficha con QR</h4><span class="texto-chico texto-sec">Lista para compartir en redes y mensajería.</span></div>
+            </div>
+            <div class="tarjeta-plana fila" style="flex-wrap:nowrap;align-items:flex-start">
+                <span class="icono-caja"><i class="pi pi-chart-line"></i></span>
+                <div><h4 class="mb-0">Estatus actualizado</h4><span class="texto-chico texto-sec">Revisa si tu solicitud sigue activa.</span></div>
+            </div>
+        </div>
+    </ui:define>
+</ui:composition>

@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    plantillaBase.xhtml — Esqueleto común de SIVIDO.
+    Puntos de inserción: titulo, encabezado (zona derecha del encabezado rojo),
+    left (menú lateral) y content.
+    Parámetros que pueden mandar las plantillas hijas:
+      sinMenu         = true  -> no se dibuja la columna del menú lateral
+      claseContenido  = clase CSS del contenedor principal (si no viene, se decide por sinMenu)
+-->
+<!DOCTYPE html>
+<html lang="es" xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="jakarta.faces.html"
+      xmlns:f="jakarta.faces.core"
+      xmlns:ui="jakarta.faces.facelets">
+    <h:head>
+        <meta charset="UTF-8"/>
+        <meta name="viewport" content="width=device-width, initial-scale=1"/>
+        <title><ui:insert name="titulo">SIVIDO</ui:insert></title>
+        <!-- Facet "last": nuestros CSS se cargan DESPUÉS de los de PrimeFaces (theme.css y components.css)
+             para poder sobrescribirlos. Se usa <link> directo porque h:outputStylesheet se reubica
+             junto con los recursos de PrimeFaces y quedaría antes de components.css. -->
+        <f:facet name="last">
+            <link rel="stylesheet" href="#{resource['css:estilos.css']}"/>
+            <link rel="stylesheet" href="#{resource['css:layout.css']}"/>
+            <link rel="stylesheet" href="#{resource['css:primefaces-cets.css']}"/>
+        </f:facet>
+    </h:head>
+    <h:body>
+        <header id="top">
+            <h:link outcome="/vista/index" styleClass="marca">
+                <span class="marca-icono"><i class="pi pi-heart-fill"></i></span>
+                <span class="marca-texto">
+                    <span class="marca-nombre">SIVIDO</span>
+                    <span class="marca-sub">Centro Estatal de la Transfusión Sanguínea · Oaxaca</span>
+                </span>
+            </h:link>
+            <div class="encabezado-derecha">
+                <ui:insert name="encabezado"/>
+            </div>
+        </header>
+
+        <div class="cuerpo">
+            <!-- Columna del menú: se oculta si la plantilla hija manda sinMenu=true -->
+            <ui:fragment rendered="#{not sinMenu}">
+                <aside id="left">
+                    <ui:insert name="left"/>
+                </aside>
+            </ui:fragment>
+
+            <main id="content" class="#{not empty claseContenido ? claseContenido : (sinMenu ? 'sin-menu' : 'con-menu')}">
+                <ui:insert name="content">Contenido</ui:insert>
+            </main>
+        </div>
+
+        <footer id="pie">SIVIDO · CETS Oaxaca</footer>
+    </h:body>
+</html>

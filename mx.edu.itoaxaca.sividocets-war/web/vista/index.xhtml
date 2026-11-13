@@ -1,0 +1,160 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Inicio / Qué es el CETS — vista pública estática (diseño Stitch v3) -->
+<!DOCTYPE html>
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:h="jakarta.faces.html"
+                xmlns:ui="jakarta.faces.facelets"
+                xmlns:p="primefaces"
+                template="/plantillas/plantillaPublica.xhtml">
+
+    <ui:param name="menuActivo" value="inicio"/>
+    <ui:define name="titulo">Inicio · SIVIDO</ui:define>
+
+    <ui:define name="content">
+        <!-- Héroe -->
+        <section class="heroe">
+            <div class="contenedor grid grid-principal">
+                <div class="columna">
+                    <div class="fila">
+                        <span class="etiqueta roja mono">Plataforma oficial SSO</span>
+                        <span class="etiqueta">CETS Oaxaca · SIVIDO</span>
+                    </div>
+                    <h1>Salvar vidas en Oaxaca comienza con un acto <span class="texto-rojo">voluntario y seguro</span>.</h1>
+                    <p class="lead">
+                        El <strong>Centro Estatal de la Transfusión Sanguínea (CETS Oaxaca)</strong>, perteneciente a los
+                        Servicios de Salud de Oaxaca (SSO), es la institución pública encargada de captar, procesar,
+                        analizar y distribuir sangre segura con apego a la
+                        <span class="mono texto-rojo">NOM-253-SSA1-2012</span>.
+                    </p>
+                    <p class="texto-sec">
+                        <strong>SIVIDO</strong> conecta a donadores altruistas voluntarios con pacientes y unidades
+                        hospitalarias en momentos críticos, garantizando confidencialidad, altruismo y bioseguridad.
+                    </p>
+                    <div class="fila">
+                        <p:button outcome="/vista/crearCuenta" value="Crear cuenta de donante" icon="pi pi-heart-fill"/>
+                        <p:button outcome="/vista/iniciarSesion" value="Iniciar sesión" icon="pi pi-sign-in"
+                                  styleClass="ui-button-secondary"/>
+                        <h:link outcome="/vista/requisitos" styleClass="enlace-flecha">
+                            Consultar requisitos <i class="pi pi-arrow-right"></i>
+                        </h:link>
+                    </div>
+                    <div class="fila texto-chico texto-sec">
+                        <span><i class="pi pi-verified texto-rojo"></i> Valoración médica en el CETS</span>
+                        <span><i class="pi pi-lock texto-rojo"></i> Datos protegidos</span>
+                        <span><i class="pi pi-heart texto-rojo"></i> 0% lucro comercial</span>
+                    </div>
+                </div>
+
+                <div class="banda-roja columna">
+                    <span class="icono-caja blanco" style="background:#fff;color:var(--rojo)"><i class="pi pi-heart-fill"></i></span>
+                    <h2 class="mb-0">1 donación = hasta 3 vidas</h2>
+                    <p class="mb-0">De una sola extracción se obtienen componentes listos para tres pacientes distintos.</p>
+                    <hr class="separador" style="border-color:rgba(255,255,255,.3)"/>
+                    <span class="texto-chico">Laboratorio Estatal CETS Oaxaca · Trazabilidad total</span>
+                </div>
+            </div>
+        </section>
+
+        <!-- Cómo funciona -->
+        <section class="seccion">
+            <div class="contenedor">
+                <div class="fila-entre mb-2">
+                    <div>
+                        <span class="sobretitulo">Flujo operativo simple y transparente</span>
+                        <h2>Cómo funciona SIVIDO en 3 pasos</h2>
+                        <p class="texto-sec mb-0">Un circuito digital que conecta directamente al donante con el protocolo médico oficial.</p>
+                    </div>
+                </div>
+                <div class="grid grid-3">
+                    <div class="tarjeta columna">
+                        <div class="fila-entre"><span class="paso-numero">01</span><span class="icono-caja"><i class="pi pi-user-plus"></i></span></div>
+                        <h3>Crea tu cuenta</h3>
+                        <p class="texto-sec">Regístrate en menos de dos minutos con tu correo y datos básicos. Una misma cuenta te
+                            permite registrarte como <strong>donante altruista</strong> y solicitar apoyo para un familiar hospitalizado.</p>
+                        <div class="fila-entre texto-chico texto-tenue"><span><i class="pi pi-check-circle"></i> Sin trámites presenciales</span><span>Paso 1 de 3</span></div>
+                    </div>
+                    <div class="tarjeta columna">
+                        <div class="fila-entre"><span class="paso-numero">02</span><span class="icono-caja"><i class="pi pi-bell"></i></span></div>
+                        <h3>Recibe avisos compatibles</h3>
+                        <p class="texto-sec">Cuando un hospital cercano requiera tu grupo y factor sanguíneo (<strong>A, B, AB u O</strong>),
+                            recibirás un aviso con folio oficial CETS y el hospital asignado.</p>
+                        <div class="fila-entre texto-chico texto-tenue"><span><i class="pi pi-map-marker"></i> Radio de aviso aproximado</span><span>Paso 2 de 3</span></div>
+                    </div>
+                    <div class="tarjeta columna">
+                        <div class="fila-entre"><span class="paso-numero">03</span><span class="icono-caja"><i class="pi pi-heart"></i></span></div>
+                        <h3>Acude y dona vida</h3>
+                        <p class="texto-sec">Confirma tu asistencia en la plataforma, responde el cuestionario preliminar y acude
+                            al <strong>CETS Oaxaca</strong> con tu ficha digital.</p>
+                        <div class="fila-entre texto-chico texto-tenue"><span><i class="pi pi-qrcode"></i> Ficha digital</span><span>Paso 3 de 3</span></div>
+                    </div>
+                </div>
+
+                <div class="aviso rojo mt-2">
+                    <i class="pi pi-question-circle"></i>
+                    <div style="flex:1">
+                        <strong>¿Tienes dudas sobre si puedes donar?</strong>
+                        <p>Peso mínimo de 50 kg, edad de 18 a 65 años, ayuno breve de grasas y buen estado general.</p>
+                    </div>
+                    <p:button outcome="/vista/requisitos" value="Ver guía completa" icon="pi pi-list-check"
+                              styleClass="ui-button-outlined"/>
+                </div>
+            </div>
+        </section>
+
+        <!-- Qué es el CETS -->
+        <section class="seccion" style="background:var(--superficie);border-top:1px solid var(--borde);border-bottom:1px solid var(--borde)">
+            <div class="contenedor">
+                <span class="etiqueta verde"><i class="pi pi-verified"></i> Organismo público descentralizado</span>
+                <h2 class="mt-1">¿Qué es el CETS Oaxaca y cuál es su misión?</h2>
+                <p class="texto-sec" style="max-width:820px">
+                    El <strong>Centro Estatal de la Transfusión Sanguínea (CETS)</strong> es el corazón rector del abasto
+                    sanguíneo en el Estado de Oaxaca. Como parte de los Servicios de Salud de Oaxaca, su misión es
+                    salvaguardar el suministro oportuno, suficiente y seguro de componentes sanguíneos para quienes
+                    enfrentan cirugías de emergencia, tratamientos oncológicos, urgencias obstétricas o politraumatismos.
+                </p>
+                <div class="grid grid-3 mt-2">
+                    <div class="tarjeta">
+                        <span class="icono-caja verde"><i class="pi pi-shield"></i></span>
+                        <span class="sobretitulo mt-1" style="display:block">Pilar institucional A</span>
+                        <h3>Bioseguridad y calidad total</h3>
+                        <p class="texto-sec mb-0">Cada unidad captada se procesa con controles de laboratorio rigurosos antes de llegar a un paciente.</p>
+                    </div>
+                    <div class="tarjeta">
+                        <span class="icono-caja"><i class="pi pi-heart"></i></span>
+                        <span class="sobretitulo mt-1" style="display:block">Pilar institucional B</span>
+                        <h3>Altruismo y cero lucro</h3>
+                        <p class="texto-sec mb-0">En México la sangre es un bien de salud pública no comercializable. SIVIDO fomenta la donación 100% voluntaria.</p>
+                    </div>
+                    <div class="tarjeta">
+                        <span class="icono-caja azul"><i class="pi pi-building"></i></span>
+                        <span class="sobretitulo mt-1" style="display:block">Pilar institucional C</span>
+                        <h3>Cobertura a la red hospitalaria</h3>
+                        <p class="texto-sec mb-0">Suministro al Hospital General Dr. Aurelio Valdivieso, al Hospital de la Niñez Oaxaqueña y a centros médicos de las regiones.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Llamado a la acción -->
+        <section class="seccion">
+            <div class="contenedor">
+                <div class="banda-roja fila-entre">
+                    <div style="max-width:720px">
+                        <span class="texto-chico mono" style="letter-spacing:.08em">EL TIEMPO CUENTA PARA QUIEN ESPERA UNA TRANSFUSIÓN</span>
+                        <h2 class="mt-1">Tu donación altruista hace la diferencia en Oaxaca.</h2>
+                        <p>Regístrate en SIVIDO hoy. Formarás parte de la red de respuesta voluntaria del estado y recibirás
+                            avisos solo cuando tu tipo de sangre sea requerido.</p>
+                        <div class="fila">
+                            <p:button outcome="/vista/crearCuenta" value="Crear cuenta de donante" icon="pi pi-user-plus"
+                                      styleClass="boton-blanco"/>
+                            <h:link outcome="/vista/ayuda" styleClass="boton" style="background:transparent;border-color:#fff">
+                                <i class="pi pi-question-circle"></i> Ver preguntas frecuentes
+                            </h:link>
+                        </div>
+                    </div>
+                    <i class="pi pi-users" style="font-size:96px;opacity:.35"></i>
+                </div>
+            </div>
+        </section>
+    </ui:define>
+</ui:composition>

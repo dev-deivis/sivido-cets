@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Resultado de elegibilidad — panel de usuario estático (diseño Stitch v3) -->
+<!DOCTYPE html>
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:h="jakarta.faces.html"
+                xmlns:ui="jakarta.faces.facelets"
+                xmlns:p="primefaces"
+                template="/plantillas/plantillaUsuario.xhtml">
+
+    <ui:param name="menuActivo" value="notificaciones"/>
+    <ui:define name="titulo">Resultado de elegibilidad · SIVIDO</ui:define>
+
+    <ui:define name="content">
+        <div class="encabezado-pagina">
+            <span class="sobretitulo">Resultado orientativo</span>
+            <h1>Resultado preliminar de aptitud</h1>
+            <p>Evaluación rápida de criterios de exclusión para la solicitud
+                <span class="mono texto-rojo">CETS-OAX-2024-1102</span> del Hospital General Dr. Aurelio Valdivieso.</p>
+        </div>
+
+        <div class="aviso ambar mb-2">
+            <i class="pi pi-exclamation-triangle"></i>
+            <div>
+                <strong>Aclaración médica obligatoria</strong>
+                <p>Resultado orientativo; la valoración final la hace el personal médico del CETS Oaxaca de forma
+                    presencial, conforme a la NOM-253-SSA1-2012.</p>
+            </div>
+        </div>
+
+        <div class="grid grid-principal">
+            <div class="columna">
+                <div class="tarjeta" style="border-top:5px solid var(--verde)">
+                    <div class="fila">
+                        <span class="icono-caja verde" style="width:56px;height:56px"><i class="pi pi-check-circle" style="font-size:28px"></i></span>
+                        <div>
+                            <span class="etiqueta verde">Elegible preliminar</span>
+                            <h2 class="mt-1 mb-0" style="color:var(--verde)">APTO PARA DONAR</h2>
+                        </div>
+                    </div>
+                    <p class="mt-2">Cumples con los criterios básicos de exclusión según tus respuestas declaradas.</p>
+
+                    <div class="grid grid-2">
+                        <div class="tarjeta-plana">
+                            <strong><i class="pi pi-clock texto-rojo"></i> Ayuno ligero recomendado</strong>
+                            <p class="texto-sec texto-chico mb-0 mt-1">4 horas previas sin grasas, lácteos ni derivados. Se permite fruta, agua, café o té sin leche.</p>
+                        </div>
+                        <div class="tarjeta-plana">
+                            <strong><i class="pi pi-id-card texto-rojo"></i> Identificación oficial vigente</strong>
+                            <p class="texto-sec texto-chico mb-0 mt-1">INE, cédula profesional o pasaporte original, indispensable en recepción.</p>
+                        </div>
+                    </div>
+
+                    <div class="fila mt-2 texto-chico">
+                        <span class="texto-sec">Criterios validados:</span>
+                        <span class="etiqueta">Edad 18 a 65 años</span>
+                        <span class="etiqueta">Peso ≥ 50 kg</span>
+                        <span class="etiqueta">Intervalo entre donaciones</span>
+                    </div>
+
+                    <div class="acciones-formulario">
+                        <p:button outcome="/vista/confirmarInteres" value="Continuar para confirmar asistencia"
+                                  icon="pi pi-arrow-right" iconPos="right"/>
+                    </div>
+                </div>
+
+                <div class="fila-entre">
+                    <h:link outcome="/vista/notificaciones" styleClass="enlace-flecha"><i class="pi pi-arrow-left"></i> Volver a notificaciones</h:link>
+                    <p:button outcome="/vista/cuestionario" value="Rehacer cuestionario" icon="pi pi-refresh"
+                              styleClass="ui-button-secondary"/>
+                </div>
+            </div>
+
+            <div class="tarjeta">
+                <div class="tarjeta-cabecera"><h3><i class="pi pi-hourglass texto-rojo"></i> ¿Por qué alguien debe esperar?</h3></div>
+                <p class="texto-sec texto-chico">Si tuviste tatuajes recientes o tratamiento médico, es indispensable cumplir el
+                    periodo reglamentario para proteger al receptor y tu propia salud.</p>
+                <ul class="lista-iconos">
+                    <li><i class="pi pi-pencil"></i><div><strong>Tatuajes, perforaciones y acupuntura</strong><span>12 meses</span></div></li>
+                    <li><i class="pi pi-box"></i><div><strong>Antibióticos o analgésicos</strong><span>7 a 14 días</span></div></li>
+                    <li><i class="pi pi-calendar"></i><div><strong>Donación previa</strong><span>2 meses (hombres) / 3 meses (mujeres)</span></div></li>
+                </ul>
+                <hr class="separador"/>
+                <h:link outcome="/vista/requisitos" styleClass="enlace-flecha texto-chico">Consultar requisitos completos <i class="pi pi-arrow-right"></i></h:link>
+            </div>
+        </div>
+    </ui:define>
+</ui:composition>

@@ -1,0 +1,14 @@
+# Compilados de NetBeans/Ant
+build/
+dist/
+*/build/
+*/dist/
+
+# Config local de NetBeans (rutas de tu máquina)
+nbproject/private/
+*/nbproject/private/
+
+# Varios
+*.class
+*.log
+.DS_Store

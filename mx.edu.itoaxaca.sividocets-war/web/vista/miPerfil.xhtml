@@ -1,0 +1,125 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Mi perfil — panel de usuario estático (diseño Stitch v3) -->
+<!DOCTYPE html>
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:h="jakarta.faces.html"
+                xmlns:f="jakarta.faces.core"
+                xmlns:ui="jakarta.faces.facelets"
+                xmlns:p="primefaces"
+                template="/plantillas/plantillaUsuario.xhtml">
+
+    <ui:param name="menuActivo" value="miPerfil"/>
+    <ui:define name="titulo">Mi perfil · SIVIDO</ui:define>
+
+    <ui:define name="content">
+        <div class="encabezado-pagina fila-entre">
+            <div>
+                <h1>Mi perfil de usuario</h1>
+                <p>Tus datos de contacto, tu grupo sanguíneo declarado y tus preferencias de privacidad.</p>
+            </div>
+            <span class="etiqueta verde"><i class="pi pi-check-circle"></i> Registro activo</span>
+        </div>
+
+        <div class="aviso ambar mb-2">
+            <i class="pi pi-info-circle"></i>
+            <div>
+                <strong>El perfil es orientativo</strong>
+                <p>La valoración final y la determinación de aptitud la realiza el personal médico en el CETS Oaxaca.</p>
+            </div>
+        </div>
+
+        <h:form id="formPerfil">
+            <div class="grid grid-2">
+                <!-- Contacto -->
+                <div class="tarjeta">
+                    <div class="tarjeta-cabecera"><h2><i class="pi pi-address-book texto-rojo"></i> Datos de contacto</h2></div>
+                    <div class="campo">
+                        <p:outputLabel for="nombre">Nombre completo <span class="requerido">*</span></p:outputLabel>
+                        <p:inputText id="nombre" value="Rosalba Méndez Jarquín"/>
+                    </div>
+                    <div class="campo">
+                        <div class="fila-campo">
+                            <p:outputLabel for="correo">Correo electrónico <span class="requerido">*</span></p:outputLabel>
+                            <span class="etiqueta verde"><i class="pi pi-check"></i> Verificado</span>
+                        </div>
+                        <p:inputText id="correo" type="email" value="r.mendez.j@correo.com"/>
+                    </div>
+                    <div class="campo">
+                        <p:outputLabel for="telefono">Teléfono móvil <span class="requerido">*</span></p:outputLabel>
+                        <p:inputText id="telefono" value="951 428 9031"/>
+                        <span class="ayuda"><i class="pi pi-mobile"></i> Solo se comparte si confirmas interés en una solicitud.</span>
+                    </div>
+                    <div class="campo mb-0">
+                        <p:outputLabel for="region">Región de residencia <span class="requerido">*</span></p:outputLabel>
+                        <p:selectOneMenu id="region" value="valles">
+                            <f:selectItem itemLabel="Valles Centrales" itemValue="valles"/>
+                            <f:selectItem itemLabel="Istmo de Tehuantepec" itemValue="istmo"/>
+                            <f:selectItem itemLabel="Costa" itemValue="costa"/>
+                            <f:selectItem itemLabel="Mixteca" itemValue="mixteca"/>
+                            <f:selectItem itemLabel="Cuenca del Papaloapan" itemValue="cuenca"/>
+                            <f:selectItem itemLabel="Sierra Sur" itemValue="sierraSur"/>
+                            <f:selectItem itemLabel="Sierra Norte" itemValue="sierraNorte"/>
+                            <f:selectItem itemLabel="Cañada" itemValue="canada"/>
+                        </p:selectOneMenu>
+                        <span class="ayuda"><i class="pi pi-lock"></i> Tu dirección exacta nunca se guarda ni se muestra.</span>
+                    </div>
+                </div>
+
+                <!-- Información sanguínea -->
+                <div class="columna">
+                    <div class="tarjeta">
+                        <div class="tarjeta-cabecera"><h2><i class="pi pi-heart texto-rojo"></i> Información sanguínea</h2></div>
+                        <div class="grid grid-2" style="gap:0 1rem">
+                            <div class="campo">
+                                <p:outputLabel for="grupo">Grupo ABO <span class="requerido">*</span></p:outputLabel>
+                                <p:selectOneMenu id="grupo" value="O">
+                                    <f:selectItem itemLabel="Grupo O" itemValue="O"/>
+                                    <f:selectItem itemLabel="Grupo A" itemValue="A"/>
+                                    <f:selectItem itemLabel="Grupo B" itemValue="B"/>
+                                    <f:selectItem itemLabel="Grupo AB" itemValue="AB"/>
+                                </p:selectOneMenu>
+                            </div>
+                            <div class="campo">
+                                <p:outputLabel for="rh">Factor Rh <span class="requerido">*</span></p:outputLabel>
+                                <p:selectOneMenu id="rh" value="+">
+                                    <f:selectItem itemLabel="Positivo (+)" itemValue="+"/>
+                                    <f:selectItem itemLabel="Negativo (−)" itemValue="-"/>
+                                </p:selectOneMenu>
+                            </div>
+                        </div>
+                        <div class="tarjeta-plana fila">
+                            <span class="grupo-sangre grande">O+<small>DECLARADO</small></span>
+                            <div>
+                                <strong>Perfil autodeclarado</strong>
+                                <p class="texto-chico texto-sec mb-0">Puedes donar glóbulos rojos a receptores O+, A+, B+ y AB+.</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="tarjeta">
+                        <div class="tarjeta-cabecera"><h2><i class="pi pi-shield texto-rojo"></i> Privacidad</h2></div>
+                        <div class="preferencia">
+                            <div>
+                                <strong>Compartir mi contacto solo cuando yo confirme interés</strong>
+                                <p>Nadie verá tu teléfono ni tu nombre completo hasta que confirmes tu interés en una solicitud.</p>
+                            </div>
+                            <p:toggleSwitch id="soloAlConfirmar" value="true"/>
+                        </div>
+                        <div class="preferencia mb-0">
+                            <div>
+                                <strong>Recibir avisos de solicitudes compatibles</strong>
+                                <p>Te avisamos cuando un hospital dentro de tu radio requiera tu grupo sanguíneo.</p>
+                            </div>
+                            <p:toggleSwitch id="recibirAvisos" value="true"/>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="acciones-formulario">
+                <p:button outcome="/vista/miPerfil" value="Cancelar cambios" icon="pi pi-undo" styleClass="ui-button-secondary"/>
+                <p:button outcome="/vista/miPerfil" value="Guardar cambios" icon="pi pi-save"/>
+            </div>
+        </h:form>
+    </ui:define>
+</ui:composition>

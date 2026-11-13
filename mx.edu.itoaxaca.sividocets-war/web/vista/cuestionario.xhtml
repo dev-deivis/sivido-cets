@@ -1,0 +1,112 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Cuestionario de elegibilidad — panel de usuario estático (diseño Stitch v3) -->
+<!DOCTYPE html>
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:h="jakarta.faces.html"
+                xmlns:f="jakarta.faces.core"
+                xmlns:ui="jakarta.faces.facelets"
+                xmlns:p="primefaces"
+                template="/plantillas/plantillaUsuario.xhtml">
+
+    <ui:param name="menuActivo" value="notificaciones"/>
+    <ui:define name="titulo">Cuestionario de elegibilidad · SIVIDO</ui:define>
+
+    <ui:define name="content">
+        <div class="encabezado-pagina">
+            <span class="sobretitulo">NOM-253-SSA1-2012</span>
+            <h1>Cuestionario rápido de elegibilidad</h1>
+            <p>Cotejo orientativo previo según los lineamientos de la NOM-253-SSA1-2012 para donar en el CETS Oaxaca.</p>
+        </div>
+
+        <div class="grid grid-principal">
+            <div class="tarjeta">
+                <div class="fila-entre mb-2">
+                    <strong><i class="pi pi-hourglass texto-rojo"></i> Progreso: 5 de 5 preguntas respondidas</strong>
+                    <span class="etiqueta verde">100%</span>
+                </div>
+                <div class="progreso mb-2"><span style="width:100%"></span></div>
+
+                <h:form id="formCuestionario">
+                    <div class="tarjeta-plana mb-2">
+                        <p class="negrita mb-0"><span class="paso-numero" style="font-size:13px">1</span>
+                            ¿Te has realizado tatuajes, perforaciones, micropigmentación o acupuntura en los últimos 12 meses?</p>
+                        <p class="ayuda texto-chico texto-tenue mt-1">Criterio preventivo por periodo de ventana de 12 meses.</p>
+                        <p:selectOneRadio id="p1" value="no" layout="lineDirection">
+                            <f:selectItem itemLabel="No" itemValue="no"/>
+                            <f:selectItem itemLabel="Sí" itemValue="si"/>
+                        </p:selectOneRadio>
+                    </div>
+
+                    <div class="tarjeta-plana mb-2">
+                        <p class="negrita mb-0"><span class="paso-numero" style="font-size:13px">2</span>
+                            ¿Has presentado fiebre, gripe, tos, diarrea o infecciones en los últimos 14 días?</p>
+                        <p class="ayuda texto-chico texto-tenue mt-1">Debes estar sin síntomas al momento de donar.</p>
+                        <p:selectOneRadio id="p2" value="no" layout="lineDirection">
+                            <f:selectItem itemLabel="No" itemValue="no"/>
+                            <f:selectItem itemLabel="Sí" itemValue="si"/>
+                        </p:selectOneRadio>
+                    </div>
+
+                    <div class="tarjeta-plana mb-2">
+                        <p class="negrita mb-0"><span class="paso-numero" style="font-size:13px">3</span>
+                            ¿Cuándo fue tu última donación de sangre?</p>
+                        <p class="ayuda texto-chico texto-tenue mt-1">Se requiere un intervalo mínimo entre donaciones.</p>
+                        <p:selectOneRadio id="p3" value="mas3" layout="pageDirection">
+                            <f:selectItem itemLabel="Hace más de 3 meses (hombres) / 4 meses (mujeres)" itemValue="mas3"/>
+                            <f:selectItem itemLabel="Hace entre 1 y 2 meses" itemValue="entre1y2"/>
+                            <f:selectItem itemLabel="Nunca he donado antes" itemValue="nunca"/>
+                        </p:selectOneRadio>
+                    </div>
+
+                    <div class="tarjeta-plana mb-2">
+                        <p class="negrita mb-0"><span class="paso-numero" style="font-size:13px">4</span>
+                            ¿Has tomado antibióticos, analgésicos o antiinflamatorios en las últimas 72 horas?</p>
+                        <p class="ayuda texto-chico texto-tenue mt-1">Medicamentos como la aspirina afectan la donación.</p>
+                        <p:selectOneRadio id="p4" value="no" layout="lineDirection">
+                            <f:selectItem itemLabel="No" itemValue="no"/>
+                            <f:selectItem itemLabel="Sí" itemValue="si"/>
+                        </p:selectOneRadio>
+                    </div>
+
+                    <div class="tarjeta-plana mb-2">
+                        <p class="negrita mb-0"><span class="paso-numero" style="font-size:13px">5</span>
+                            ¿Tienes entre 18 y 65 años cumplidos y peso mayor a 50 kg?</p>
+                        <p class="ayuda texto-chico texto-tenue mt-1">Requisitos básicos obligatorios.</p>
+                        <p:selectOneRadio id="p5" value="si" layout="lineDirection">
+                            <f:selectItem itemLabel="Sí" itemValue="si"/>
+                            <f:selectItem itemLabel="No" itemValue="no"/>
+                        </p:selectOneRadio>
+                    </div>
+
+                    <div class="acciones-formulario" style="justify-content:space-between">
+                        <h:link outcome="/vista/notificaciones" styleClass="enlace-flecha"><i class="pi pi-arrow-left"></i> Regresar a notificaciones</h:link>
+                        <p:button outcome="/vista/resultado" value="Ver resultado" icon="pi pi-check-square" iconPos="right"/>
+                    </div>
+                </h:form>
+            </div>
+
+            <!-- Solicitud vinculada -->
+            <div class="columna">
+                <div class="tarjeta">
+                    <div class="tarjeta-cabecera"><h3><i class="pi pi-building texto-rojo"></i> Solicitud vinculada</h3></div>
+                    <div class="fila mb-2">
+                        <span class="grupo-sangre grande">O+<small>POSITIVO</small></span>
+                        <div>
+                            <span class="texto-chico texto-tenue">Hospital</span><br/>
+                            <strong>Hospital General Dr. Aurelio Valdivieso</strong>
+                        </div>
+                    </div>
+                    <dl class="datos">
+                        <dt>Folio</dt><dd class="mono texto-rojo">CETS-OAX-2024-1102</dd>
+                        <dt>Estatus</dt><dd><span class="estatus activa">Activa</span></dd>
+                    </dl>
+                </div>
+                <div class="aviso">
+                    <i class="pi pi-shield"></i>
+                    <p><strong>Confidencialidad.</strong> Tus respuestas son confidenciales. Este cuestionario es orientativo y no
+                        sustituye la valoración del médico del CETS.</p>
+                </div>
+            </div>
+        </div>
+    </ui:define>
+</ui:composition>

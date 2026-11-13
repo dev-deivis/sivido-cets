@@ -1,0 +1,119 @@
+/*
+    primefaces-cets.css — Sobrescribe el color primario del tema saga-blue (#2196F3)
+    por el rojo institucional #B71C1C en los componentes que usa SIVIDO.
+    Se carga en el facet "last" del h:head, después de los CSS de PrimeFaces.
+*/
+
+:root {
+    --primary-color: #b71c1c;
+    --p-primary-color: #b71c1c;
+    --primary-color-text: #ffffff;
+    --focus-ring: 0 0 0 .2rem rgba(183, 28, 28, .25);
+}
+
+body .ui-widget,
+body .ui-widget .ui-widget { font-family: var(--fuente); font-size: 14px; }
+body .ui-button .ui-button-text { white-space: nowrap; }
+
+/* ---------- Botones ---------- */
+body .ui-button {
+    background: #b71c1c;
+    border: 1px solid #b71c1c;
+    color: #fff;
+    border-radius: 6px;
+    font-weight: 600;
+}
+body .ui-button.ui-state-hover { background: #9a1616; border-color: #9a1616; color: #fff; }
+body .ui-button.ui-state-active,
+body .ui-button.ui-state-down { background: #91000a; border-color: #91000a; color: #fff; }
+body .ui-button.ui-state-focus { box-shadow: 0 0 0 .2em rgba(183, 28, 28, .25); }
+
+body .ui-button.ui-button-outlined { background: transparent; color: #b71c1c; border-color: #b71c1c; }
+body .ui-button.ui-button-outlined.ui-state-hover { background: rgba(183, 28, 28, .05); color: #b71c1c; border-color: #b71c1c; }
+body .ui-button.ui-button-outlined.ui-state-active,
+body .ui-button.ui-button-outlined.ui-state-down { background: rgba(183, 28, 28, .14); color: #b71c1c; }
+
+body .ui-button.ui-button-flat { background: transparent; color: #b71c1c; border-color: transparent; }
+body .ui-button.ui-button-flat.ui-state-hover { background: rgba(183, 28, 28, .05); color: #b71c1c; border-color: transparent; }
+
+/* Botón secundario (blanco con borde gris) — styleClass="ui-button-secondary" */
+body .ui-button.ui-button-secondary { background: #fff; color: #121c2a; border-color: #dfe3ec; }
+body .ui-button.ui-button-secondary.ui-state-hover { background: #eff4ff; color: #121c2a; border-color: #dfe3ec; }
+
+/* Botón suave (fondo azul muy claro, texto rojo) — styleClass="boton-suave" */
+body .ui-button.boton-suave { background: #e6eeff; color: #91000a; border-color: transparent; }
+body .ui-button.boton-suave.ui-state-hover { background: #dee9fc; color: #91000a; }
+
+/* Botón blanco sobre fondo rojo — styleClass="boton-blanco" */
+body .ui-button.boton-blanco { background: #fff; color: #b71c1c; border-color: #fff; }
+body .ui-button.boton-blanco.ui-state-hover { background: #ffdad6; color: #91000a; border-color: #ffdad6; }
+
+body .ui-button.boton-bloque { width: 100%; }
+
+/* ---------- Entradas ---------- */
+body .ui-inputfield { border-radius: 6px; border-color: #dfe3ec; }
+body .ui-inputfield.ui-state-hover,
+body .ui-selectonemenu.ui-state-hover { border-color: #b71c1c; }
+body .ui-inputfield.ui-state-focus,
+body .ui-selectonemenu.ui-state-focus {
+    border-color: #b71c1c;
+    box-shadow: 0 0 0 .2em rgba(183, 28, 28, .2);
+}
+body select:focus,
+body input:not([role=combobox],[type=file],.ui-widget,.ui-inputfield):focus {
+    border-color: #b71c1c;
+    box-shadow: 0 0 0 .2em rgba(183, 28, 28, .2);
+}
+body .ui-selectonemenu { border-radius: 6px; border-color: #dfe3ec; }
+body .ui-selectonemenu .ui-selectonemenu-label,
+body .ui-inputfield { font-size: 14px; }
+body .ui-selectonemenu-panel .ui-selectonemenu-items .ui-selectonemenu-item.ui-state-highlight {
+    background: #ffdad6; color: #91000a;
+}
+
+/* ---------- Checkbox / Radio ---------- */
+body .ui-chkbox .ui-chkbox-box.ui-state-hover,
+body .ui-radiobutton .ui-radiobutton-box.ui-state-hover { border-color: #b71c1c; }
+body .ui-chkbox .ui-chkbox-box.ui-state-active,
+body .ui-radiobutton .ui-radiobutton-box.ui-state-active {
+    border-color: #b71c1c; background: #b71c1c; color: #fff;
+}
+body .ui-chkbox .ui-chkbox-box.ui-state-focus,
+body .ui-radiobutton .ui-radiobutton-box.ui-state-focus { box-shadow: 0 0 0 .2em rgba(183, 28, 28, .25); }
+
+/* ---------- SelectOneButton ---------- */
+body .ui-selectonebutton > .ui-button { background: #fff; color: #121c2a; border-color: #dfe3ec; }
+body .ui-selectonebutton > .ui-button.ui-state-hover { background: #eff4ff; color: #121c2a; border-color: #dfe3ec; }
+body .ui-selectonebutton > .ui-button.ui-state-active,
+body .ui-selectbooleanbutton.ui-state-active {
+    background: #b71c1c; border-color: #b71c1c; color: #fff;
+}
+
+/* ---------- ToggleSwitch ---------- */
+body .ui-toggleswitch.ui-toggleswitch-checked .ui-toggleswitch-slider { background: #b71c1c; }
+body .ui-toggleswitch.ui-toggleswitch-focus .ui-toggleswitch-slider { box-shadow: 0 0 0 .2rem rgba(183, 28, 28, .25); }
+
+/* ---------- Tag ---------- */
+body .ui-tag { background: #b71c1c; color: #fff; border-radius: 999px; padding: .2rem .6rem; }
+body .ui-tag.ui-tag-success { background: #006c30; }
+body .ui-tag.ui-tag-info { background: #1d4ed8; }
+body .ui-tag.ui-tag-secondary { background: #5f6673; }
+body .ui-tag.ui-tag-danger { background: #91000a; }
+
+/* ---------- Panel / Accordion ---------- */
+body .ui-panel { border-radius: 10px; overflow: hidden; border: 1px solid #dfe3ec; box-shadow: var(--sombra); }
+body .ui-panel .ui-panel-titlebar { background: #eff4ff; border: 0; border-bottom: 1px solid #dfe3ec; color: #121c2a; }
+body .ui-panel .ui-panel-content { border: 0; }
+
+body .ui-accordion .ui-accordion-header {
+    background: #fff; color: #121c2a; border-color: #dfe3ec; font-weight: 600;
+}
+body .ui-accordion .ui-accordion-header.ui-state-hover { background: #eff4ff; color: #121c2a; }
+body .ui-accordion .ui-accordion-header.ui-state-active {
+    background: #fff4f2; color: #91000a; border-color: #e4beb9; border-left: 4px solid #b71c1c;
+}
+body .ui-accordion .ui-accordion-header .ui-icon { color: #b71c1c; }
+body .ui-accordion .ui-accordion-header:focus { box-shadow: 0 0 0 .2rem rgba(183, 28, 28, .25); }
+
+/* ---------- Password (indicador de fuerza) ---------- */
+body .ui-password-panel .ui-password-meter { background: #dee9fc; }

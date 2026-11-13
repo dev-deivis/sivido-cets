@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Crear cuenta — HU-1.1 conectada a RegistroBean -->
+<!DOCTYPE html>
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:h="jakarta.faces.html"
+                xmlns:ui="jakarta.faces.facelets"
+                xmlns:p="primefaces"
+                template="/plantillas/plantillaAcceso.xhtml">
+
+    <ui:define name="titulo">Crear cuenta · SIVIDO</ui:define>
+
+    <ui:define name="content">
+        <div class="acceso" style="max-width:560px">
+            <div class="tarjeta-acceso">
+                <span class="etiqueta azul mono"><i class="pi pi-user-plus"></i> Alta de usuario</span>
+                <h1 class="mt-1">Crear cuenta de donador o solicitante</h1>
+                <p class="subtitulo">Inicia tu registro en el padrón estatal de donación sanguínea de Oaxaca.</p>
+
+                <div class="aviso mb-2">
+                    <i class="pi pi-info-circle"></i>
+                    <div>
+                        <strong>Una misma cuenta sirve para donar y para solicitar donadores</strong>
+                        <p>No necesitas registrar perfiles diferentes.</p>
+                    </div>
+                </div>
+
+                <h:form id="formCrearCuenta">
+                    <p:messages id="mensajes" closable="true"/>
+
+                    <div class="campo">
+                        <p:outputLabel for="nombre">Nombre completo <span class="requerido">*</span></p:outputLabel>
+                        <p:inputText id="nombre" value="#{registroBean.nombreCompleto}" required="true"
+                                     requiredMessage="Escribe tu nombre completo"
+                                     placeholder="Ej. María Elena Jiménez Bautista"/>
+                        <span class="ayuda"><i class="pi pi-info-circle"></i> Escribe tu nombre tal como aparece en tu identificación oficial.</span>
+                    </div>
+                    <div class="grid grid-2" style="gap:0 1rem">
+                        <div class="campo">
+                            <p:outputLabel for="telefono">Teléfono de contacto <span class="requerido">*</span></p:outputLabel>
+                            <p:inputText id="telefono" value="#{registroBean.telefono}" required="true"
+                                         requiredMessage="Escribe tu teléfono"
+                                         placeholder="951 123 4567" maxlength="10"/>
+                            <span class="ayuda">10 dígitos</span>
+                        </div>
+                        <div class="campo">
+                            <p:outputLabel for="correo">Correo electrónico <span class="requerido">*</span></p:outputLabel>
+                            <p:inputText id="correo" type="email" value="#{registroBean.correo}" required="true"
+                                         requiredMessage="Escribe tu correo"
+                                         placeholder="ejemplo@correo.com"/>
+                        </div>
+                    </div>
+                    <div class="grid grid-2" style="gap:0 1rem">
+                        <div class="campo">
+                            <p:outputLabel for="contrasena">Contraseña <span class="requerido">*</span></p:outputLabel>
+                            <p:password id="contrasena" value="#{registroBean.password}" required="true"
+                                        requiredMessage="Escribe una contraseña"
+                                        placeholder="••••••••" toggleMask="true"/>
+                        </div>
+                        <div class="campo">
+                            <p:outputLabel for="confirmar">Confirmar contraseña <span class="requerido">*</span></p:outputLabel>
+                            <p:password id="confirmar" value="#{registroBean.confirmacion}" required="true"
+                                        requiredMessage="Confirma tu contraseña"
+                                        placeholder="••••••••" toggleMask="true"/>
+                        </div>
+                    </div>
+
+                    <div class="tarjeta-plana mb-2">
+                        <strong class="texto-chico"><i class="pi pi-shield texto-rojo"></i> La contraseña debe tener:</strong>
+                        <ul class="lista-iconos mt-1 texto-chico" style="gap:.3rem">
+                            <li><i class="pi pi-circle" style="font-size:10px"></i><span>Mínimo 8 caracteres</span></li>
+                            <li><i class="pi pi-circle" style="font-size:10px"></i><span>Al menos una mayúscula y una minúscula</span></li>
+                            <li><i class="pi pi-circle" style="font-size:10px"></i><span>Al menos un número</span></li>
+                        </ul>
+                    </div>
+
+                    <div class="check-linea mb-2">
+                        <p:selectBooleanCheckbox id="aviso" value="#{registroBean.aceptaAviso}"/>
+                        <p:outputLabel for="aviso">He leído y acepto el <strong>Aviso de privacidad</strong> y el consentimiento
+                            informado del CETS Oaxaca para el tratamiento de mis datos personales en materia de salud.</p:outputLabel>
+                    </div>
+
+                    <p:commandButton value="Crear cuenta" icon="pi pi-user-plus" styleClass="boton-bloque"
+                                     action="#{registroBean.llenarFormulario}" ajax="false"/>
+                </h:form>
+
+                <div class="division-texto">¿Ya tienes cuenta?</div>
+                <div class="opcion-acceso">
+                    <span><i class="pi pi-sign-in texto-rojo"></i> Ingresa con tu correo y contraseña</span>
+                    <h:link outcome="/vista/iniciarSesion" styleClass="enlace-flecha">Iniciar sesión <i class="pi pi-arrow-right"></i></h:link>
+                </div>
+            </div>
+
+            <div class="aviso ambar mt-2">
+                <i class="pi pi-info-circle"></i>
+                <p>La donación de sangre es un acto 100% altruista, libre y voluntario. La sangre no tiene precio.</p>
+            </div>
+        </div>
+    </ui:define>
+</ui:composition>

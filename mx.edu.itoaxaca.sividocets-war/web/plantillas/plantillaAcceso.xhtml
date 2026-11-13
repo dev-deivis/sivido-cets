@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    plantillaAcceso.xhtml — Login, crear cuenta y login institucional.
+    Sin menú; el contenido va centrado.
+-->
+<!DOCTYPE html>
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:h="jakarta.faces.html"
+                xmlns:ui="jakarta.faces.facelets"
+                template="/plantillas/plantillaBase.xhtml">
+
+    <ui:param name="sinMenu" value="true"/>   <!-- le avisa a la base: sin menú -->
+
+    <ui:define name="encabezado">
+        <nav class="menu-superior">
+            <h:link outcome="/vista/index"><i class="pi pi-arrow-left"></i> Volver al inicio</h:link>
+        </nav>
+    </ui:define>
+</ui:composition>

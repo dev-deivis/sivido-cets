@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    plantillaUsuario.xhtml — Panel del ciudadano (una misma cuenta dona y solicita).
+    La vista marca la opción activa con
+    <ui:param name="menuActivo" value="notificaciones|misSolicitudes|capturarSolicitud|miHistorial|miPerfil"/>
+    Solo accesible con sesión iniciada (HU-1.2).
+-->
+<!DOCTYPE html>
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:h="jakarta.faces.html"
+                xmlns:f="jakarta.faces.core"
+                xmlns:ui="jakarta.faces.facelets"
+                template="/plantillas/plantillaBase.xhtml">
+
+    <ui:define name="encabezado">
+        <f:event type="preRenderView" listener="#{sesionBean.verificar}"/>
+        <div class="usuario-encabezado">
+            <span>#{sesionBean.nombre}</span>
+            <span class="avatar">#{sesionBean.iniciales}</span>
+        </div>
+    </ui:define>
+
+    <ui:define name="left">
+        <nav class="menu-lateral">
+            <span class="menu-lateral-titulo">Panel principal</span>
+
+            <h:link outcome="/vista/notificaciones"
+                    styleClass="menu-item #{menuActivo eq 'notificaciones' ? 'activo' : ''}">
+                <i class="pi pi-bell"></i> Notificaciones <span class="menu-contador">3</span>
+            </h:link>
+            <h:link outcome="/vista/misSolicitudes"
+                    styleClass="menu-item #{menuActivo eq 'misSolicitudes' ? 'activo' : ''}">
+                <i class="pi pi-inbox"></i> Mis solicitudes
+            </h:link>
+            <h:link outcome="/vista/capturarSolicitud"
+                    styleClass="menu-item #{menuActivo eq 'capturarSolicitud' ? 'activo' : ''}">
+                <i class="pi pi-plus-circle"></i> Capturar solicitud
+            </h:link>
+            <h:link outcome="/vista/miHistorial"
+                    styleClass="menu-item #{menuActivo eq 'miHistorial' ? 'activo' : ''}">
+                <i class="pi pi-history"></i> Mi historial
+            </h:link>
+            <h:link outcome="/vista/miPerfil"
+                    styleClass="menu-item #{menuActivo eq 'miPerfil' ? 'activo' : ''}">
+                <i class="pi pi-user"></i> Mi perfil
+            </h:link>
+
+            <hr class="menu-separador"/>
+            <h:form id="formSalir">
+                <h:commandLink action="#{sesionBean.cerrarSesion}" styleClass="menu-item salir">
+                    <i class="pi pi-sign-out"></i> Cerrar sesión
+                </h:commandLink>
+            </h:form>
+        </nav>
+    </ui:define>
+</ui:composition>

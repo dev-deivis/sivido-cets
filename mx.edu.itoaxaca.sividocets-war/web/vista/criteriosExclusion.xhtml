@@ -1,0 +1,162 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Criterios de exclusión — panel institucional CETS estático (diseño Stitch v3) -->
+<!DOCTYPE html>
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:h="jakarta.faces.html"
+                xmlns:f="jakarta.faces.core"
+                xmlns:ui="jakarta.faces.facelets"
+                xmlns:p="primefaces"
+                template="/plantillas/plantillaInstitucional.xhtml">
+
+    <ui:param name="menuActivo" value="criteriosExclusion"/>
+    <ui:define name="titulo">Criterios de exclusión · SIVIDO CETS</ui:define>
+
+    <ui:define name="content">
+        <div class="encabezado-pagina">
+            <span class="sobretitulo"><i class="pi pi-book"></i> Normatividad sanitaria CETS Oaxaca</span>
+            <h1>Catálogo de criterios de exclusión (NOM-253-SSA1-2012)</h1>
+            <p>Preguntas del cuestionario de elegibilidad que responde el donador antes de confirmar su interés.</p>
+        </div>
+
+        <div class="grid grid-principal">
+            <!-- Catálogo -->
+            <div class="columna">
+                <div class="fila-entre">
+                    <div class="pildoras">
+                        <span class="pildora activa">Todos (24)</span>
+                        <span class="pildora">Temporal (16)</span>
+                        <span class="pildora">Permanente (8)</span>
+                        <span class="pildora">Activos (22)</span>
+                        <span class="pildora">Inactivos (2)</span>
+                    </div>
+                </div>
+
+                <h:form id="formCatalogo">
+                    <div class="tabla-contenedor">
+                        <div style="padding:.75rem 1rem;border-bottom:1px solid var(--borde)">
+                            <p:inputText placeholder="Filtrar por palabra clave..." style="width:100%"/>
+                        </div>
+                        <table class="tabla">
+                            <thead>
+                                <tr>
+                                    <th>Pregunta</th>
+                                    <th>Respuesta</th>
+                                    <th>Exclusión</th>
+                                    <th>Días de espera</th>
+                                    <th>Activo</th>
+                                    <th></th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td><strong>¿Te has realizado tatuajes, perforaciones o acupuntura?</strong><span class="sub">Riesgo de transmisión parenteral</span></td>
+                                    <td>Sí / No</td>
+                                    <td><p:tag value="Temporal" severity="warning"/></td>
+                                    <td class="mono">365 días</td>
+                                    <td><p:toggleSwitch value="true"/></td>
+                                    <td><p:button outcome="/vista/criteriosExclusion" icon="pi pi-pencil" styleClass="ui-button-flat" title="Editar"/></td>
+                                </tr>
+                                <tr>
+                                    <td><strong>¿Padeces hepatitis B, hepatitis C o infección por VIH?</strong><span class="sub">Infección transmisible por sangre</span></td>
+                                    <td>Sí / No</td>
+                                    <td><p:tag value="Permanente"/></td>
+                                    <td class="mono texto-tenue">N/A (definitiva)</td>
+                                    <td><p:toggleSwitch value="true"/></td>
+                                    <td><p:button outcome="/vista/criteriosExclusion" icon="pi pi-pencil" styleClass="ui-button-flat" title="Editar"/></td>
+                                </tr>
+                                <tr>
+                                    <td><strong>¿Has presentado fiebre, gripe o tos en los últimos 14 días?</strong><span class="sub">Cuadros infecciosos agudos</span></td>
+                                    <td>Sí / No</td>
+                                    <td><p:tag value="Temporal" severity="warning"/></td>
+                                    <td class="mono">14 días</td>
+                                    <td><p:toggleSwitch value="true"/></td>
+                                    <td><p:button outcome="/vista/criteriosExclusion" icon="pi pi-pencil" styleClass="ui-button-flat" title="Editar"/></td>
+                                </tr>
+                                <tr>
+                                    <td><strong>¿Has tomado antibióticos o analgésicos en las últimas 72 horas?</strong><span class="sub">Medicamentos que afectan la donación</span></td>
+                                    <td>Selección simple</td>
+                                    <td><p:tag value="Temporal" severity="warning"/></td>
+                                    <td class="mono">3 días</td>
+                                    <td><p:toggleSwitch value="true"/></td>
+                                    <td><p:button outcome="/vista/criteriosExclusion" icon="pi pi-pencil" styleClass="ui-button-flat" title="Editar"/></td>
+                                </tr>
+                                <tr>
+                                    <td><strong>¿Has tenido cirugías mayores en los últimos seis meses?</strong><span class="sub">Recuperación postquirúrgica</span></td>
+                                    <td>Sí / No</td>
+                                    <td><p:tag value="Temporal" severity="warning"/></td>
+                                    <td class="mono">180 días</td>
+                                    <td><p:toggleSwitch value="false"/></td>
+                                    <td><p:button outcome="/vista/criteriosExclusion" icon="pi pi-pencil" styleClass="ui-button-flat" title="Editar"/></td>
+                                </tr>
+                                <tr>
+                                    <td><strong>¿Diagnóstico de enfermedad de Chagas o cardiopatía severa?</strong><span class="sub">Condición endémica en Oaxaca</span></td>
+                                    <td>Sí / No</td>
+                                    <td><p:tag value="Permanente"/></td>
+                                    <td class="mono texto-tenue">N/A (definitiva)</td>
+                                    <td><p:toggleSwitch value="true"/></td>
+                                    <td><p:button outcome="/vista/criteriosExclusion" icon="pi pi-pencil" styleClass="ui-button-flat" title="Editar"/></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                        <div class="pie-tabla">
+                            <span>Mostrando 6 de 24 criterios</span>
+                            <div class="paginador"><span><i class="pi pi-chevron-left"></i></span><span class="actual">1</span><span>2</span><span>3</span><span><i class="pi pi-chevron-right"></i></span></div>
+                        </div>
+                    </div>
+                </h:form>
+            </div>
+
+            <!-- Nuevo criterio -->
+            <div class="columna">
+                <p:panel header="Nuevo criterio de exclusión">
+                    <h:form id="formNuevoCriterio">
+                        <div class="campo">
+                            <p:outputLabel for="pregunta">Texto de la pregunta <span class="requerido">*</span></p:outputLabel>
+                            <p:inputTextarea id="pregunta" rows="3" autoResize="false"
+                                             placeholder="Ej: ¿Has tenido contacto sexual de riesgo en los últimos 12 meses?"/>
+                            <span class="ayuda">Redáctala en lenguaje claro para el donador.</span>
+                        </div>
+                        <div class="campo">
+                            <p:outputLabel for="referencia">Referencia NOM-253</p:outputLabel>
+                            <p:inputText id="referencia" placeholder="Ej: Sección 6.4.1"/>
+                        </div>
+                        <div class="campo">
+                            <p:outputLabel for="tipoRespuesta">Tipo de respuesta <span class="requerido">*</span></p:outputLabel>
+                            <p:selectOneMenu id="tipoRespuesta" value="sino">
+                                <f:selectItem itemLabel="Sí / No" itemValue="sino"/>
+                                <f:selectItem itemLabel="Selección simple" itemValue="simple"/>
+                                <f:selectItem itemLabel="Selección múltiple" itemValue="multiple"/>
+                            </p:selectOneMenu>
+                        </div>
+                        <div class="campo">
+                            <span class="etiqueta-campo">Tipo de exclusión <span class="requerido">*</span></span>
+                            <p:selectOneRadio id="tipoExclusion" value="temporal" layout="lineDirection">
+                                <f:selectItem itemLabel="Temporal" itemValue="temporal"/>
+                                <f:selectItem itemLabel="Permanente" itemValue="permanente"/>
+                            </p:selectOneRadio>
+                        </div>
+                        <div class="campo">
+                            <p:outputLabel for="dias">Días de espera <span class="requerido">*</span></p:outputLabel>
+                            <p:inputText id="dias" value="365"/>
+                            <span class="ayuda">Para exclusiones permanentes indicar "N/A".</span>
+                        </div>
+                        <div class="preferencia">
+                            <div><strong>Activo inmediatamente</strong><p>Se mostrará en el cuestionario del donador.</p></div>
+                            <p:toggleSwitch id="activo" value="true"/>
+                        </div>
+                        <div class="fila" style="justify-content:flex-end">
+                            <p:button outcome="/vista/criteriosExclusion" value="Cancelar" styleClass="ui-button-secondary"/>
+                            <p:button outcome="/vista/criteriosExclusion" value="Guardar criterio" icon="pi pi-save"/>
+                        </div>
+                    </h:form>
+                </p:panel>
+
+                <div class="tarjeta tarjeta-plana">
+                    <h3><i class="pi pi-book texto-rojo"></i> Marco normativo</h3>
+                    <p class="texto-chico texto-sec mb-0">La exclusión oportuna previene riesgos al donante y al receptor,
+                        conforme a la NOM-253-SSA1-2012 para la disposición de sangre humana.</p>
+                </div>
+            </div>
+        </div>
+    </ui:define>
+</ui:composition>

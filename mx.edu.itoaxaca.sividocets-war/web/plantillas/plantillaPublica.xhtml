@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    plantillaPublica.xhtml — Páginas abiertas (sin sesión).
+    Menú superior; sin menú lateral. La vista marca la opción activa con
+    <ui:param name="menuActivo" value="inicio|requisitos|ayuda|iniciarSesion|crearCuenta"/>
+-->
+<!DOCTYPE html>
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:h="jakarta.faces.html"
+                xmlns:ui="jakarta.faces.facelets"
+                template="/plantillas/plantillaBase.xhtml">
+
+    <ui:param name="sinMenu" value="true"/>
+    <ui:param name="claseContenido" value="contenido-publico"/>
+
+    <ui:define name="encabezado">
+        <nav class="menu-superior">
+            <h:link outcome="/vista/index" value="Inicio"
+                    styleClass="#{menuActivo eq 'inicio' ? 'activo' : ''}"/>
+            <h:link outcome="/vista/requisitos" value="Requisitos"
+                    styleClass="#{menuActivo eq 'requisitos' ? 'activo' : ''}"/>
+            <h:link outcome="/vista/ayuda" value="Ayuda"
+                    styleClass="#{menuActivo eq 'ayuda' ? 'activo' : ''}"/>
+            <span class="separador-menu"></span>
+            <h:link outcome="/vista/iniciarSesion" value="Iniciar sesión"
+                    styleClass="#{menuActivo eq 'iniciarSesion' ? 'activo' : ''}"/>
+            <h:link outcome="/vista/crearCuenta" value="Crear cuenta"
+                    styleClass="cta #{menuActivo eq 'crearCuenta' ? 'activo' : ''}"/>
+        </nav>
+    </ui:define>
+</ui:composition>

@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    plantillaInstitucional.xhtml — Panel del personal CETS.
+    La vista marca la opción activa con
+    <ui:param name="menuActivo" value="solicitudesActivas|donadores|capturarDonacion|criteriosExclusion"/>
+    Solo accesible con sesión de rol "CETS" (HU-6.1).
+-->
+<!DOCTYPE html>
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:h="jakarta.faces.html"
+                xmlns:f="jakarta.faces.core"
+                xmlns:ui="jakarta.faces.facelets"
+                template="/plantillas/plantillaBase.xhtml">
+
+    <ui:define name="encabezado">
+        <f:event type="preRenderView" listener="#{sesionBean.verificarCETS}"/>
+        <span class="etiqueta-encabezado"><i class="pi pi-shield"></i> Personal CETS</span>
+        <div class="usuario-encabezado">
+            <span>#{sesionBean.nombre}</span>
+            <span class="avatar">#{sesionBean.iniciales}</span>
+        </div>
+    </ui:define>
+
+    <ui:define name="left">
+        <nav class="menu-lateral">
+            <span class="menu-lateral-titulo">Panel personal</span>
+            <span class="menu-lateral-sub">Módulo de gestión CETS</span>
+
+            <h:link outcome="/vista/solicitudesActivas"
+                    styleClass="menu-item #{menuActivo eq 'solicitudesActivas' ? 'activo' : ''}">
+                <i class="pi pi-list"></i> Solicitudes activas
+            </h:link>
+            <h:link outcome="/vista/donadores"
+                    styleClass="menu-item #{menuActivo eq 'donadores' ? 'activo' : ''}">
+                <i class="pi pi-users"></i> Donadores
+            </h:link>
+            <h:link outcome="/vista/capturarDonacion"
+                    styleClass="menu-item #{menuActivo eq 'capturarDonacion' ? 'activo' : ''}">
+                <i class="pi pi-pen-to-square"></i> Capturar donación
+            </h:link>
+            <h:link outcome="/vista/criteriosExclusion"
+                    styleClass="menu-item #{menuActivo eq 'criteriosExclusion' ? 'activo' : ''}">
+                <i class="pi pi-list-check"></i> Criterios de exclusión
+            </h:link>
+
+            <hr class="menu-separador"/>
+            <h:form id="formSalirCETS">
+                <h:commandLink action="#{sesionBean.cerrarSesionCETS}" styleClass="menu-item salir">
+                    <i class="pi pi-sign-out"></i> Cerrar sesión
+                </h:commandLink>
+            </h:form>
+        </nav>
+    </ui:define>
+</ui:composition>
