@@ -4,8 +4,6 @@
  */
 package ln;
 
-import jakarta.ejb.Stateless;
-import jakarta.ejb.LocalBean;
 import acceso_datos.PersonalCETSFacade;
 import jakarta.ejb.EJB;
 import jakarta.ejb.LocalBean;

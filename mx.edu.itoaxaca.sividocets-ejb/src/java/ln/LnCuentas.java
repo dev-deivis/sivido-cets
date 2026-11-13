@@ -4,8 +4,6 @@
  */
 package ln;
 
-import jakarta.ejb.Stateless;
-import jakarta.ejb.LocalBean;
 import acceso_datos.UsuarioFacade;
 import modelo.Usuario;
 import jakarta.ejb.EJB;
