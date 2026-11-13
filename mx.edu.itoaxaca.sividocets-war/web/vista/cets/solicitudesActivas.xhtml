@@ -72,13 +72,13 @@
                             <f:selectItem itemLabel="AB-" itemValue="AB-"/>
                         </p:selectOneMenu>
                     </div>
-                    <p:button outcome="/vista/solicitudesActivas" value="Refrescar" icon="pi pi-refresh" styleClass="boton-suave"/>
+                    <p:button outcome="/vista/cets/solicitudesActivas" value="Refrescar" icon="pi pi-refresh" styleClass="boton-suave"/>
                 </div>
             </h:form>
             <div class="fila mt-2 texto-chico">
                 <span class="negrita texto-sec">FILTROS APLICADOS:</span>
                 <span class="pildora">Estatus: <strong>Activa</strong> <i class="pi pi-times" style="font-size:10px"></i></span>
-                <h:link outcome="/vista/solicitudesActivas" value="Limpiar todos" styleClass="negrita" style="margin-left:auto"/>
+                <h:link outcome="/vista/cets/solicitudesActivas" value="Limpiar todos" styleClass="negrita" style="margin-left:auto"/>
             </div>
         </div>
 
@@ -109,7 +109,7 @@
                         <td><strong>Hospital General Dr. Aurelio Valdivieso</strong><span class="sub">Oaxaca de Juárez</span></td>
                         <td><span class="estatus activa">Activa</span></td>
                         <td><i class="pi pi-users" style="color:var(--verde)"></i> 4 interesados</td>
-                        <td style="text-align:right"><p:button outcome="/vista/detalleSolicitud" value="Ver solicitud" styleClass="boton-suave"/></td>
+                        <td style="text-align:right"><p:button outcome="/vista/cets/detalleSolicitud" value="Ver solicitud" styleClass="boton-suave"/></td>
                     </tr>
                     <tr>
                         <td><span class="folio">CETS-OAX-2024-1108</span><span class="sub">Hoy · 08:20 hrs</span></td>
@@ -117,7 +117,7 @@
                         <td><strong>Hospital de la Niñez Oaxaqueña</strong><span class="sub">San Bartolo Coyotepec</span></td>
                         <td><span class="estatus activa">Activa</span></td>
                         <td><i class="pi pi-users" style="color:var(--azul)"></i> 2 interesados</td>
-                        <td style="text-align:right"><p:button outcome="/vista/detalleSolicitud" value="Ver solicitud" styleClass="boton-suave"/></td>
+                        <td style="text-align:right"><p:button outcome="/vista/cets/detalleSolicitud" value="Ver solicitud" styleClass="boton-suave"/></td>
                     </tr>
                     <tr class="resaltada">
                         <td><span class="folio">CETS-OAX-2024-1115</span><span class="sub texto-rojo">Hoy · 09:12 hrs</span></td>
@@ -125,7 +125,7 @@
                         <td><strong>Hospital Regional Presidente Juárez (ISSSTE)</strong><span class="sub">Oaxaca de Juárez</span></td>
                         <td><span class="estatus activa">Activa</span></td>
                         <td class="texto-rojo"><i class="pi pi-user-minus"></i> 0 interesados</td>
-                        <td style="text-align:right"><p:button outcome="/vista/detalleSolicitud" value="Ver solicitud"/></td>
+                        <td style="text-align:right"><p:button outcome="/vista/cets/detalleSolicitud" value="Ver solicitud"/></td>
                     </tr>
                     <tr>
                         <td><span class="folio">CETS-OAX-2024-1094</span><span class="sub">Ayer · 16:30 hrs</span></td>
@@ -133,7 +133,7 @@
                         <td><strong>Hospital General de San Pedro Pochutla</strong><span class="sub">Costa</span></td>
                         <td><span class="estatus atendida">Atendida</span></td>
                         <td><i class="pi pi-users" style="color:var(--azul)"></i> 3 interesados</td>
-                        <td style="text-align:right"><p:button outcome="/vista/detalleSolicitud" value="Ver solicitud" styleClass="boton-suave"/></td>
+                        <td style="text-align:right"><p:button outcome="/vista/cets/detalleSolicitud" value="Ver solicitud" styleClass="boton-suave"/></td>
                     </tr>
                     <tr>
                         <td><span class="folio texto-tenue">CETS-OAX-2024-1081</span><span class="sub">22 nov</span></td>
@@ -141,7 +141,7 @@
                         <td><strong>Hospital Básico Comunitario de Nochixtlán</strong><span class="sub">Mixteca</span></td>
                         <td><span class="estatus cerrada">Cerrada</span></td>
                         <td class="texto-tenue"><i class="pi pi-users"></i> 2 interesados</td>
-                        <td style="text-align:right"><p:button outcome="/vista/detalleSolicitud" value="Ver solicitud" styleClass="boton-suave"/></td>
+                        <td style="text-align:right"><p:button outcome="/vista/cets/detalleSolicitud" value="Ver solicitud" styleClass="boton-suave"/></td>
                     </tr>
                     <tr>
                         <td><span class="folio texto-tenue">CETS-OAX-2024-1077</span><span class="sub">21 nov</span></td>
@@ -149,7 +149,7 @@
                         <td><strong>Hospital General de Santo Domingo Tehuantepec</strong><span class="sub">Istmo</span></td>
                         <td><span class="estatus cancelada">Cancelada</span></td>
                         <td class="texto-tenue"><i class="pi pi-user-minus"></i> 0 interesados</td>
-                        <td style="text-align:right"><p:button outcome="/vista/detalleSolicitud" value="Ver solicitud" styleClass="boton-suave"/></td>
+                        <td style="text-align:right"><p:button outcome="/vista/cets/detalleSolicitud" value="Ver solicitud" styleClass="boton-suave"/></td>
                     </tr>
                 </tbody>
             </table>

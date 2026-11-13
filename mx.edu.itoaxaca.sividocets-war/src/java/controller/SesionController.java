@@ -34,7 +34,7 @@ public class SesionController implements Serializable {
 
     public String cerrarSesionCETS() {
         FacesContext.getCurrentInstance().getExternalContext().invalidateSession();
-        return "/vista/loginInstitucional?faces-redirect=true";
+        return "/vista/cets/loginInstitucional?faces-redirect=true";
     }
 
     public boolean isAutenticado() {
@@ -65,7 +65,7 @@ public class SesionController implements Serializable {
     // Vistas del Panel CETS: requiere sesión con rol "CETS" (HU-6.1)
     public void verificarCETS() throws IOException {
         if (!isAutenticado() || !"CETS".equals(rol)) {
-            redirigir("/faces/vista/loginInstitucional.xhtml");
+            redirigir("/faces/vista/cets/loginInstitucional.xhtml");
         }
     }
 

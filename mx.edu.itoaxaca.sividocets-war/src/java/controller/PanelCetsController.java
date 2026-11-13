@@ -40,7 +40,7 @@ public class PanelCetsController {
         PersonalCETS autenticado = lnPanelCETS.iniciarSesionInstitucional(personal);
         if (autenticado != null) {
             sesion.iniciar(autenticado.getUsuario(), "CETS");
-            return "/vista/solicitudesActivas?faces-redirect=true";
+            return "/vista/cets/solicitudesActivas?faces-redirect=true";
         }
         FacesContext.getCurrentInstance().addMessage(null,
                 new FacesMessage(FacesMessage.SEVERITY_ERROR, "Credenciales institucionales incorrectas", null));

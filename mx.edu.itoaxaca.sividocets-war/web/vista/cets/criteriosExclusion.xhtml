@@ -54,7 +54,7 @@
                                     <td><p:tag value="Temporal" severity="warning"/></td>
                                     <td class="mono">365 días</td>
                                     <td><p:toggleSwitch value="true"/></td>
-                                    <td><p:button outcome="/vista/criteriosExclusion" icon="pi pi-pencil" styleClass="ui-button-flat" title="Editar"/></td>
+                                    <td><p:button outcome="/vista/cets/criteriosExclusion" icon="pi pi-pencil" styleClass="ui-button-flat" title="Editar"/></td>
                                 </tr>
                                 <tr>
                                     <td><strong>¿Padeces hepatitis B, hepatitis C o infección por VIH?</strong><span class="sub">Infección transmisible por sangre</span></td>
@@ -62,7 +62,7 @@
                                     <td><p:tag value="Permanente"/></td>
                                     <td class="mono texto-tenue">N/A (definitiva)</td>
                                     <td><p:toggleSwitch value="true"/></td>
-                                    <td><p:button outcome="/vista/criteriosExclusion" icon="pi pi-pencil" styleClass="ui-button-flat" title="Editar"/></td>
+                                    <td><p:button outcome="/vista/cets/criteriosExclusion" icon="pi pi-pencil" styleClass="ui-button-flat" title="Editar"/></td>
                                 </tr>
                                 <tr>
                                     <td><strong>¿Has presentado fiebre, gripe o tos en los últimos 14 días?</strong><span class="sub">Cuadros infecciosos agudos</span></td>
@@ -70,7 +70,7 @@
                                     <td><p:tag value="Temporal" severity="warning"/></td>
                                     <td class="mono">14 días</td>
                                     <td><p:toggleSwitch value="true"/></td>
-                                    <td><p:button outcome="/vista/criteriosExclusion" icon="pi pi-pencil" styleClass="ui-button-flat" title="Editar"/></td>
+                                    <td><p:button outcome="/vista/cets/criteriosExclusion" icon="pi pi-pencil" styleClass="ui-button-flat" title="Editar"/></td>
                                 </tr>
                                 <tr>
                                     <td><strong>¿Has tomado antibióticos o analgésicos en las últimas 72 horas?</strong><span class="sub">Medicamentos que afectan la donación</span></td>
@@ -78,7 +78,7 @@
                                     <td><p:tag value="Temporal" severity="warning"/></td>
                                     <td class="mono">3 días</td>
                                     <td><p:toggleSwitch value="true"/></td>
-                                    <td><p:button outcome="/vista/criteriosExclusion" icon="pi pi-pencil" styleClass="ui-button-flat" title="Editar"/></td>
+                                    <td><p:button outcome="/vista/cets/criteriosExclusion" icon="pi pi-pencil" styleClass="ui-button-flat" title="Editar"/></td>
                                 </tr>
                                 <tr>
                                     <td><strong>¿Has tenido cirugías mayores en los últimos seis meses?</strong><span class="sub">Recuperación postquirúrgica</span></td>
@@ -86,7 +86,7 @@
                                     <td><p:tag value="Temporal" severity="warning"/></td>
                                     <td class="mono">180 días</td>
                                     <td><p:toggleSwitch value="false"/></td>
-                                    <td><p:button outcome="/vista/criteriosExclusion" icon="pi pi-pencil" styleClass="ui-button-flat" title="Editar"/></td>
+                                    <td><p:button outcome="/vista/cets/criteriosExclusion" icon="pi pi-pencil" styleClass="ui-button-flat" title="Editar"/></td>
                                 </tr>
                                 <tr>
                                     <td><strong>¿Diagnóstico de enfermedad de Chagas o cardiopatía severa?</strong><span class="sub">Condición endémica en Oaxaca</span></td>
@@ -94,7 +94,7 @@
                                     <td><p:tag value="Permanente"/></td>
                                     <td class="mono texto-tenue">N/A (definitiva)</td>
                                     <td><p:toggleSwitch value="true"/></td>
-                                    <td><p:button outcome="/vista/criteriosExclusion" icon="pi pi-pencil" styleClass="ui-button-flat" title="Editar"/></td>
+                                    <td><p:button outcome="/vista/cets/criteriosExclusion" icon="pi pi-pencil" styleClass="ui-button-flat" title="Editar"/></td>
                                 </tr>
                             </tbody>
                         </table>
@@ -145,8 +145,8 @@
                             <p:toggleSwitch id="activo" value="true"/>
                         </div>
                         <div class="fila" style="justify-content:flex-end">
-                            <p:button outcome="/vista/criteriosExclusion" value="Cancelar" styleClass="ui-button-secondary"/>
-                            <p:button outcome="/vista/criteriosExclusion" value="Guardar criterio" icon="pi pi-save"/>
+                            <p:button outcome="/vista/cets/criteriosExclusion" value="Cancelar" styleClass="ui-button-secondary"/>
+                            <p:button outcome="/vista/cets/criteriosExclusion" value="Guardar criterio" icon="pi pi-save"/>
                         </div>
                     </h:form>
                 </p:panel>
