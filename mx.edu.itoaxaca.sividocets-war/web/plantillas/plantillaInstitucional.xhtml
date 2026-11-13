@@ -13,11 +13,11 @@
                 template="/plantillas/plantillaBase.xhtml">
 
     <ui:define name="encabezado">
-        <f:event type="preRenderView" listener="#{sesionBean.verificarCETS}"/>
+        <f:event type="preRenderView" listener="#{sesionController.verificarCETS}"/>
         <span class="etiqueta-encabezado"><i class="pi pi-shield"></i> Personal CETS</span>
         <div class="usuario-encabezado">
-            <span>#{sesionBean.nombre}</span>
-            <span class="avatar">#{sesionBean.iniciales}</span>
+            <span>#{sesionController.usuario.nombreCompleto}</span>
+            <span class="avatar">#{sesionController.iniciales}</span>
         </div>
     </ui:define>
 
@@ -45,7 +45,7 @@
 
             <hr class="menu-separador"/>
             <h:form id="formSalirCETS">
-                <h:commandLink action="#{sesionBean.cerrarSesionCETS}" styleClass="menu-item salir">
+                <h:commandLink action="#{sesionController.cerrarSesionCETS}" styleClass="menu-item salir">
                     <i class="pi pi-sign-out"></i> Cerrar sesión
                 </h:commandLink>
             </h:form>

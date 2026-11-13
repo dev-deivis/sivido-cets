@@ -4,6 +4,7 @@ import jakarta.ejb.EJB;
 import jakarta.enterprise.context.RequestScoped;
 import jakarta.faces.application.FacesMessage;
 import jakarta.faces.context.FacesContext;
+import jakarta.inject.Inject;
 import jakarta.inject.Named;
 import ln.LnCuentas;
 import modelo.Usuario;
@@ -20,6 +21,9 @@ public class CuentasController {
 
     @EJB
     private LnCuentas lnCuentas;
+
+    @Inject
+    private SesionController sesion;
 
     // Entidad que llena la vista (usuario.passwordHash llega en texto plano)
     private Usuario usuario = new Usuario();
@@ -43,6 +47,17 @@ public class CuentasController {
             return "/vista/iniciarSesion?faces-redirect=true";
         }
         error("Ese correo ya está registrado");
+        return null;
+    }
+
+    // HU-1.2 Autenticación
+    public String iniciarSesion() {
+        Usuario autenticado = lnCuentas.iniciarSesion(usuario);
+        if (autenticado != null) {
+            sesion.iniciar(autenticado, "usuario");
+            return "/vista/notificaciones?faces-redirect=true";
+        }
+        error("Correo o contraseña incorrectos");
         return null;
     }
 

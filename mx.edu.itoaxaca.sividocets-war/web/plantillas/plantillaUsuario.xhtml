@@ -13,10 +13,10 @@
                 template="/plantillas/plantillaBase.xhtml">
 
     <ui:define name="encabezado">
-        <f:event type="preRenderView" listener="#{sesionBean.verificar}"/>
+        <f:event type="preRenderView" listener="#{sesionController.verificar}"/>
         <div class="usuario-encabezado">
-            <span>#{sesionBean.nombre}</span>
-            <span class="avatar">#{sesionBean.iniciales}</span>
+            <span>#{sesionController.usuario.nombreCompleto}</span>
+            <span class="avatar">#{sesionController.iniciales}</span>
         </div>
     </ui:define>
 
@@ -47,7 +47,7 @@
 
             <hr class="menu-separador"/>
             <h:form id="formSalir">
-                <h:commandLink action="#{sesionBean.cerrarSesion}" styleClass="menu-item salir">
+                <h:commandLink action="#{sesionController.cerrarSesion}" styleClass="menu-item salir">
                     <i class="pi pi-sign-out"></i> Cerrar sesión
                 </h:commandLink>
             </h:form>

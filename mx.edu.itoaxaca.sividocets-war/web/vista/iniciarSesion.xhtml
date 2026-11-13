@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- Iniciar sesión (ciudadano) — HU-1.2 conectada a LoginBean -->
+<!-- Iniciar sesión (ciudadano) — HU-1.2 conectada a CuentasController -->
 <!DOCTYPE html>
 <ui:composition xmlns="http://www.w3.org/1999/xhtml"
                 xmlns:h="jakarta.faces.html"
@@ -21,7 +21,7 @@
 
                     <div class="campo">
                         <p:outputLabel for="correo">Correo electrónico <span class="requerido">*</span></p:outputLabel>
-                        <p:inputText id="correo" type="email" value="#{loginBean.correo}" required="true"
+                        <p:inputText id="correo" type="email" value="#{cuentasController.usuario.correo}" required="true"
                                      requiredMessage="Escribe tu correo"
                                      placeholder="ejemplo@correo.com"/>
                     </div>
@@ -30,7 +30,7 @@
                             <p:outputLabel for="contrasena">Contraseña <span class="requerido">*</span></p:outputLabel>
                             <h:link outcome="/vista/iniciarSesion" value="¿Olvidaste tu contraseña?" styleClass="texto-chico"/>
                         </div>
-                        <p:password id="contrasena" value="#{loginBean.password}" required="true"
+                        <p:password id="contrasena" value="#{cuentasController.usuario.passwordHash}" required="true"
                                     requiredMessage="Escribe tu contraseña"
                                     placeholder="••••••••" toggleMask="true"/>
                     </div>
@@ -39,7 +39,7 @@
                         <p:outputLabel for="recordar" value="Recordar mi sesión en este equipo"/>
                     </div>
                     <p:commandButton value="Entrar" icon="pi pi-sign-in" styleClass="boton-bloque"
-                                     action="#{loginBean.ingresarCredenciales}" ajax="false"/>
+                                     action="#{cuentasController.iniciarSesion}" ajax="false"/>
                 </h:form>
 
                 <div class="division-texto">Opciones de registro</div>

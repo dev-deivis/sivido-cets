@@ -10,6 +10,7 @@ import jakarta.faces.application.FacesMessage;
 import jakarta.faces.context.FacesContext;
 import jakarta.inject.Inject;
 import jakarta.inject.Named;
+import controller.SesionController;
 import ln.LnPanelCETS;
 import modelo.PersonalCETS;
 
@@ -25,7 +26,7 @@ public class LoginInstitucionalBean {
     private LnPanelCETS lnPanelCETS;
 
     @Inject
-    private SesionBean sesion;
+    private SesionController sesion;
 
     private String correoInstitucional;
     private String password;

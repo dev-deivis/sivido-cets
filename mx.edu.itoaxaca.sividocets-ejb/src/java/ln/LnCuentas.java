@@ -39,11 +39,11 @@ public class LnCuentas {
         guardarUsuario(u);
         return true;
     }
-    // HU-1.2 Autenticación
-
-    public Usuario iniciarSesion(String correo, String password) {
-        Usuario usuario = usuarioF.buscarPorCorreo(correo);
-        boolean autenticado = autenticarse(usuario, password);
+    // HU-1.2 Autenticación: u trae correo y passwordHash (texto plano) desde la vista.
+    // Regresa el Usuario autenticado o null.
+    public Usuario iniciarSesion(Usuario u) {
+        Usuario usuario = usuarioF.buscarPorCorreo(u.getCorreo());
+        boolean autenticado = autenticarse(usuario, u.getPasswordHash());
         return autenticado ? usuario : null;
     }
 
