@@ -44,7 +44,7 @@ public class CuentasController {
         }
         boolean valido = lnCuentas.registrarUsuario(usuario);
         if (valido) {
-            return "/vista/iniciarSesion?faces-redirect=true";
+            return "/vista/cuentas/iniciarSesion?faces-redirect=true";
         }
         error("Ese correo ya está registrado");
         return null;

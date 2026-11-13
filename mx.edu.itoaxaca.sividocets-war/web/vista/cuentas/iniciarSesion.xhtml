@@ -28,7 +28,7 @@
                     <div class="campo">
                         <div class="fila-campo">
                             <p:outputLabel for="contrasena">Contraseña <span class="requerido">*</span></p:outputLabel>
-                            <h:link outcome="/vista/iniciarSesion" value="¿Olvidaste tu contraseña?" styleClass="texto-chico"/>
+                            <h:link outcome="/vista/cuentas/iniciarSesion" value="¿Olvidaste tu contraseña?" styleClass="texto-chico"/>
                         </div>
                         <p:password id="contrasena" value="#{cuentasController.usuario.passwordHash}" required="true"
                                     requiredMessage="Escribe tu contraseña"
@@ -45,7 +45,7 @@
                 <div class="division-texto">Opciones de registro</div>
                 <div class="opcion-acceso">
                     <span><i class="pi pi-user-plus texto-rojo"></i> ¿No tienes una cuenta?</span>
-                    <h:link outcome="/vista/crearCuenta" value="Crear cuenta de donante" styleClass="negrita"/>
+                    <h:link outcome="/vista/cuentas/crearCuenta" value="Crear cuenta de donante" styleClass="negrita"/>
                 </div>
                 <div class="opcion-acceso">
                     <span><i class="pi pi-id-card texto-rojo"></i> Acceso personal CETS</span>

@@ -58,7 +58,7 @@ public class SesionController implements Serializable {
     // Vistas de usuario: requiere sesión con rol "usuario"
     public void verificar() throws IOException {
         if (!isAutenticado() || !"usuario".equals(rol)) {
-            redirigir("/faces/vista/iniciarSesion.xhtml");
+            redirigir("/faces/vista/cuentas/iniciarSesion.xhtml");
         }
     }
 
