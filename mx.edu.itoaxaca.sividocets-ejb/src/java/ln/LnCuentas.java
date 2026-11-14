@@ -14,7 +14,6 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.Date;
 import java.util.HexFormat;
-import java.util.List;
 
 /**
  *
@@ -30,13 +29,13 @@ public class LnCuentas {
     // HU-1.1 Alta inicial: la vista llena el Usuario completo;
     // passwordHash llega en texto plano y aquí se reemplaza por su hash.
     public boolean registrarUsuario(Usuario u) {
-        boolean valido = validarDatos(u.getCorreo());
+        boolean valido = !usuarioF.existeCorreo(u.getCorreo());
         if (!valido) {
             return false;
         }
         u.setPasswordHash(hash(u.getPasswordHash()));
         u.setFechaRegistro(new Date());
-        guardarUsuario(u);
+        usuarioF.create(u);
         return true;
     }
     // HU-1.2 Autenticación: u trae correo y passwordHash (texto plano) desde la vista.
@@ -54,19 +53,6 @@ public class LnCuentas {
             return false;
         }
         return usuario.getPasswordHash().equals(hash(password));
-    }
-
-    private boolean validarDatos(String correo) {
-        boolean existe = usuarioF.existeCorreo(correo);
-        return !existe;
-    }
-
-    private void guardarUsuario(Usuario usuario) {
-        usuarioF.create(usuario);
-    }
-
-    public List<Usuario> lista() {
-        return usuarioF.findAll();
     }
 
     private String hash(String password) {
