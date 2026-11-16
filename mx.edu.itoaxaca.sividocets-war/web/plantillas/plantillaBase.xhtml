@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
     plantillaBase.xhtml — Esqueleto común de SIVIDO.
-    Puntos de inserción: titulo, encabezado (zona derecha del encabezado rojo),
-    left (menú lateral) y content.
+    Puntos de inserción: metadata (f:metadata de la vista), titulo, encabezado (zona derecha del
+    encabezado rojo), left (menú lateral) y content.
     Parámetros que pueden mandar las plantillas hijas:
       sinMenu         = true  -> no se dibuja la columna del menú lateral
       claseContenido  = clase CSS del contenedor principal (si no viene, se decide por sinMenu)
@@ -12,6 +12,9 @@
       xmlns:h="jakarta.faces.html"
       xmlns:f="jakarta.faces.core"
       xmlns:ui="jakarta.faces.facelets">
+    <!-- Punto de inserción para <f:metadata> (f:viewParam / f:viewAction) de las vistas.
+         Uso en la vista: <ui:define name="metadata"><f:metadata>...</f:metadata></ui:define> -->
+    <ui:insert name="metadata"/>
     <h:head>
         <meta charset="UTF-8"/>
         <meta name="viewport" content="width=device-width, initial-scale=1"/>

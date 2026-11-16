@@ -107,124 +107,80 @@ Semana 2  [Alex]    HU-3.1/3.2 buscarDonadoresCercanos() ─► [Galilea] lo lla
 
 | Quién necesita | Qué | De quién | Mientras tanto |
 |---|---|---|---|
-| Todos | Solicitudes en la BD | [Galilea] HU-2.1 | Cargar los `INSERT` de prueba de 2.2 |
+| Todos | Solicitudes en la BD | [Galilea] HU-2.1 | Correr `sql/datos_prueba.sql` (solicitudes 901–903, sección 2.2) |
 | Todos los que usan `f:viewParam` | `<ui:insert name="metadata"/>` en `plantillaBase.xhtml` | [DAVID] T0.1 | — (son 5 minutos; DAVID lo sube a `main` el día 1) |
 | [Alex] HU-3.3 | `LnDonacion.esElegible(Usuario)` | [Diego] | Un *stub* local que regrese `true` (no subirlo) |
 | [Galilea] HU-5.4 | `LnDonacion.obtenerHistorial(Usuario)`, `obtenerElegibilidad(Usuario)`, `verificarExclusion(Usuario)` | [Diego] | Mostrar solo la lista de donadores |
 | [Galilea] HU-5.1 | `LnPanelCETS.listarSolicitudesActivas()` | [DAVID] HU-6.2 | `INSERT` de prueba + combo vacío |
 | [Galilea] HU-2.1 (paso final) | `LnNotificacion.buscarDonadoresCercanos(SolicitudReposicion)` | [Alex] HU-3.1 | Dejar `// TODO HU-3.1` en `LnSolicitud.registrarSolicitud` |
 | [Galilea] HU-2.2 / HU-1.4 | `LnSolicitud.obtenerPublicacion(...)` | [Galilea] (ambas HU, D8) | — |
-| [Alex] HU-3.1 | Donadores con `latitud/longitud` (botón "Usar mi ubicación", D1) | [DAVID] HU-1.3 | `INSERT` de prueba de 2.1 (903 y 904 ya traen coordenadas) |
+| [Alex] HU-3.1 | Donadores con `latitud/longitud` (botón "Usar mi ubicación", D1) | [DAVID] HU-1.3 | `sql/datos_prueba.sql` (903 y 904 ya traen coordenadas, sección 2.1) |
 
 ### Datos de prueba por módulo
 
-Corre los `INSERT` en este orden, solo una vez y sobre una BD recién creada (sección 6). Usan IDs **901+**
-para no chocar con lo que se registre desde la aplicación.
+Los datos de prueba están en el repo:
+
+| Archivo | Qué hace |
+|---|---|
+| `sql/datos_prueba.sql` | Carga los datos de 2.1 a 2.4 en una BD que **ya tiene las 17 tablas**, en orden de llaves foráneas y dentro de una transacción |
+| `sql/limpiar_datos_prueba.sql` | Borra **solo** esos datos y lo que se haya generado en la app con las cuentas de prueba |
+| `sql/SIVIDO_CETS_mysql.sql` | Script de tablas (solo para quien todavía no las tiene; ver 6.2) |
+
+Cómo están hechos:
+
+- Todos los registros usan **IDs fijos 901+**. La limpieza borra por esos IDs exactos, nunca por rangos, así que no
+  toca datos reales.
+- Los hospitales solo se insertan si no existe ya uno con el mismo nombre, y las solicitudes buscan el hospital por
+  nombre.
+- Para recargar desde cero: `limpiar_datos_prueba.sql` y luego `datos_prueba.sql`.
+- Si un registro real apunta a un dato de prueba en una columna que admite NULL, se desliga en vez de borrarse.
+  Ejemplos: una solicitud real atendida por el personal 901, o una donación real ligada a la solicitud 901.
+- Ninguno de los dos scripts usa `EXIT`, así que corren en el editor SQL de NetBeans.
+- Efecto secundario: después de cargarlos, los IDs `AUTO_INCREMENT` de esas tablas siguen desde el 902–906. Es normal.
 
 **Contraseñas de prueba**, en SHA-256 sin sal, igual que `LnCuentas.hash()`:
 
-| Cuenta | Contraseña | Hash SHA-256 |
+| Cuenta | Correo de login | Contraseña | Hash SHA-256 |
+|---|---|---|---|
+| Personal CETS (rol `Administrador`) | `admin@cets.oaxaca.gob.mx` (login institucional) | `Cets2026!` | `b4eb84f0c1d0ee7d6a1cd590e626a405a50e2a005dc68683543bc93762cd8525` |
+| Familiar | `familiar@prueba.mx` | `Donador2026!` | `555d0ba5699947a8381c09a09a0c93e591e12623ccbf5ba7ff6e89f74528b5d4` |
+| Donador cercano O− | `donador1@prueba.mx` | `Donador2026!` | (mismo) |
+| Donador lejano A+ | `donador2@prueba.mx` | `Donador2026!` | (mismo) |
+
+#### 2.1 Comunes (todos los necesitan)
+
+| Tabla | IDs | Contenido |
 |---|---|---|
-| Personal CETS | `Cets2026!` | `b4eb84f0c1d0ee7d6a1cd590e626a405a50e2a005dc68683543bc93762cd8525` |
-| Familiar y donadores | `Donador2026!` | `555d0ba5699947a8381c09a09a0c93e591e12623ccbf5ba7ff6e89f74528b5d4` |
+| `Hospital` | 901–905 | Hospital Civil, HRAEO, HGZ 1 IMSS, Presidente Juárez ISSSTE y Hospital de la Niñez, con coordenadas aproximadas de Oaxaca |
+| `Usuario` + `PersonalCETS` | 901 | Personal CETS `admin@cets.oaxaca.gob.mx`, rol `Administrador`, activo |
+| `Usuario` | 902, 903, 904 | Familiar, donador cercano y donador lejano |
+| `PerfilClinico` | 903, 904 | 903: O−, radio 5, a ~1 km del Hospital Civil. 904: A+, radio 3, en el Istmo (~190 km) |
 
-#### 2.1 Comunes (los carga [DAVID] en T0; todos los necesitan)
+#### 2.2 Solicitudes (mientras [Galilea] termina HU-2.1)
 
-```sql
-USE sivido;
+| ID | Folio | Tipo | Estatus | Hospital |
+|---|---|---|---|---|
+| 901 | `CETS-OAX-2026-0901` | O− | Activa | Hospital Civil |
+| 902 | `CETS-OAX-2026-0902` | A+ | Activa | HRAEO |
+| 903 | `CETS-OAX-2026-0903` | B+ | Atendida | HGZ 1 IMSS |
 
--- Catálogo de hospitales (HU-2.1). Coordenadas aproximadas de la ciudad de Oaxaca.
-INSERT INTO Hospital (id, nombre, latitud, longitud) VALUES
- (1, 'Hospital General "Dr. Aurelio Valdivieso" (Hospital Civil)', 17.070200, -96.718700),
- (2, 'Hospital Regional de Alta Especialidad de Oaxaca (HRAEO)',    16.963700, -96.712000),
- (3, 'Hospital General de Zona No. 1 IMSS Oaxaca',                 17.079000, -96.709000),
- (4, 'Hospital Regional Presidente Juárez ISSSTE',                 17.080700, -96.710600),
- (5, 'Hospital de la Niñez Oaxaqueña',                             16.970000, -96.718000);
-
--- Personal CETS (HU-6.x, HU-5.1). Login institucional: cets@cets.oaxaca.gob.mx / Cets2026!
-INSERT INTO Usuario (id, nombreCompleto, telefono, correo, passwordHash, fechaRegistro) VALUES
- (901, 'Personal CETS Prueba', '9510000001', 'personal.cets@prueba.mx',
-  'b4eb84f0c1d0ee7d6a1cd590e626a405a50e2a005dc68683543bc93762cd8525', CURDATE());
-INSERT INTO PersonalCETS (Usuarioid, rol, correoInstitucional, activo) VALUES
- (901, 'Personal', 'cets@cets.oaxaca.gob.mx', TRUE);
-
--- Familiar que crea solicitudes y dos donadores. Login de usuario: <correo> / Donador2026!
-INSERT INTO Usuario (id, nombreCompleto, telefono, correo, passwordHash, fechaRegistro) VALUES
- (902, 'Familiar Prueba',     '9510000002', 'familiar@prueba.mx',
-  '555d0ba5699947a8381c09a09a0c93e591e12623ccbf5ba7ff6e89f74528b5d4', CURDATE()),
- (903, 'Donador Cercano O-',  '9510000003', 'donador1@prueba.mx',
-  '555d0ba5699947a8381c09a09a0c93e591e12623ccbf5ba7ff6e89f74528b5d4', CURDATE()),
- (904, 'Donador Lejano A+',   '9510000004', 'donador2@prueba.mx',
-  '555d0ba5699947a8381c09a09a0c93e591e12623ccbf5ba7ff6e89f74528b5d4', CURDATE());
-
--- Perfiles clínicos (PK compartida con Usuario). 903 está a ~1 km del Hospital Civil; 904 está en el Istmo.
-INSERT INTO PerfilClinico (Usuarioid, tipoSanguineo, factorRh, fechaRegistroPerfil, radioNotificacion, latitud, longitud) VALUES
- (903, 'O', '-', CURDATE(), 5, 17.065000, -96.720000),
- (904, 'A', '+', CURDATE(), 3, 16.200000, -95.200000);
-```
-
-#### 2.2 Solicitudes (para [DAVID], [Alex] y [Diego] mientras [Galilea] termina HU-2.1)
-
-```sql
-INSERT INTO SolicitudReposicion
- (id, folioCETS, tipoSanguineo, factorRh, descripcion, estatus, fechaHoraRegistro, uuidPublico, Usuarioid, Hospitalid) VALUES
- (901, 'CETS-OAX-2026-0901', 'O', '-', 'Cirugía programada, se requieren 3 donadores', 'Activa',   NOW(),                    UUID(), 902, 1),
- (902, 'CETS-OAX-2026-0902', 'A', '+', 'Accidente vial',                               'Activa',   NOW() - INTERVAL 1 DAY,   UUID(), 902, 2),
- (903, 'CETS-OAX-2026-0903', 'B', '+', 'Solicitud ya atendida',                        'Atendida', NOW() - INTERVAL 3 DAY,   UUID(), 902, 3);
-```
+Todas las creó el familiar 902 y tienen un `uuidPublico` aleatorio.
 
 #### 2.3 Notificaciones y cuestionario ([Alex])
 
-```sql
-INSERT INTO CriterioExclusion (id, criterio, tipoRespuesta, activo, tipoExclusion, duracionDias) VALUES
- (901, '¿Te hiciste un tatuaje o perforación en los últimos 12 meses?', 'SiNo', TRUE,  'Temporal',   365),
- (902, '¿Has tenido hepatitis B o C?',                                  'SiNo', TRUE,  'Permanente', NULL),
- (903, '¿Tomaste antibióticos en los últimos 7 días?',                  'SiNo', TRUE,  'Temporal',   7),
- (904, '¿Pesas menos de 50 kg?',                                        'SiNo', FALSE, 'Temporal',   0);
-
-INSERT INTO Notificacion (distanciaAproximada, estatus, fechaEnvio, Usuarioid, SolicitudReposicionid) VALUES
- (1.00, 'Enviada', NOW(), 903, 901);
-```
+| Tabla | IDs | Contenido |
+|---|---|---|
+| `CriterioExclusion` | 901–904 | Tatuaje (Temporal, 365), hepatitis (Permanente), antibióticos (Temporal, 7) y peso (Temporal, 0, **inactivo**) |
+| `Notificacion` | 901 | Para el donador 903 sobre la solicitud 901, a 1.00 km, `Enviada` |
 
 #### 2.4 Donaciones e historial ([Diego] y [Galilea])
 
-```sql
--- 903: donó hace 200 días → ya es elegible.  904: donó hace 20 días → todavía no.
-INSERT INTO RegistroDonacion (fechaDonacion, proximaFechaElegible, Usuarioid, PersonalCETSUsuarioid, SolicitudReposicionid) VALUES
- (CURDATE() - INTERVAL 200 DAY, CURDATE() - INTERVAL 144 DAY, 903, 901, NULL),
- (CURDATE() - INTERVAL 20 DAY,  CURDATE() + INTERVAL 36 DAY,  904, 901, 903);
-
--- 904 tiene un padecimiento con exclusión permanente (requiere los criterios de 2.3).
-INSERT INTO HistorialClinico (diagnostico, fechaDeteccion, observaciones, Usuarioid, PersonalCETSUsuarioid, CriterioExclusionid) VALUES
- ('Hepatitis C', CURDATE() - INTERVAL 1 YEAR, 'Dato de prueba', 904, 901, 902);
--- D10: la fuente única es Usuario.exclusionPermanente; se marca al registrar un padecimiento con criterio Permanente.
-UPDATE Usuario SET exclusionPermanente = TRUE WHERE id = 904;
-
--- Historial externo (HU-7.3)
-INSERT INTO InstitucionExterna (id, nombreInstitucion, tipoConexion, contactoTecnico, activa) VALUES
- (901, 'Banco de Sangre externo (prueba)', 'API REST', 'soporte@prueba.mx', TRUE);
-INSERT INTO HistorialExterno (Usuarioid, InstitucionExternaid, fechaDonacion, observaciones) VALUES
- (903, 901, '2025-03-10', 'Donación registrada en otra institución');
-```
-
-#### Borrar los datos de prueba (si los quieres recargar)
-
-```sql
-DELETE FROM HistorialExterno       WHERE Usuarioid >= 901;
-DELETE FROM InstitucionExterna     WHERE id >= 901;
-DELETE FROM HistorialClinico       WHERE Usuarioid >= 901;
-DELETE FROM RegistroDonacion       WHERE Usuarioid >= 901;
-DELETE FROM RespuestaCriterio      WHERE CriterioExclusionid >= 901;
-DELETE FROM CuestionarioRespuesta  WHERE Usuarioid >= 901;
-DELETE FROM Interes                WHERE Usuarioid >= 901;
-DELETE FROM Notificacion           WHERE Usuarioid >= 901;
-DELETE FROM CriterioExclusion      WHERE id >= 901;
-DELETE FROM HistorialEstatusSolicitud WHERE SolicitudReposicionid >= 901;
-DELETE FROM SolicitudReposicion    WHERE id >= 901;
-DELETE FROM PerfilClinico          WHERE Usuarioid >= 901;
-DELETE FROM PersonalCETS           WHERE Usuarioid >= 901;
-DELETE FROM Usuario                WHERE id >= 901;
-```
+| Tabla | IDs | Contenido |
+|---|---|---|
+| `RegistroDonacion` | 901, 902 | 903 donó hace 200 días (ya elegible). 904 donó hace 20 días, ligado a la 903 (próxima fecha en 36 días) |
+| `HistorialClinico` | 901 | 904: Hepatitis C con el criterio 902 (Permanente) |
+| `Usuario.exclusionPermanente` | 904 | `TRUE` (D10, fuente única) |
+| `InstitucionExterna` + `HistorialExterno` | 901 | Donación externa de 903 el 2025-03-10 |
 
 ---
 
@@ -425,13 +381,12 @@ Rama: `feature/panel-cets`
 
 #### T0 — Tareas compartidas (día 1, antes que los demás)
 
-- [ ] **T0.1** Agregar `<ui:insert name="metadata"/>` en `-war/web/plantillas/plantillaBase.xhtml`, justo antes de
+- [x] **T0.1** Agregar `<ui:insert name="metadata"/>` en `-war/web/plantillas/plantillaBase.xhtml`, justo antes de
       `<h:head>`. Así cualquier vista puede definir `<ui:define name="metadata"><f:metadata>…`, aun con las
       plantillas anidadas (`plantillaUsuario`, `plantillaInstitucional` y `plantillaPublica` heredan de `plantillaBase`).
-- [ ] **T0.2** Subir el script de la BD al repo, en `sql/SIVIDO_CETS_mysql.sql`, junto con los `INSERT` de la
-      sección 2 en `sql/datos_prueba.sql`, para que todos usen el mismo.
-- [ ] **T0.3** Cargar los datos comunes (2.1) y de solicitudes (2.2), y comprobar el login CETS con
-      `cets@cets.oaxaca.gob.mx` / `Cets2026!`.
+- [x] **T0.2** Subir al repo `sql/SIVIDO_CETS_mysql.sql`, `sql/datos_prueba.sql` y `sql/limpiar_datos_prueba.sql`
+      (sección 2).
+- [ ] **T0.3** Correr `sql/datos_prueba.sql` y comprobar el login CETS con `admin@cets.oaxaca.gob.mx` / `Cets2026!`.
 - [ ] **T0.4** Merge a `main` y avisar al equipo.
 
 ---
@@ -1841,7 +1796,16 @@ Valores que usa todo el equipo (los mismos en todas las variantes):
 
 ### 6.2 Base de datos y usuario de MySQL (igual en Linux y Windows)
 
-Entra a MySQL como root:
+> **¿Ya tienes la base `sivido` con las 17 tablas?** Entonces **solo** corre `sql/datos_prueba.sql` (ver "Datos de
+> prueba", más abajo) y salta al paso 6.3. No vuelvas a crear la base ni las tablas.
+>
+> ```bash
+> mysql -u sivido -p sivido < sql/datos_prueba.sql        # Windows (cmd): sql\datos_prueba.sql
+> ```
+>
+> También puedes abrir el archivo en el editor SQL de NetBeans, conectado a `sivido`, y ejecutarlo todo (*Run SQL*).
+
+**Si todavía no tienes la base**, entra a MySQL como root:
 
 - Linux: `sudo mysql`
 - Windows: `mysql -u root -p` (desde *MySQL Command Line Client* o cmd)
@@ -1884,8 +1848,8 @@ mysql -u sivido -p sivido < sql/datos_prueba.sql        # Windows: sql\datos_pru
 ```sql
 USE sivido;
 SHOW TABLES;                          -- 17 tablas
-SELECT id, nombre FROM Hospital;      -- 5 hospitales
-SELECT * FROM PersonalCETS;           -- 901, cets@cets.oaxaca.gob.mx
+SELECT id, nombre FROM Hospital;      -- al menos los 5 hospitales
+SELECT * FROM PersonalCETS;           -- 901, admin@cets.oaxaca.gob.mx
 ```
 
 ### 6.3 Driver JDBC
@@ -2004,7 +1968,7 @@ Compruébalo con `asadmin version --local`.
 Ya vienen en `sql/datos_prueba.sql` (sección 2.1). Al terminar puedes entrar con:
 
 - **Usuario:** `familiar@prueba.mx` / `Donador2026!` (o crea tu cuenta con HU-1.1).
-- **CETS:** `cets@cets.oaxaca.gob.mx` / `Cets2026!`.
+- **CETS:** `admin@cets.oaxaca.gob.mx` / `Cets2026!`.
 
 ### 6.7 NetBeans: abrir el proyecto y "Resolve Project Problems"
 
@@ -2106,7 +2070,7 @@ Todos corren esto antes de mezclar su rama a `main` y otra vez **después** del 
   - Una contraseña mala → "Correo o contraseña incorrectos".
   - "Cerrar sesión" → `publico/index`.
 - [ ] **HU-6.1 Login institucional:**
-  - `cets@cets.oaxaca.gob.mx` / `Cets2026!` → `cets/solicitudesActivas`.
+  - `admin@cets.oaxaca.gob.mx` / `Cets2026!` → `cets/solicitudesActivas`.
   - Una contraseña mala → "Credenciales institucionales incorrectas".
   - Sin sesión CETS, `/faces/vista/cets/donadores.xhtml` → redirige a `cets/loginInstitucional`.
   - Con sesión de usuario normal, una vista CETS también redirige al login institucional.
