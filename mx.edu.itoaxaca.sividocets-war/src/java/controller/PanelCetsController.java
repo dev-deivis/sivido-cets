@@ -92,6 +92,29 @@ public class PanelCetsController implements Serializable {
         if (!sesionCETSValida()) {
             return;
         }
+        cargarDetalle();
+    }
+
+    // HU-6.4 Actualizar estatus (botón "Guardar cambio de estatus"). La vista llena solicitud.estatus con el
+    // nuevo estatus; aquí se agrega el personal en sesión y todo viaja como la entidad completa.
+    // Se queda en el detalle: tras el intento se vuelve a leer la solicitud de la BD, así la vista siempre
+    // muestra el estatus real (si el Ln rechaza el cambio, no queda el valor elegido).
+    public void actualizarEstatus() throws IOException {
+        if (!sesionCETSValida()) {
+            return;
+        }
+        String nuevoEstatus = solicitud.getEstatus();
+        solicitud.setPersonalCETSUsuarioid(sesion.getUsuario().getPersonalCETS());
+        boolean actualizado = lnPanelCETS.actualizarEstatus(solicitud);
+        if (actualizado) {
+            info("El estatus de la solicitud cambió a " + nuevoEstatus);
+        } else {
+            error("No se pudo cambiar el estatus: elige Atendida, Cerrada o Cancelada, distinto al estatus actual");
+        }
+        cargarDetalle();
+    }
+
+    private void cargarDetalle() {
         SolicitudReposicion encontrada = lnPanelCETS.obtenerDetalle(solicitud);
         if (encontrada == null) {
             solicitud = new SolicitudReposicion();
@@ -120,6 +143,11 @@ public class PanelCetsController implements Serializable {
     private void error(String texto) {
         FacesContext.getCurrentInstance().addMessage(null,
                 new FacesMessage(FacesMessage.SEVERITY_ERROR, texto, null));
+    }
+
+    private void info(String texto) {
+        FacesContext.getCurrentInstance().addMessage(null,
+                new FacesMessage(FacesMessage.SEVERITY_INFO, texto, null));
     }
 
     // Tarjetas de resumen de solicitudesActivas (se calculan sobre las solicitudes mostradas)

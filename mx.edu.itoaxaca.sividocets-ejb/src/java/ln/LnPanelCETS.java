@@ -4,13 +4,16 @@
  */
 package ln;
 
+import acceso_datos.HistorialEstatusSolicitudFacade;
 import acceso_datos.InteresFacade;
 import acceso_datos.PersonalCETSFacade;
 import acceso_datos.SolicitudReposicionFacade;
 import jakarta.ejb.EJB;
 import jakarta.ejb.LocalBean;
 import jakarta.ejb.Stateless;
+import java.util.Date;
 import java.util.List;
+import modelo.HistorialEstatusSolicitud;
 import modelo.PersonalCETS;
 import modelo.SolicitudReposicion;
 
@@ -33,7 +36,14 @@ public class LnPanelCETS {
     private InteresFacade interesF;
 
     @EJB
+    private HistorialEstatusSolicitudFacade historialEstatusF;
+
+    @EJB
     private LnCuentas lnCuentas;
+
+    // HU-6.4: estatus que el personal del CETS puede asignar. Fuente: diagrama de clases, nota del atributo
+    // SolicitudReposicion.estatus: "Activa al crearse; el personal del CETS la pasa a Atendida, Cerrada o Cancelada".
+    private static final List<String> ESTATUS_ASIGNABLES = List.of("Atendida", "Cerrada", "Cancelada");
 
     // HU-6.1 Iniciar sesión como personal institucional.
     // p trae correoInstitucional y usuario.passwordHash (texto plano) desde la vista.
@@ -81,6 +91,44 @@ public class LnPanelCETS {
             return 0;
         }
         return interesF.contarPorSolicitud(s);
+    }
+
+    // HU-6.4 Actualizar estatus. s trae el id, el nuevo estatus y el personal CETS en sesión
+    // (s.personalCETSUsuarioid, lo pone el controller). Regresa false si no se puede cambiar.
+    // La solicitud y su bitácora se guardan en la misma transacción.
+    public boolean actualizarEstatus(SolicitudReposicion s) {
+        if (s.getId() == null || s.getPersonalCETSUsuarioid() == null
+                || s.getPersonalCETSUsuarioid().getUsuarioid() == null) {
+            return false;
+        }
+        SolicitudReposicion solicitud = solicitudF.find(s.getId());
+        PersonalCETS personal = personalF.find(s.getPersonalCETSUsuarioid().getUsuarioid());
+        if (solicitud == null || personal == null || !personal.getActivo()) {
+            return false;
+        }
+        boolean valido = validarEstatus(solicitud.getEstatus(), s.getEstatus());
+        if (!valido) {
+            return false;
+        }
+
+        HistorialEstatusSolicitud historial = new HistorialEstatusSolicitud();
+        historial.setSolicitudReposicionid(solicitud);
+        historial.setPersonalCETSUsuarioid(personal);
+        historial.setEstatusAnterior(solicitud.getEstatus());
+        historial.setEstatusNuevo(s.getEstatus());
+        historial.setFechaCambio(new Date());
+
+        solicitud.setEstatus(s.getEstatus());
+        solicitud.setPersonalCETSUsuarioid(personal);
+        solicitudF.edit(solicitud);
+        historialEstatusF.create(historial);
+        return true;
+    }
+
+    // El nuevo estatus debe ser uno de los asignables (nunca "Activa": solo es el estado al crearse)
+    // y distinto del actual.
+    private boolean validarEstatus(String actual, String nuevo) {
+        return nuevo != null && ESTATUS_ASIGNABLES.contains(nuevo) && !nuevo.equals(actual);
     }
 
     private String vacioANull(String valor) {

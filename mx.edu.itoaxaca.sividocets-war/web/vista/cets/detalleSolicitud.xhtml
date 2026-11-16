@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- Detalle de solicitud — panel institucional CETS (HU-6.3).
+<!-- Detalle de solicitud — panel institucional CETS (HU-6.3 detalle y HU-6.4 actualizar estatus).
      Entrada: solicitudesActivas → detalleSolicitud?id=N (f:viewParam → panelCetsController.solicitud.id).
      La sesión CETS la verifica plantillaInstitucional (preRenderView → sesionController.verificarCETS)
      y, antes de consultar la BD, el propio panelCetsController.obtenerDetalle. -->
@@ -79,21 +79,22 @@
                 </div>
 
                 <div class="columna">
-                    <!-- HU-6.4 (actualizar estatus) todavía no está implementada: el bloque queda inerte y muestra el estatus real -->
+                    <!-- HU-6.4: la vista llena solicitud.estatus (entidad completa); la acción la valida el Ln -->
                     <div class="tarjeta tarjeta-borde-rojo">
                         <h2><i class="pi pi-arrow-right-arrow-left texto-rojo"></i> Actualizar estatus</h2>
                         <h:form id="formEstatus">
                             <div class="campo">
                                 <p:outputLabel for="nuevoEstatus">Nuevo estatus <span class="requerido">*</span></p:outputLabel>
-                                <p:selectOneMenu id="nuevoEstatus" value="#{panelCetsController.solicitud.estatus}" disabled="true">
+                                <p:selectOneMenu id="nuevoEstatus" value="#{panelCetsController.solicitud.estatus}">
                                     <f:selectItem itemLabel="Activa" itemValue="Activa"/>
                                     <f:selectItem itemLabel="Atendida" itemValue="Atendida"/>
                                     <f:selectItem itemLabel="Cerrada" itemValue="Cerrada"/>
                                     <f:selectItem itemLabel="Cancelada" itemValue="Cancelada"/>
                                 </p:selectOneMenu>
-                                <span class="ayuda">Disponible con la HU-6.4. Define si la solicitud sigue visible para los donadores.</span>
+                                <span class="ayuda">Define si la solicitud sigue visible para los donadores. Solo se puede pasar a Atendida, Cerrada o Cancelada.</span>
                             </div>
-                            <p:commandButton value="Guardar cambio de estatus" icon="pi pi-save" styleClass="boton-bloque" disabled="true"/>
+                            <p:commandButton value="Guardar cambio de estatus" icon="pi pi-save" styleClass="boton-bloque" ajax="false"
+                                             action="#{panelCetsController.actualizarEstatus}"/>
                         </h:form>
                     </div>
                 </div>
