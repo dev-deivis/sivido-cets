@@ -136,6 +136,8 @@ Cómo están hechos:
 - Si un registro real apunta a un dato de prueba en una columna que admite NULL, se desliga en vez de borrarse.
   Ejemplos: una solicitud real atendida por el personal 901, o una donación real ligada a la solicitud 901.
 - Ninguno de los dos scripts usa `EXIT`, así que corren en el editor SQL de NetBeans.
+- **Con la app desplegada, redespliega (Run en NetBeans) después de correr cualquiera de los dos scripts.** La aplicación
+  guarda en caché lo que ya leyó y no se entera de cambios hechos directo en MySQL (Inconsistencias #34).
 - Efecto secundario: después de cargarlos, los IDs `AUTO_INCREMENT` de esas tablas siguen desde el 902–906. Es normal.
 
 **Contraseñas de prueba**, en SHA-256 sin sal, igual que `LnCuentas.hash()`:
@@ -2097,6 +2099,9 @@ Todos corren esto antes de mezclar su rama a `main` y otra vez **después** del 
   - Una contraseña mala → "Credenciales institucionales incorrectas".
   - Sin sesión CETS, `/faces/vista/cets/donadores.xhtml` → redirige a `cets/loginInstitucional`.
   - Con sesión de usuario normal, una vista CETS también redirige al login institucional.
+- [ ] **Sesión expirada (#26):** abre un formulario (por ejemplo `cuentas/miPerfil` o `cets/detalleSolicitud`), en otra
+      pestaña pulsa "Cerrar sesión" y luego envía el formulario de la primera: debe aparecer "Tu sesión expiró" con los dos
+      botones (destacado el institucional si estabas en una vista CETS), sin pantalla de error.
 - [ ] La raíz `http://localhost:8080/mx.edu.itoaxaca.sividocets-war/` carga `publico/index`.
 - [ ] Las HU de tu módulo siguen pasando sus "Terminado cuando".
 
@@ -2237,10 +2242,29 @@ Siguen **abiertas**: necesitan una decisión del equipo o del profe. Lo ya resue
 25. **HU-6.4, efecto sobre los donadores:** la ayuda de la maqueta dice que el estatus "define si la solicitud sigue
     visible para los donadores", pero ningún diagrama lo define. Hoy cambiar el estatus solo afecta el listado del
     panel CETS; falta decidir si la publicación pública y las notificaciones deben ocultar las solicitudes no activas.
-26. **Vista expirada o sin sesión en un POST:** enviar un formulario con un `ViewState` inválido (por ejemplo, con la
-    sesión vencida) devuelve la página de error 500 del servidor, aunque no cambia ningún dato. No es de HU-6.4: pasa en
-    cualquier formulario JSF del proyecto. Decidir si se agrega un `<error-page>` para `ViewExpiredException` en
-    `web.xml` que redirija al login.
+26. **Vista expirada o sin sesión en un POST — RESUELTA.** Enviar un formulario con un `ViewState` inválido (por ejemplo,
+    con la sesión vencida) devolvía la página de error 500 del servidor, aunque no cambiaba ningún dato. Pasaba en
+    cualquier formulario JSF del proyecto.
+    - **Solución:** un `<error-page>` para `jakarta.faces.application.ViewExpiredException` en `web.xml`, que lleva a
+      `web/vista/publico/sesionExpirada.xhtml` ("Tu sesión expiró"). Es una página pública (no verifica sesión) con dos
+      botones: "Iniciar sesión" (`cuentas/iniciarSesion`) y "Acceso personal CETS" (`cets/loginInstitucional`).
+    - **Cómo distingue el origen:** `web.xml` no puede elegir la página según la URL, así que es la propia página la que
+      lee `jakarta.servlet.error.request_uri`: si venía de `/vista/cets/` destaca el acceso institucional; si no, el de
+      usuario. Abierta directamente, destaca el de usuario.
+    - **Verificado por HTTP:** un POST con `ViewState` inválido sin sesión a `miPerfil`, `detalleSolicitud` y
+      `solicitudesActivas` muestra la página, destaca el acceso correcto y **no cambia ningún dato**. Con una sesión CETS
+      válida muestra la página pero **no la cierra**. La protección de sesión (`verificar` / `verificarCETS`) sigue
+      igual: sin sesión, un GET a una vista de usuario o CETS redirige a su login, y un usuario con el rol equivocado
+      también.
+    - **Limitaciones (no bloqueantes):**
+      - El **código HTTP sigue siendo 500**: el contenedor conserva el estatus de la excepción. El usuario sí ve la
+        página amigable, pero el servidor sigue registrando la excepción en el log. Quitar ambas cosas requeriría un
+        `ExceptionHandler` de JSF que redirija (mejora opcional, no se hizo).
+      - No hizo falta cambiar `STATE_SAVING_METHOD` ni ningún parámetro de Faces: la página carga aunque el POST traiga
+        un `ViewState` vencido.
+      - PrimeFaces lee este mapeo y lo escribe como `errorPages` en su configuración del cliente, así que también
+        debería cubrir las peticiones AJAX vencidas (por ejemplo, el paginador de `solicitudesActivas`). Por HTTP solo se
+        vio la respuesta parcial de error del servidor; **falta verificar en el navegador** que PrimeFaces redirija.
 27. **HU-1.3 / HU-3.4, controller:** el diagrama pone todo en `ControlCuentas`, pero `CuentasController` es
     `@RequestScoped` (registro e inicio de sesión) y miPerfil necesita conservar el perfil entre clics. Se creó
     `PerfilController` (`@ViewScoped`, D16); ambos controllers llaman a `LnCuentas`. Decidir si el diagrama de clases
@@ -2265,3 +2289,11 @@ Siguen **abiertas**: necesitan una decisión del equipo o del profe. Lo ya resue
     sin HTTPS no podrá capturar ubicaciones; hay que contemplarlo en el despliegue.
 33. **UX de errores en miPerfil:** tras un rechazo, la vista vuelve a leer la BD y descarta lo que el usuario había elegido
     (los combos regresan a lo guardado). Es consistente con HU-6.4, pero se puede mejorar conservando la captura.
+34. **Caché compartido de EclipseLink y SQL directo en MySQL:** `datos_prueba.sql`, `limpiar_datos_prueba.sql` y cualquier
+    `UPDATE`/`DELETE` hecho a mano modifican la BD por fuera de la aplicación y **no invalidan el caché compartido**
+    del servidor. Con la app desplegada puede mostrar datos viejos: `find()` y las consultas JPQL devuelven la entidad
+    que ya tienen en memoria (por ejemplo, una solicitud con el estatus anterior), y un id borrado y reutilizado
+    puede traer los datos "fantasma" del anterior (por ejemplo, el perfil clínico de un usuario ya borrado). Mitigación
+    actual: **redesplegar la app (Run en NetBeans) después de correr esos scripts**. Opción de fondo, que toca un archivo
+    compartido y debe decidir el equipo: `<shared-cache-mode>NONE</shared-cache-mode>` en `persistence.xml`. Tampoco
+    conviene reiniciar el contador de ids (`ALTER TABLE ... AUTO_INCREMENT = 1`) después de borrar usuarios de prueba.

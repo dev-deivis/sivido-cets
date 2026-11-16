@@ -20,4 +20,10 @@
     <welcome-file-list>
         <welcome-file>faces/vista/publico/index.xhtml</welcome-file>
     </welcome-file-list>
+    <!-- Sesión o vista vencida (por ejemplo, un formulario enviado después de que expiró la sesión):
+         en lugar de la página de error 500, se muestra "Tu sesión expiró" con enlaces a los inicios de sesión. -->
+    <error-page>
+        <exception-type>jakarta.faces.application.ViewExpiredException</exception-type>
+        <location>/faces/vista/publico/sesionExpirada.xhtml</location>
+    </error-page>
 </web-app>
