@@ -1,5 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- Solicitudes activas — panel institucional CETS estático (diseño Stitch v2) -->
+<!-- Solicitudes activas — panel institucional CETS (HU-6.2).
+     La sesión CETS la verifica plantillaInstitucional (f:event preRenderView → sesionController.verificarCETS)
+     y, antes de consultar la BD, el propio panelCetsController.listarSolicitudesActivas. -->
 <!DOCTYPE html>
 <ui:composition xmlns="http://www.w3.org/1999/xhtml"
                 xmlns:h="jakarta.faces.html"
@@ -11,156 +13,154 @@
     <ui:param name="menuActivo" value="solicitudesActivas"/>
     <ui:define name="titulo">Solicitudes activas · SIVIDO CETS</ui:define>
 
+    <ui:define name="metadata">
+        <f:metadata>
+            <f:viewAction action="#{panelCetsController.listarSolicitudesActivas}"/>
+        </f:metadata>
+    </ui:define>
+
     <ui:define name="content">
         <div class="encabezado-pagina">
             <div class="fila mb-2">
                 <span class="etiqueta solida mono">NOM-253-SSA1-2012</span>
-                <span class="texto-chico texto-tenue">Actualizado: hace 2 min</span>
+                <span class="texto-chico texto-tenue">Actualizado:
+                    <h:outputText value="#{panelCetsController.ahora}">
+                        <f:convertDateTime pattern="dd/MM/yyyy HH:mm" timeZone="America/Mexico_City"/>
+                    </h:outputText>
+                </span>
             </div>
             <h1>Gestión de solicitudes hospitalarias</h1>
             <p>Seguimiento de las solicitudes de donación y de los donadores que confirmaron interés.</p>
         </div>
 
-        <!-- Métricas -->
+        <!-- Métricas (se calculan sobre las solicitudes mostradas) -->
         <div class="grid grid-3 mb-2">
             <div class="tarjeta metrica" style="border-right:4px solid var(--rojo)">
                 <div class="fila-entre"><span class="metrica-titulo">Solicitudes activas</span><span class="icono-caja"><i class="pi pi-plus-circle"></i></span></div>
-                <div class="metrica-valor">15</div>
-                <span class="metrica-nota">De 24 registradas en total</span>
+                <div class="metrica-valor">#{panelCetsController.totalActivas}</div>
+                <span class="metrica-nota">De #{empty panelCetsController.solicitudes ? 0 : panelCetsController.solicitudes.size()} mostradas</span>
             </div>
             <div class="tarjeta metrica" style="border-right:4px solid var(--verde)">
-                <div class="fila-entre"><span class="metrica-titulo">Donadores interesados hoy</span><span class="icono-caja verde"><i class="pi pi-user-plus"></i></span></div>
-                <div class="metrica-valor">38</div>
-                <span class="metrica-nota" style="color:var(--verde)"><i class="pi pi-arrow-up"></i> 14% vs ayer</span>
+                <div class="fila-entre"><span class="metrica-titulo">Donadores interesados</span><span class="icono-caja verde"><i class="pi pi-user-plus"></i></span></div>
+                <div class="metrica-valor">#{panelCetsController.totalInteresados}</div>
+                <span class="metrica-nota">En las solicitudes mostradas</span>
             </div>
             <div class="tarjeta metrica" style="border-right:4px solid var(--azul)">
                 <div class="fila-entre"><span class="metrica-titulo">Sin donador interesado</span><span class="icono-caja azul"><i class="pi pi-exclamation-circle"></i></span></div>
-                <div class="metrica-valor">3</div>
+                <div class="metrica-valor">#{panelCetsController.totalSinInteresados}</div>
                 <span class="metrica-nota">Requieren seguimiento del CETS</span>
             </div>
         </div>
 
-        <!-- Filtros -->
+        <!-- Filtros: estatus, tipo sanguíneo y factor Rh (HU-6.2, mensaje 2) -->
         <div class="tarjeta mb-2">
             <h:form id="formFiltros">
-                <div class="grid" style="grid-template-columns:2fr 1fr 1fr auto;align-items:end">
+                <div class="grid" style="grid-template-columns:2fr 1fr 1fr 1fr auto;align-items:end">
                     <div class="campo mb-0">
                         <p:outputLabel for="buscar">Buscar por folio u hospital</p:outputLabel>
-                        <p:inputText id="buscar" placeholder="Ej. CETS-OAX-2024-1102 o Hospital Civil..."/>
+                        <!-- Sin función en HU-6.2: el diagrama solo filtra por estatus, tipo y Rh (ver TASKS.md, inconsistencia 20) -->
+                        <p:inputText id="buscar" disabled="true" placeholder="Ej. CETS-OAX-2026-0901 o Hospital Civil..."/>
                     </div>
                     <div class="campo mb-0">
                         <p:outputLabel for="estatus">Estatus</p:outputLabel>
-                        <p:selectOneMenu id="estatus" value="activa">
-                            <f:selectItem itemLabel="Todas (24)" itemValue="todas"/>
-                            <f:selectItem itemLabel="Activas (15)" itemValue="activa"/>
-                            <f:selectItem itemLabel="Atendidas (5)" itemValue="atendida"/>
-                            <f:selectItem itemLabel="Cerradas (3)" itemValue="cerrada"/>
-                            <f:selectItem itemLabel="Canceladas (1)" itemValue="cancelada"/>
+                        <p:selectOneMenu id="estatus" value="#{panelCetsController.filtro.estatus}">
+                            <f:selectItem itemLabel="Todas" itemValue=""/>
+                            <f:selectItem itemLabel="Activas" itemValue="Activa"/>
+                            <f:selectItem itemLabel="Atendidas" itemValue="Atendida"/>
+                            <f:selectItem itemLabel="Cerradas" itemValue="Cerrada"/>
+                            <f:selectItem itemLabel="Canceladas" itemValue="Cancelada"/>
                         </p:selectOneMenu>
                     </div>
                     <div class="campo mb-0">
-                        <p:outputLabel for="grupo">Grupo y factor Rh</p:outputLabel>
-                        <p:selectOneMenu id="grupo" value="todos">
-                            <f:selectItem itemLabel="Todos los grupos" itemValue="todos"/>
-                            <f:selectItem itemLabel="O+" itemValue="O+"/>
-                            <f:selectItem itemLabel="O-" itemValue="O-"/>
-                            <f:selectItem itemLabel="A+" itemValue="A+"/>
-                            <f:selectItem itemLabel="A-" itemValue="A-"/>
-                            <f:selectItem itemLabel="B+" itemValue="B+"/>
-                            <f:selectItem itemLabel="B-" itemValue="B-"/>
-                            <f:selectItem itemLabel="AB+" itemValue="AB+"/>
-                            <f:selectItem itemLabel="AB-" itemValue="AB-"/>
+                        <p:outputLabel for="grupo">Grupo sanguíneo</p:outputLabel>
+                        <p:selectOneMenu id="grupo" value="#{panelCetsController.filtro.tipoSanguineo}">
+                            <f:selectItem itemLabel="Todos los grupos" itemValue=""/>
+                            <f:selectItem itemLabel="O" itemValue="O"/>
+                            <f:selectItem itemLabel="A" itemValue="A"/>
+                            <f:selectItem itemLabel="B" itemValue="B"/>
+                            <f:selectItem itemLabel="AB" itemValue="AB"/>
                         </p:selectOneMenu>
                     </div>
-                    <p:button outcome="/vista/cets/solicitudesActivas" value="Refrescar" icon="pi pi-refresh" styleClass="boton-suave"/>
+                    <div class="campo mb-0">
+                        <p:outputLabel for="rh">Factor Rh</p:outputLabel>
+                        <p:selectOneMenu id="rh" value="#{panelCetsController.filtro.factorRh}">
+                            <f:selectItem itemLabel="Ambos" itemValue=""/>
+                            <f:selectItem itemLabel="Positivo (+)" itemValue="+"/>
+                            <f:selectItem itemLabel="Negativo (−)" itemValue="-"/>
+                        </p:selectOneMenu>
+                    </div>
+                    <p:commandButton value="Refrescar" icon="pi pi-refresh" styleClass="boton-suave" ajax="false"
+                                     action="#{panelCetsController.filtrarSolicitudes}"/>
                 </div>
             </h:form>
             <div class="fila mt-2 texto-chico">
                 <span class="negrita texto-sec">FILTROS APLICADOS:</span>
-                <span class="pildora">Estatus: <strong>Activa</strong> <i class="pi pi-times" style="font-size:10px"></i></span>
+                <ui:fragment rendered="#{not empty panelCetsController.filtro.estatus}">
+                    <span class="pildora">Estatus: <strong>#{panelCetsController.filtro.estatus}</strong></span>
+                </ui:fragment>
+                <ui:fragment rendered="#{not empty panelCetsController.filtro.tipoSanguineo}">
+                    <span class="pildora">Grupo: <strong>#{panelCetsController.filtro.tipoSanguineo}</strong></span>
+                </ui:fragment>
+                <ui:fragment rendered="#{not empty panelCetsController.filtro.factorRh}">
+                    <span class="pildora">Rh: <strong>#{panelCetsController.filtro.factorRh}</strong></span>
+                </ui:fragment>
                 <h:link outcome="/vista/cets/solicitudesActivas" value="Limpiar todos" styleClass="negrita" style="margin-left:auto"/>
             </div>
         </div>
 
-        <!-- Tabla -->
-        <div class="tabla-contenedor">
-            <div class="fila-entre" style="padding:.85rem 1rem;background:var(--sup);border-bottom:1px solid var(--borde)">
-                <strong><i class="pi pi-table texto-rojo"></i> Solicitudes registradas <span class="etiqueta roja mono">6 mostradas</span></strong>
-                <div class="fila texto-chico texto-sec">
-                    <span><i class="pi pi-circle-fill" style="color:var(--verde);font-size:9px"></i> Con donadores</span>
-                    <span><i class="pi pi-circle-fill" style="color:var(--rojo);font-size:9px"></i> Sin donador</span>
+        <!-- Tabla (HU-6.2, mensajes 1 y 2.1) -->
+        <h:form id="formTabla">
+            <div class="tabla-contenedor">
+                <div class="fila-entre" style="padding:.85rem 1rem;background:var(--sup);border-bottom:1px solid var(--borde)">
+                    <strong><i class="pi pi-table texto-rojo"></i> Solicitudes registradas
+                        <span class="etiqueta roja mono">#{empty panelCetsController.solicitudes ? 0 : panelCetsController.solicitudes.size()} mostradas</span></strong>
+                    <div class="fila texto-chico texto-sec">
+                        <span><i class="pi pi-circle-fill" style="color:var(--verde);font-size:9px"></i> Con donadores</span>
+                        <span><i class="pi pi-circle-fill" style="color:var(--rojo);font-size:9px"></i> Sin donador</span>
+                    </div>
                 </div>
+                <p:dataTable id="tabla" var="s" value="#{panelCetsController.solicitudes}" styleClass="tabla"
+                             rowKey="#{s.id}" rows="10" paginator="true" paginatorPosition="bottom"
+                             paginatorTemplate="{CurrentPageReport} {PrevPageLink} {PageLinks} {NextPageLink}"
+                             currentPageReportTemplate="Mostrando {startRecord} a {endRecord} de {totalRecords} registros"
+                             emptyMessage="No hay solicitudes con esos filtros."
+                             rowStyleClass="#{s.estatus eq 'Activa' and panelCetsController.interesados[s.id] eq 0 ? 'resaltada' : ''}">
+                    <p:column headerText="Folio">
+                        <span class="folio #{s.estatus eq 'Activa' ? '' : 'texto-tenue'}">#{s.folioCETS}</span>
+                        <span class="sub">
+                            <h:outputText value="#{s.fechaHoraRegistro}">
+                                <f:convertDateTime pattern="dd/MM/yyyy HH:mm" timeZone="America/Mexico_City"/>
+                            </h:outputText>
+                        </span>
+                    </p:column>
+                    <p:column headerText="Tipo">
+                        <span class="grupo-sangre #{s.tipoSanguineo eq 'B' or s.tipoSanguineo eq 'AB' ? 'claro' : ''}"
+                              style="#{s.tipoSanguineo eq 'A' ? 'background:var(--texto)' : ''}">#{s.tipoSanguineo}#{s.factorRh}</span>
+                    </p:column>
+                    <p:column headerText="Hospital solicitante">
+                        <strong>#{s.hospitalid.nombre}</strong>
+                    </p:column>
+                    <p:column headerText="Estatus">
+                        <span class="estatus #{s.estatus.toLowerCase()}">#{s.estatus}</span>
+                    </p:column>
+                    <p:column headerText="Donadores interesados">
+                        <ui:fragment rendered="#{panelCetsController.interesados[s.id] gt 0}">
+                            <i class="pi pi-users" style="color:var(--verde)"></i>
+                            #{panelCetsController.interesados[s.id]} #{panelCetsController.interesados[s.id] eq 1 ? 'interesado' : 'interesados'}
+                        </ui:fragment>
+                        <ui:fragment rendered="#{panelCetsController.interesados[s.id] eq 0}">
+                            <span class="texto-rojo"><i class="pi pi-user-minus"></i> 0 interesados</span>
+                        </ui:fragment>
+                    </p:column>
+                    <p:column headerText="Acciones" style="text-align:right">
+                        <!-- HU-6.3: la solicitud seleccionada viaja como ?id= (f:viewParam en detalleSolicitud) -->
+                        <p:button outcome="/vista/cets/detalleSolicitud" value="Ver solicitud"
+                                  styleClass="#{s.estatus eq 'Activa' and panelCetsController.interesados[s.id] eq 0 ? '' : 'boton-suave'}">
+                            <f:param name="id" value="#{s.id}"/>
+                        </p:button>
+                    </p:column>
+                </p:dataTable>
             </div>
-            <table class="tabla">
-                <thead>
-                    <tr>
-                        <th>Folio</th>
-                        <th>Tipo</th>
-                        <th>Hospital solicitante</th>
-                        <th>Estatus</th>
-                        <th>Donadores interesados</th>
-                        <th style="text-align:right">Acciones</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr>
-                        <td><span class="folio">CETS-OAX-2024-1102</span><span class="sub">Hoy · 06:45 hrs</span></td>
-                        <td><span class="grupo-sangre">O-</span></td>
-                        <td><strong>Hospital General Dr. Aurelio Valdivieso</strong><span class="sub">Oaxaca de Juárez</span></td>
-                        <td><span class="estatus activa">Activa</span></td>
-                        <td><i class="pi pi-users" style="color:var(--verde)"></i> 4 interesados</td>
-                        <td style="text-align:right"><p:button outcome="/vista/cets/detalleSolicitud" value="Ver solicitud" styleClass="boton-suave"/></td>
-                    </tr>
-                    <tr>
-                        <td><span class="folio">CETS-OAX-2024-1108</span><span class="sub">Hoy · 08:20 hrs</span></td>
-                        <td><span class="grupo-sangre" style="background:var(--texto)">A+</span></td>
-                        <td><strong>Hospital de la Niñez Oaxaqueña</strong><span class="sub">San Bartolo Coyotepec</span></td>
-                        <td><span class="estatus activa">Activa</span></td>
-                        <td><i class="pi pi-users" style="color:var(--azul)"></i> 2 interesados</td>
-                        <td style="text-align:right"><p:button outcome="/vista/cets/detalleSolicitud" value="Ver solicitud" styleClass="boton-suave"/></td>
-                    </tr>
-                    <tr class="resaltada">
-                        <td><span class="folio">CETS-OAX-2024-1115</span><span class="sub texto-rojo">Hoy · 09:12 hrs</span></td>
-                        <td><span class="grupo-sangre">O+</span></td>
-                        <td><strong>Hospital Regional Presidente Juárez (ISSSTE)</strong><span class="sub">Oaxaca de Juárez</span></td>
-                        <td><span class="estatus activa">Activa</span></td>
-                        <td class="texto-rojo"><i class="pi pi-user-minus"></i> 0 interesados</td>
-                        <td style="text-align:right"><p:button outcome="/vista/cets/detalleSolicitud" value="Ver solicitud"/></td>
-                    </tr>
-                    <tr>
-                        <td><span class="folio">CETS-OAX-2024-1094</span><span class="sub">Ayer · 16:30 hrs</span></td>
-                        <td><span class="grupo-sangre claro">B+</span></td>
-                        <td><strong>Hospital General de San Pedro Pochutla</strong><span class="sub">Costa</span></td>
-                        <td><span class="estatus atendida">Atendida</span></td>
-                        <td><i class="pi pi-users" style="color:var(--azul)"></i> 3 interesados</td>
-                        <td style="text-align:right"><p:button outcome="/vista/cets/detalleSolicitud" value="Ver solicitud" styleClass="boton-suave"/></td>
-                    </tr>
-                    <tr>
-                        <td><span class="folio texto-tenue">CETS-OAX-2024-1081</span><span class="sub">22 nov</span></td>
-                        <td><span class="grupo-sangre claro">AB+</span></td>
-                        <td><strong>Hospital Básico Comunitario de Nochixtlán</strong><span class="sub">Mixteca</span></td>
-                        <td><span class="estatus cerrada">Cerrada</span></td>
-                        <td class="texto-tenue"><i class="pi pi-users"></i> 2 interesados</td>
-                        <td style="text-align:right"><p:button outcome="/vista/cets/detalleSolicitud" value="Ver solicitud" styleClass="boton-suave"/></td>
-                    </tr>
-                    <tr>
-                        <td><span class="folio texto-tenue">CETS-OAX-2024-1077</span><span class="sub">21 nov</span></td>
-                        <td><span class="grupo-sangre claro">O-</span></td>
-                        <td><strong>Hospital General de Santo Domingo Tehuantepec</strong><span class="sub">Istmo</span></td>
-                        <td><span class="estatus cancelada">Cancelada</span></td>
-                        <td class="texto-tenue"><i class="pi pi-user-minus"></i> 0 interesados</td>
-                        <td style="text-align:right"><p:button outcome="/vista/cets/detalleSolicitud" value="Ver solicitud" styleClass="boton-suave"/></td>
-                    </tr>
-                </tbody>
-            </table>
-            <div class="pie-tabla">
-                <span>Mostrando <strong>1</strong> a <strong>6</strong> de <strong>24</strong> registros</span>
-                <div class="paginador">
-                    <span><i class="pi pi-chevron-left"></i></span>
-                    <span class="actual">1</span><span>2</span><span>3</span><span>4</span>
-                    <span><i class="pi pi-chevron-right"></i></span>
-                </div>
-            </div>
-        </div>
+        </h:form>
     </ui:define>
 </ui:composition>

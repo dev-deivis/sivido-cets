@@ -400,7 +400,7 @@ Rama: `feature/panel-cets`
 | # | Mensaje en el diagrama | Equivalente en código |
 |---|---|---|
 | 1 | `UIPanelCETS → ControlPanelCETS.listarSolicitudesActivas(): List<SolicitudReposicion>` | `f:viewAction="#{panelCetsController.listarSolicitudesActivas}"` → `lnPanelCETS.listarSolicitudesActivas()` |
-| 1.1 | `ControlPanelCETS → DBMS: consultarSolicitudesActivas()` → `return solicitudes` | `solicitudF.buscarActivas()` |
+| 1.1 | `ControlPanelCETS → DBMS: consultarSolicitudesActivas()` → `return solicitudes` | `solicitudF.buscarFiltradas(filtro)` con el filtro por defecto (la entidad nueva ya trae `estatus = "Activa"`) |
 | 2 | `PersonalInstitucional → UIPanelCETS.filtrar(estatus, tipoSanguineo, factorRh)` | Botón "Refrescar" → `#{panelCetsController.filtrarSolicitudes}` |
 | 2.1 | `UIPanelCETS → ControlPanelCETS.filtrarSolicitudes(String estatus, String tipoSanguineo, String factorRh)` | `lnPanelCETS.filtrarSolicitudes(filtro)` |
 | 2.1.1 | `ControlPanelCETS → DBMS: consultarSolicitudesFiltradas(estatus, tipoSanguineo, factorRh)` → `return solicitudes` | `solicitudF.buscarFiltradas(filtro)` |
@@ -408,8 +408,8 @@ Rama: `feature/panel-cets`
 **Firmas corregidas (LnPanelCETS)**
 
 ```java
-public List<SolicitudReposicion> listarSolicitudesActivas()                       // 1 línea a la facade (permitido)
-public List<SolicitudReposicion> filtrarSolicitudes(SolicitudReposicion filtro)   // filtro.estatus / tipoSanguineo / factorRh; null = todos
+public List<SolicitudReposicion> listarSolicitudesActivas()                       // = filtrarSolicitudes(new SolicitudReposicion()): el constructor ya trae "Activa"
+public List<SolicitudReposicion> filtrarSolicitudes(SolicitudReposicion filtro)   // normaliza: "" o null = todos; llama a la facade con un filtro limpio
 ```
 
 **Archivos**
@@ -427,22 +427,19 @@ public List<SolicitudReposicion> filtrarSolicitudes(SolicitudReposicion filtro) 
 **Facade nueva (`SolicitudReposicionFacade`)**
 
 ```java
-public List<SolicitudReposicion> buscarActivas() {
-    // JPQL: SELECT s FROM SolicitudReposicion s WHERE s.estatus = 'Activa' ORDER BY s.fechaHoraRegistro DESC
-}
-public List<SolicitudReposicion> buscarFiltradas(SolicitudReposicion f) {
-    // JPQL: SELECT s FROM SolicitudReposicion s
-    //       WHERE (:estatus IS NULL OR s.estatus = :estatus)
-    //         AND (:tipo IS NULL OR s.tipoSanguineo = :tipo)
-    //         AND (:rh IS NULL OR s.factorRh = :rh)
-    //       ORDER BY s.fechaHoraRegistro DESC
-}
+// Hecho. Un solo método cubre los mensajes 1.1 y 2.1.1: arma el JPQL solo con las condiciones que no son null
+// (así no se usa "? IS NULL"), ordena por fechaHoraRegistro DESC.
+public List<SolicitudReposicion> buscarFiltradas(SolicitudReposicion filtro)
 ```
 
 **Vista:**
 
-- Cambia las 6 filas fijas de la tabla por un `ui:repeat value="#{panelCetsController.solicitudes}" var="s"`.
-  Deja las mismas `<tr>`/`<td>` y clases.
+- Hecho: las 6 filas fijas pasaron a un `p:dataTable` (`styleClass="tabla"`, paginador de 10 filas) sobre
+  `#{panelCetsController.solicitudes}`. Se agregó un bloque de CSS `body .ui-datatable.tabla …` en `estilos.css`
+  para conservar el aspecto de `.tabla`; **falta revisarlo a ojo en el navegador**.
+- `PanelCetsController` pasó a `@ViewScoped` (la lista debe sobrevivir al paginador); la contraseña del login se borra
+  del bean después de cada intento.
+- Las tarjetas de resumen se calculan sobre las solicitudes mostradas (ver [Inconsistencias](#10-inconsistencias-a-revisar) #20).
 - Quita los contadores fijos "(24)", "(15)"… del combo de estatus.
 - Los values del combo de estatus deben coincidir con la BD: `Activa`, `Atendida`, `Cerrada`, `Cancelada`, y vacío para "Todas".
 - El combo "grupo" (`O+`, `A-`…) mezcla tipo y Rh. Sepáralo en dos combos (`filtro.tipoSanguineo` y `filtro.factorRh`).
@@ -465,11 +462,12 @@ public List<SolicitudReposicion> buscarFiltradas(SolicitudReposicion f) {
 
 **Checklist**
 
-- [ ] `buscarActivas()` y `buscarFiltradas(...)` en `SolicitudReposicionFacade`
-- [ ] `listarSolicitudesActivas()` y `filtrarSolicitudes(SolicitudReposicion)` en `LnPanelCETS`
-- [ ] Controller: lista, filtro y método para el `f:viewAction`
-- [ ] Vista: `ui:repeat`, combos separados, `f:param id`, sin datos fijos
-- [ ] Pruebas en navegador + SQL
+- [x] `buscarFiltradas(...)` en `SolicitudReposicionFacade` (no hizo falta `buscarActivas`)
+- [x] `listarSolicitudesActivas()` y `filtrarSolicitudes(SolicitudReposicion)` en `LnPanelCETS`
+- [x] Controller: lista, filtro y método para el `f:viewAction`
+- [x] Vista: `p:dataTable`, combos separados, `f:param id`, sin datos fijos
+- [x] Pruebas HTTP automáticas (login, listado, 4 filtros, sin sesión y rol equivocado): todas pasan
+- [ ] Revisión visual en el navegador (tabla, paginador, tarjetas)
 - [ ] Regresión (sección 8)
 
 ---
@@ -486,7 +484,7 @@ public List<SolicitudReposicion> buscarFiltradas(SolicitudReposicion f) {
 | 1 | `PersonalInstitucional → UIPanelCETS.seleccionarSolicitud(int solicitudId)` | Clic "Ver solicitud" (`?id=`) |
 | 1.1 | `UIPanelCETS → UIDetalleSolicitud.mostrar(int solicitudId)` | Navega a `cets/detalleSolicitud` |
 | 2 | `UIDetalleSolicitud → ControlPanelCETS.obtenerDetalle(int solicitudId): SolicitudReposicion` | `f:viewParam id` → `solicitud.id`; `f:viewAction` → `lnPanelCETS.obtenerDetalle(solicitud)` |
-| 2.1 | `ControlPanelCETS → DBMS: consultarSolicitudPorId(solicitudId)` → `return solicitud` | `solicitudF.find(s.getId())` |
+| 2.1 | `ControlPanelCETS → DBMS: consultarSolicitudPorId(solicitudId)` → `return solicitud` | `solicitudF.find(s.getId())` (devuelve null si no hay id) |
 | 3 | `UIDetalleSolicitud → ControlPanelCETS.obtenerCantidadInteresados(int solicitudId): int` | `lnPanelCETS.obtenerCantidadInteresados(solicitud)` |
 | 3.1 | `ControlPanelCETS → DBMS: contarInteresados(solicitudId)` → `return cantidadInteresados` | `interesF.contarPorSolicitud(s)` |
 | neg | `ControlPanelCETS → UIDetalleSolicitud: enviarUbicacionDonador()` `neg[mostrarUbicacion == true]` | **Prohibido:** la vista nunca muestra `PerfilClinico.latitud/longitud` |
@@ -530,11 +528,12 @@ public int contarPorSolicitud(SolicitudReposicion s) {
 
 **Checklist**
 
-- [ ] `contarPorSolicitud` en `InteresFacade`
-- [ ] `obtenerDetalle` y `obtenerCantidadInteresados` en `LnPanelCETS`
-- [ ] `f:viewParam` y `f:viewAction` en la vista (requiere T0.1)
-- [ ] Vista sin datos fijos y sin ubicación
-- [ ] Pruebas + SQL
+- [x] `contarPorSolicitud` en `InteresFacade`
+- [x] `obtenerDetalle` y `obtenerCantidadInteresados` en `LnPanelCETS`
+- [x] `f:viewParam` y `f:viewAction` en la vista (requiere T0.1)
+- [x] Vista sin datos fijos y sin ubicación (se retiró la tabla de donadores de ejemplo; el bloque "Actualizar estatus"
+      queda inerte hasta la HU-6.4 y el historial de cambios de ejemplo se quitó)
+- [x] Pruebas HTTP: id válido, 0 y 1 interesados, id inexistente, sin id, id no numérico, sin sesión y rol equivocado
 
 ---
 
@@ -2165,7 +2164,9 @@ Siguen **abiertas**: necesitan una decisión del equipo o del profe. Lo ya resue
     - El nombre dice "solicitudes activas", pero la vista filtra por cualquier estatus, con contadores fijos.
     - La vista combina tipo y Rh en un solo combo (`O+`) y el diagrama los maneja por separado.
 17. **HU-6.3:** el título habla de "detalle de **donadores** vinculados", pero la secuencia solo obtiene la
-    **cantidad** de interesados. Definir si el CETS debe ver la lista (nombres, sin ubicación).
+    **cantidad** de interesados. Definir si el CETS debe ver la lista (nombres, sin ubicación). Mientras tanto
+    `detalleSolicitud` muestra solo la cantidad; se retiró la tabla de identificadores "DON-OAX-…" de la maqueta
+    porque eran datos inventados.
 18. **HU-6.4:**
     - `«create» HistorialEstatusSolicitud(solicitudId, personalId, …)` no indica de dónde sale `personalId`. Se toma de
       la sesión.
@@ -2175,3 +2176,18 @@ Siguen **abiertas**: necesitan una decisión del equipo o del profe. Lo ya resue
     - El *Diagrama de navegación* no tiene transiciones para `donadores → capturarDonacion`, ni para
       `misSolicitudes → capturarSolicitud`, aunque las vistas tienen esos botones.
     - El botón "Descargar" de miHistorial y "Descargar imagen"/"Imprimir ficha" de publicación no tienen HU.
+20. **HU-6.2 (vista `solicitudesActivas`) tiene elementos que el diagrama no define:**
+    - El buscador "Buscar por folio u hospital": el diagrama solo filtra por estatus, tipo y Rh. Quedó deshabilitado.
+    - Las tarjetas de resumen: "Solicitudes activas", "Donadores interesados" y "Sin donador interesado" se calculan
+      sobre las solicitudes mostradas. La maqueta decía "interesados hoy" y "14% vs ayer"; se cambió el texto porque no
+      hay dato que lo respalde.
+    - La columna "Donadores interesados" de la tabla reutiliza `obtenerCantidadInteresados` de HU-6.3 (una consulta por
+      fila). Decidir si el diagrama de HU-6.2 debe incluirla o si conviene una consulta agrupada.
+    - El diagrama menciona `listarSolicitudesActivas()` y `filtrarSolicitudes(...)` como dos mensajes; en código son un
+      solo camino (el primero llama al segundo con el filtro por defecto).
+21. **HU-6.3 y HU-6.4 comparten la vista `detalleSolicitud`:** el bloque "Actualizar estatus" sigue en pantalla pero
+    inerte, y el historial de cambios de la maqueta se quitó, hasta implementar la HU-6.4.
+22. **Sesión CETS en dos lugares:** `plantillaInstitucional` verifica el rol en `preRenderView`, pero los `f:viewAction`
+    corren antes. Por eso `PanelCetsController` vuelve a llamar `sesion.verificarCETS()` antes de consultar la BD. No se
+    agregó un segundo `f:event` en cada vista para no intentar redirigir dos veces en la misma respuesta (la plantilla
+    ya lo hace). Decidir si se mueve esta verificación a un filtro (`web.xml`) para todo `/vista/cets/*`.
