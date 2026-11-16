@@ -1,5 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- Mi perfil — panel de usuario estático (diseño Stitch v3) -->
+<!-- Mi perfil — HU-1.3 (perfil clínico), HU-3.4 (radio de notificación), "Usar mi ubicación" (D1) y
+     consentimiento de contacto (D8). La vista llena la entidad completa #{perfilController.perfil}.
+     La sesión de usuario la verifica plantillaUsuario (preRenderView → sesionController.verificar)
+     y, antes de consultar la BD, perfilController.cargarPerfil. -->
 <!DOCTYPE html>
 <ui:composition xmlns="http://www.w3.org/1999/xhtml"
                 xmlns:h="jakarta.faces.html"
@@ -11,13 +14,24 @@
     <ui:param name="menuActivo" value="miPerfil"/>
     <ui:define name="titulo">Mi perfil · SIVIDO</ui:define>
 
+    <ui:define name="metadata">
+        <f:metadata>
+            <f:viewAction action="#{perfilController.cargarPerfil}"/>
+        </f:metadata>
+    </ui:define>
+
     <ui:define name="content">
         <div class="encabezado-pagina fila-entre">
             <div>
                 <h1>Mi perfil de usuario</h1>
                 <p>Tus datos de contacto, tu grupo sanguíneo declarado y tus preferencias de privacidad.</p>
             </div>
-            <span class="etiqueta verde"><i class="pi pi-check-circle"></i> Registro activo</span>
+            <ui:fragment rendered="#{perfilController.perfilCompleto}">
+                <span class="etiqueta verde"><i class="pi pi-check-circle"></i> Perfil clínico registrado</span>
+            </ui:fragment>
+            <ui:fragment rendered="#{not perfilController.perfilCompleto}">
+                <span class="etiqueta"><i class="pi pi-info-circle"></i> Perfil clínico pendiente</span>
+            </ui:fragment>
         </div>
 
         <div class="aviso ambar mb-2">
@@ -28,51 +42,51 @@
             </div>
         </div>
 
+        <p:messages id="mensajes" closable="true"/>
+
         <h:form id="formPerfil">
             <div class="grid grid-2">
-                <!-- Contacto -->
+                <!-- Contacto (solo lectura: ninguna HU edita estos datos) y ubicación -->
                 <div class="tarjeta">
                     <div class="tarjeta-cabecera"><h2><i class="pi pi-address-book texto-rojo"></i> Datos de contacto</h2></div>
                     <div class="campo">
-                        <p:outputLabel for="nombre">Nombre completo <span class="requerido">*</span></p:outputLabel>
-                        <p:inputText id="nombre" value="Rosalba Méndez Jarquín"/>
+                        <p:outputLabel for="nombre">Nombre completo</p:outputLabel>
+                        <p:inputText id="nombre" value="#{perfilController.perfil.usuario.nombreCompleto}" readonly="true"/>
                     </div>
                     <div class="campo">
-                        <div class="fila-campo">
-                            <p:outputLabel for="correo">Correo electrónico <span class="requerido">*</span></p:outputLabel>
-                            <span class="etiqueta verde"><i class="pi pi-check"></i> Verificado</span>
-                        </div>
-                        <p:inputText id="correo" type="email" value="r.mendez.j@correo.com"/>
+                        <p:outputLabel for="correo">Correo electrónico</p:outputLabel>
+                        <p:inputText id="correo" type="email" value="#{perfilController.perfil.usuario.correo}" readonly="true"/>
                     </div>
                     <div class="campo">
-                        <p:outputLabel for="telefono">Teléfono móvil <span class="requerido">*</span></p:outputLabel>
-                        <p:inputText id="telefono" value="951 428 9031"/>
-                        <span class="ayuda"><i class="pi pi-mobile"></i> Solo se comparte si confirmas interés en una solicitud.</span>
+                        <p:outputLabel for="telefono">Teléfono móvil</p:outputLabel>
+                        <p:inputText id="telefono" value="#{perfilController.perfil.usuario.telefono}" readonly="true"/>
+                        <span class="ayuda"><i class="pi pi-mobile"></i> Solo se comparte si activas el permiso de contacto y confirmas interés en una solicitud.</span>
                     </div>
+
+                    <!-- Ubicación (D1). Sin coordenadas no se te notifica. Reemplaza al combo "Región". -->
                     <div class="campo mb-0">
-                        <p:outputLabel for="region">Región de residencia <span class="requerido">*</span></p:outputLabel>
-                        <p:selectOneMenu id="region" value="valles">
-                            <f:selectItem itemLabel="Valles Centrales" itemValue="valles"/>
-                            <f:selectItem itemLabel="Istmo de Tehuantepec" itemValue="istmo"/>
-                            <f:selectItem itemLabel="Costa" itemValue="costa"/>
-                            <f:selectItem itemLabel="Mixteca" itemValue="mixteca"/>
-                            <f:selectItem itemLabel="Cuenca del Papaloapan" itemValue="cuenca"/>
-                            <f:selectItem itemLabel="Sierra Sur" itemValue="sierraSur"/>
-                            <f:selectItem itemLabel="Sierra Norte" itemValue="sierraNorte"/>
-                            <f:selectItem itemLabel="Cañada" itemValue="canada"/>
-                        </p:selectOneMenu>
-                        <span class="ayuda"><i class="pi pi-lock"></i> Tu dirección exacta nunca se guarda ni se muestra.</span>
+                        <label>Tu ubicación</label>
+                        <div class="fila">
+                            <p:commandButton type="button" value="Usar mi ubicación" icon="pi pi-map-marker"
+                                             styleClass="boton-suave" onclick="usarMiUbicacion()"/>
+                            <span id="estadoUbicacion" class="texto-chico texto-sec">#{perfilController.conUbicacion ? 'Ubicación registrada' : 'Sin ubicación: no recibirás avisos de solicitudes cercanas'}</span>
+                        </div>
+                        <h:inputHidden id="lat" value="#{perfilController.perfil.latitud}"/>
+                        <h:inputHidden id="lng" value="#{perfilController.perfil.longitud}"/>
+                        <span class="ayuda"><i class="pi pi-lock"></i> Se guardan tus coordenadas solo para calcular qué solicitudes te quedan cerca. Nunca se muestran ni se comparten: únicamente se informa una distancia aproximada.</span>
+                        <span class="ayuda"><i class="pi pi-info-circle"></i> Nota: el navegador solo permite la ubicación en <strong>localhost</strong> o con <strong>HTTPS</strong>.</span>
                     </div>
                 </div>
 
-                <!-- Información sanguínea -->
                 <div class="columna">
+                    <!-- Información sanguínea (HU-1.3) -->
                     <div class="tarjeta">
                         <div class="tarjeta-cabecera"><h2><i class="pi pi-heart texto-rojo"></i> Información sanguínea</h2></div>
                         <div class="grid grid-2" style="gap:0 1rem">
                             <div class="campo">
                                 <p:outputLabel for="grupo">Grupo ABO <span class="requerido">*</span></p:outputLabel>
-                                <p:selectOneMenu id="grupo" value="O">
+                                <p:selectOneMenu id="grupo" value="#{perfilController.perfil.tipoSanguineo}">
+                                    <f:selectItem itemLabel="Selecciona" itemValue="" noSelectionOption="true"/>
                                     <f:selectItem itemLabel="Grupo O" itemValue="O"/>
                                     <f:selectItem itemLabel="Grupo A" itemValue="A"/>
                                     <f:selectItem itemLabel="Grupo B" itemValue="B"/>
@@ -81,36 +95,58 @@
                             </div>
                             <div class="campo">
                                 <p:outputLabel for="rh">Factor Rh <span class="requerido">*</span></p:outputLabel>
-                                <p:selectOneMenu id="rh" value="+">
+                                <p:selectOneMenu id="rh" value="#{perfilController.perfil.factorRh}">
+                                    <f:selectItem itemLabel="Selecciona" itemValue="" noSelectionOption="true"/>
                                     <f:selectItem itemLabel="Positivo (+)" itemValue="+"/>
                                     <f:selectItem itemLabel="Negativo (−)" itemValue="-"/>
                                 </p:selectOneMenu>
                             </div>
                         </div>
+                        <!-- Se calcula con el perfil guardado, no con valores fijos -->
                         <div class="tarjeta-plana fila">
-                            <span class="grupo-sangre grande">O+<small>DECLARADO</small></span>
+                            <ui:fragment rendered="#{perfilController.perfilCompleto}">
+                                <span class="grupo-sangre grande">#{perfilController.perfil.tipoSanguineo}#{perfilController.perfil.factorRh}<small>DECLARADO</small></span>
+                            </ui:fragment>
+                            <ui:fragment rendered="#{not perfilController.perfilCompleto}">
+                                <span class="grupo-sangre grande claro">?<small>SIN CAPTURAR</small></span>
+                            </ui:fragment>
                             <div>
                                 <strong>Perfil autodeclarado</strong>
-                                <p class="texto-chico texto-sec mb-0">Puedes donar glóbulos rojos a receptores O+, A+, B+ y AB+.</p>
+                                <p class="texto-chico texto-sec mb-0">
+                                    <h:outputText rendered="#{not empty perfilController.receptores}"
+                                                  value="Puedes donar glóbulos rojos a receptores #{perfilController.receptores}."/>
+                                    <h:outputText rendered="#{empty perfilController.receptores}"
+                                                  value="Elige tu grupo y tu factor Rh y guarda para ver a quién puedes donar."/>
+                                </p>
                             </div>
                         </div>
                     </div>
 
+                    <!-- Privacidad (D8) -->
                     <div class="tarjeta">
                         <div class="tarjeta-cabecera"><h2><i class="pi pi-shield texto-rojo"></i> Privacidad</h2></div>
                         <div class="preferencia">
                             <div>
+                                <strong>Permitir que se revele mi contacto al confirmar interés</strong>
+                                <p>Apagado por defecto. Si lo activas, al confirmar tu interés en una solicitud se podrá revelar tu contacto; si no, nadie verá tu teléfono ni tu nombre completo.</p>
+                            </div>
+                            <p:toggleSwitch id="consentimientoContacto" value="#{perfilController.perfil.usuario.consentimientoContacto}"/>
+                        </div>
+                        <div class="preferencia">
+                            <div>
                                 <strong>Compartir mi contacto solo cuando yo confirme interés</strong>
                                 <p>Nadie verá tu teléfono ni tu nombre completo hasta que confirmes tu interés en una solicitud.</p>
+                                <span class="ayuda"><i class="pi pi-clock"></i> Aún no disponible: no tiene dónde guardarse en la base de datos.</span>
                             </div>
-                            <p:toggleSwitch id="soloAlConfirmar" value="true"/>
+                            <p:toggleSwitch id="soloAlConfirmar" value="false" disabled="true"/>
                         </div>
                         <div class="preferencia mb-0">
                             <div>
                                 <strong>Recibir avisos de solicitudes compatibles</strong>
                                 <p>Te avisamos cuando un hospital dentro de tu radio requiera tu grupo sanguíneo.</p>
+                                <span class="ayuda"><i class="pi pi-clock"></i> Aún no disponible: no tiene dónde guardarse en la base de datos.</span>
                             </div>
-                            <p:toggleSwitch id="recibirAvisos" value="true"/>
+                            <p:toggleSwitch id="recibirAvisos" value="false" disabled="true"/>
                         </div>
                     </div>
                 </div>
@@ -118,8 +154,54 @@
 
             <div class="acciones-formulario">
                 <p:button outcome="/vista/cuentas/miPerfil" value="Cancelar cambios" icon="pi pi-undo" styleClass="ui-button-secondary"/>
-                <p:button outcome="/vista/cuentas/miPerfil" value="Guardar cambios" icon="pi pi-save"/>
+                <p:commandButton value="Guardar cambios" icon="pi pi-save" ajax="false" action="#{perfilController.guardarPerfil}"/>
             </div>
         </h:form>
+
+        <!-- Radio de notificación (HU-3.4). Formulario aparte: no se pueden anidar formularios. -->
+        <div class="tarjeta mt-2">
+            <div class="tarjeta-cabecera"><h2><i class="pi pi-bell texto-rojo"></i> Radio de notificación</h2></div>
+            <h:form id="formRadio">
+                <p class="texto-sec">Te avisamos de las solicitudes compatibles que estén dentro de este radio desde tu ubicación.
+                    Radio guardado: <strong>#{perfilController.radioGuardado} km</strong>.</p>
+                <div class="campo">
+                    <p:selectOneButton id="radio" value="#{perfilController.perfil.radioNotificacion}">
+                        <f:selectItem itemLabel="3 km" itemValue="#{3}"/>
+                        <f:selectItem itemLabel="5 km (recomendado)" itemValue="#{5}"/>
+                        <f:selectItem itemLabel="10 km" itemValue="#{10}"/>
+                    </p:selectOneButton>
+                    <span class="ayuda"><i class="pi pi-info-circle"></i> Primero guarda tu perfil clínico; el radio se guarda aparte.</span>
+                </div>
+                <p:commandButton value="Guardar radio" icon="pi pi-save" styleClass="boton-suave" ajax="false"
+                                 action="#{perfilController.guardarRadio}"/>
+            </h:form>
+        </div>
+
+        <!-- "Usar mi ubicación": Geolocation API del navegador, sin librerías externas.
+             Llena los campos ocultos formPerfil:lat y formPerfil:lng; se guardan con "Guardar cambios". -->
+        <script type="text/javascript">
+            //<![CDATA[
+            function usarMiUbicacion() {
+                var estado = document.getElementById('estadoUbicacion');
+                if (!('geolocation' in navigator)) {
+                    estado.textContent = 'Tu navegador no admite geolocalización.';
+                    return;
+                }
+                estado.textContent = 'Obteniendo tu ubicación...';
+                navigator.geolocation.getCurrentPosition(function (posicion) {
+                    document.getElementById('formPerfil:lat').value = posicion.coords.latitude.toFixed(6);
+                    document.getElementById('formPerfil:lng').value = posicion.coords.longitude.toFixed(6);
+                    estado.textContent = 'Ubicación obtenida. Pulsa "Guardar cambios" para registrarla.';
+                }, function (error) {
+                    var mensajes = {
+                        1: 'Permiso denegado: permite la ubicación en tu navegador (solo funciona en localhost o con HTTPS).',
+                        2: 'No se pudo determinar tu ubicación.',
+                        3: 'Se agotó el tiempo para obtener tu ubicación.'
+                    };
+                    estado.textContent = mensajes[error.code] || 'No se pudo obtener tu ubicación.';
+                }, {enableHighAccuracy: false, timeout: 10000, maximumAge: 60000});
+            }
+            //]]>
+        </script>
     </ui:define>
 </ui:composition>

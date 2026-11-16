@@ -624,84 +624,75 @@ public boolean actualizarEstatus(SolicitudReposicion s)
 
 **Objetivo:**
 
-- El donador captura su tipo sanguíneo, su Rh y su **ubicación** (decisión D1). Sin perfil y sin coordenadas
-  no le llegan notificaciones (HU-3.1).
-- En la misma vista elige si se revela su contacto al confirmar interés (checkbox de HU-1.4, decisión D8).
+- El donador captura su grupo sanguíneo, su Rh y su **ubicación** (D1). Sin perfil y sin coordenadas no le llegan
+  notificaciones (HU-3.1).
+- En la misma vista elige si se revela su contacto al confirmar interés (`consentimientoContacto`, D8).
+
+**Estado:** implementada en `cuentas/miPerfil` (junto con HU-3.4). Controller **`PerfilController`**
+(`@ViewScoped`), no `CuentasController`: ver [Inconsistencias](#10-inconsistencias-a-revisar) #27.
 
 **Secuencia (`.vpp`).** Todo va dentro de `opt[perfilClinico == null]`.
 
 | # | Mensaje en el diagrama | Equivalente en código |
 |---|---|---|
 | 1 | `Donador → Dashboard.seleccionarPerfilClinico()` | Menú "Mi perfil" |
-| 1.1 | `Dashboard → UIPerfilClinico.mostrar()` | `cuentas/miPerfil.xhtml` |
-| 2 | `Donador → UIPerfilClinico.capturar(String tipoSanguineo, String factorRh)` | Combos `grupo` y `rh` → `#{cuentasController.perfil.tipoSanguineo}` y `.factorRh`; botón "Usar mi ubicación" → `perfil.latitud` y `perfil.longitud` (D1) |
-| 2.1 | `UIPerfilClinico → ControlCuentas.guardarPerfilClinico(String tipoSanguineo, String factorRh): boolean` | `lnCuentas.guardarPerfilClinico(perfil)` |
+| 1.1 | `Dashboard → UIPerfilClinico.mostrar()` | `cuentas/miPerfil.xhtml` (`f:viewAction` → `perfilController.cargarPerfil`) |
+| 2 | `Donador → UIPerfilClinico.capturar(String tipoSanguineo, String factorRh)` | Combos `grupo` y `rh` → `#{perfilController.perfil.tipoSanguineo}` y `.factorRh`; botón "Usar mi ubicación" → `perfil.latitud` y `perfil.longitud` (D1); toggle → `perfil.usuario.consentimientoContacto` (D8) |
+| 2.1 | `UIPerfilClinico → ControlCuentas.guardarPerfilClinico(String tipoSanguineo, String factorRh): boolean` | `perfilController.guardarPerfil()` → `lnCuentas.guardarPerfilClinico(perfil)` |
 | 2.1.1 | `ControlCuentas → Usuario.completarPerfilClinico(tipoSanguineo, factorRh)` | **En el Ln** (no en la entidad) |
-| 2.1.1.1 | `Usuario → «create» PerfilClinico(tipoSanguineo, factorRh)` | El controller ya trae la entidad; el Ln pone `usuarioid` (PK compartida) y `fechaRegistroPerfil` |
-| 2.1.1.2 | `PerfilClinico.marcarElegibilidadPreliminar(): boolean` → `return elegible` | Ver [Inconsistencias](#10-inconsistencias-a-revisar): no hay columna para "elegible" |
-| 2.1.2 | `ControlCuentas → DBMS: insertarPerfilClinico(usuarioId, tipoSanguineo, factorRh)` → `return usuarioId` | `perfilF.create(p)`, o `perfilF.edit(p)` si ya existía; además `usuarioF.edit(p.getUsuario())` para guardar `consentimientoContacto` (D8) |
-| — | `return true` → `UIPerfilClinico → Dashboard` | Mensaje "Perfil guardado" |
+| 2.1.1.1 | `Usuario → «create» PerfilClinico(tipoSanguineo, factorRh)` | El Ln crea el `PerfilClinico` (PK compartida: `usuarioid`, `usuario` y `fechaRegistroPerfil`); el radio 5 viene del constructor |
+| 2.1.1.2 | `PerfilClinico.marcarElegibilidadPreliminar(): boolean` → `return elegible` | **No implementado**: no hay columna ni regla (Inconsistencias #4) |
+| 2.1.2 | `ControlCuentas → DBMS: insertarPerfilClinico(usuarioId, tipoSanguineo, factorRh)` → `return usuarioId` | `perfilF.create(perfil)`, o `perfilF.edit(perfil)` si ya existía; más `usuarioF.edit(usuario)` por el consentimiento |
+| — | `return true` → `UIPerfilClinico → Dashboard` | Mensaje "Tu perfil se guardó" (`p:messages`) |
 
-**Firma corregida (LnCuentas)**
+**Firmas (hechas, en `LnCuentas`)**
 
 ```java
-public boolean guardarPerfilClinico(PerfilClinico p)   // p.usuario = usuario en sesión (lo pone el controller)
+public boolean guardarPerfilClinico(PerfilClinico p)        // p.usuario = Usuario de la sesión, con consentimientoContacto
+public PerfilClinico obtenerPerfilClinico(Usuario u)         // el perfil guardado, o uno nuevo ligado al usuario (no está en el diagrama)
+public List<String> receptoresCompatibles(PerfilClinico p)   // "puedes donar a..." (no está en el diagrama)
 ```
 
-Lógica del Ln:
+**Reglas que valida el Ln.** Todo se valida **antes** de modificar algo; si falla, no se guarda nada:
 
-1. `p.setUsuarioid(p.getUsuario().getId())`.
-2. `p.setFechaRegistroPerfil(new Date())`.
-3. Si `perfilF.find(id) == null` → `create`; si no → `edit`.
-4. `usuarioF.edit(p.getUsuario())`, que guarda el checkbox `consentimientoContacto` (D8).
+1. `tipoSanguineo` ∈ {A, B, AB, O} y `factorRh` ∈ {+, −} (el CHECK de la BD). Vacío o nulo es inválido.
+2. Ubicación: latitud y longitud van **juntas** (o ninguna), con |latitud| ≤ 90 y |longitud| ≤ 180.
+   Se redondean a 6 decimales (`DECIMAL(9,6)`).
+3. Si se envían sin coordenadas (nulas o vacías) **no se borra** la ubicación ya guardada.
+4. Si el perfil ya existe se actualiza (grupo, Rh y ubicación) **sin tocar** el radio ni `fechaRegistroPerfil`.
+   El radio se cambia solo con `configurarRadio` (HU-3.4).
+5. `Usuario.consentimientoContacto` se guarda en cada "Guardar cambios" (con el perfil nuevo o ya existente).
 
-`latitud` y `longitud` pueden quedar en `null`; el perfil se guarda igual, pero ese donador **no** recibe
-notificaciones hasta que comparta su ubicación (D1). El `radioNotificacion=5` ya viene del constructor de
-`PerfilClinico`.
-
-**Archivos**
+**Archivos (hechos)**
 
 | Acción | Archivo |
 |---|---|
-| Modificar | `-ejb/src/java/ln/LnCuentas.java` (`@EJB PerfilClinicoFacade perfilF`) |
-| Modificar | `-war/src/java/controller/CuentasController.java` (`PerfilClinico perfil`; carga el perfil de `sesion.getUsuario().getPerfilClinico()` o crea uno nuevo con `setUsuario(sesion.getUsuario())`) |
-| Modificar | `-war/web/vista/cuentas/miPerfil.xhtml` |
+| Modificado | `-ejb/src/java/ln/LnCuentas.java` (`@EJB PerfilClinicoFacade`) |
+| Creado | `-war/src/java/controller/PerfilController.java` (`@Named @ViewScoped`; carga con `f:viewAction`, sin `@PostConstruct`) |
+| Modificado | `-war/web/vista/cuentas/miPerfil.xhtml` |
 
-**Facade:** no necesita métodos nuevos (`find`, `create`, `edit`).
+**Facade:** sin métodos nuevos (`find`, `create`, `edit`).
 
-**Vista miPerfil**
+**Vista miPerfil (HU-1.3)**
 
-- **Datos personales:** muestra `#{sesionController.usuario.nombreCompleto}`, correo y teléfono, en solo lectura
-  (ninguna HU cubre la edición).
-- **Combos grupo/rh:** se enlazan a `cuentasController.perfil`.
-- **Ubicación (D1):**
-  - Quita el combo "Región". En su lugar va un botón **"Usar mi ubicación"** con las mismas clases CSS
-    (`type="button"`, no envía el formulario).
-  - El botón llama a la Geolocation API del navegador y llena dos `h:inputHidden`
-    (`#{cuentasController.perfil.latitud}` y `#{cuentasController.perfil.longitud}`; JSF convierte a `BigDecimal`).
-  - Muestra un texto "Ubicación registrada", **sin** mostrar las coordenadas.
-  ```html
-  <h:inputHidden id="lat" value="#{cuentasController.perfil.latitud}"/>
-  <h:inputHidden id="lng" value="#{cuentasController.perfil.longitud}"/>
-  <script>
-    function usarMiUbicacion() {
-      navigator.geolocation.getCurrentPosition(function (pos) {
-        document.getElementById('formPerfil:lat').value = pos.coords.latitude.toFixed(6);
-        document.getElementById('formPerfil:lng').value = pos.coords.longitude.toFixed(6);
-        document.getElementById('estadoUbicacion').textContent = 'Ubicación registrada';
-      }, function () {
-        document.getElementById('estadoUbicacion').textContent = 'No se pudo obtener la ubicación';
-      });
-    }
-  </script>
-  ```
-  - Ajusta `formPerfil` al id real del `h:form`.
-  - El navegador solo permite geolocalización en `localhost` o con HTTPS. Desde otra máquina por `http://IP:8080`
-    el botón no funciona; para probar usa `localhost` o los `INSERT` de prueba.
-- **Checkbox de contacto (D8):** el toggle `soloAlConfirmar` se enlaza a
-  `#{cuentasController.perfil.usuario.consentimientoContacto}`. Es lo único de HU-1.4 que hace [DAVID].
-- El toggle "Recibir avisos" no tiene columna en la BD ([Inconsistencias](#10-inconsistencias-a-revisar) #5). Déjalo sin enlazar.
-- **Botón "Guardar cambios":** cámbialo a `p:commandButton action="#{cuentasController.guardarPerfilClinico}"`.
+- **Datos de contacto:** nombre, correo y teléfono salen del `Usuario` real y son de **solo lectura** (ninguna HU los
+  edita; el servidor ignora un intento de modificarlos). Se quitaron "Rosalba Méndez", "Verificado" y "Registro activo".
+- **Región (D1):** el combo se eliminó. No existía columna.
+- **Ubicación:** botón **"Usar mi ubicación"** con la Geolocation API (JS inline, sin librerías externas), que llena dos
+  `h:inputHidden` ligados a `perfil.latitud` y `perfil.longitud`. Los guarda "Guardar cambios". Maneja permiso denegado,
+  posición no disponible, tiempo agotado y navegador sin soporte con un mensaje en la misma vista. Nota visible: solo
+  funciona en `localhost` o con HTTPS. Las coordenadas **no se muestran** como texto.
+- **Grupo y Rh:** combos con opción "Selecciona". El badge ("O+ DECLARADO") y el texto "puedes donar a..." se calculan con
+  el perfil guardado (`receptoresCompatibles` en el Ln); sin perfil muestran "?" y una indicación.
+- **Privacidad (D8, decisión D13):**
+  - El toggle **"Permitir que se revele mi contacto al confirmar interés"** está ligado a
+    `perfil.usuario.consentimientoContacto` y **apagado por defecto** (opt-in; manda el `DEFAULT FALSE` de la BD).
+  - "Compartir mi contacto solo cuando yo confirme interés" y "Recibir avisos de solicitudes compatibles" no tienen columna:
+    quedan **deshabilitados** con una nota (D14).
+- Tras cada guardado (con éxito o con error) la vista vuelve a leer de la BD, así siempre muestra lo realmente guardado.
+  Un rechazo descarta lo que el usuario había elegido.
+- La protección de sesión es la de `plantillaUsuario`; `PerfilController` la repite antes de consultar la BD (como en
+  `PanelCetsController`).
 
 **Navegación**
 
@@ -711,11 +702,11 @@ notificaciones hasta que comparta su ubicación (D1). El `radioNotificacion=5` y
 
 **Terminado cuando**
 
-- Entrar como un usuario nuevo (HU-1.1), elegir O / −, pulsar "Usar mi ubicación" (aceptar el permiso del
-  navegador), guardar y recargar: los combos conservan O / − y la BD tiene coordenadas.
-- Volver a guardar con A / + actualiza el registro, no lo duplica.
-- Activar el checkbox de contacto lo guarda en `Usuario`.
-- El HTML (Ctrl+U) no muestra las coordenadas como texto, solo en los campos ocultos del propio usuario.
+- Un usuario nuevo ve "Perfil clínico pendiente", sin ubicación y consentimiento apagado.
+- Elegir O−, pulsar "Usar mi ubicación" (aceptar el permiso en `localhost`), activar el consentimiento y guardar: al
+  recargar conserva todo, y la BD tiene el perfil, las coordenadas y `consentimientoContacto = 1`.
+- Guardar de nuevo con A+ actualiza el mismo registro (no lo duplica) y conserva la fecha de registro y el radio.
+- Grupo o Rh vacíos, o una ubicación inválida, muestran un error y no guardan nada.
 - SQL de verificación:
   ```sql
   SELECT p.Usuarioid, p.tipoSanguineo, p.factorRh, p.radioNotificacion, p.latitud, p.longitud, p.fechaRegistroPerfil,
@@ -726,13 +717,16 @@ notificaciones hasta que comparta su ubicación (D1). El `radioNotificacion=5` y
 
 **Checklist**
 
-- [ ] `guardarPerfilClinico(PerfilClinico)` en `LnCuentas` (perfil + `consentimientoContacto`)
-- [ ] `perfil` en `CuentasController` (inicializado en el constructor o con `f:viewAction`)
-- [ ] Vista miPerfil sin datos fijos ("Rosalba Méndez…")
-- [ ] Combo "Región" reemplazado por "Usar mi ubicación" + `h:inputHidden` latitud/longitud (D1)
-- [ ] Checkbox `consentimientoContacto` (D8)
-- [ ] Actualizar `sesion.getUsuario().setPerfilClinico(p)` después de guardar
-- [ ] Pruebas + SQL
+- [x] `guardarPerfilClinico`, `obtenerPerfilClinico` y `receptoresCompatibles` en `LnCuentas`
+- [x] `PerfilController` (`perfil` inicializado en el constructor; carga con `f:viewAction`)
+- [x] Vista sin datos fijos; combo "Región" reemplazado por "Usar mi ubicación" + `h:inputHidden` (D1)
+- [x] Toggle `consentimientoContacto` apagado por defecto (D8, D13); toggles sin columna deshabilitados (D14)
+- [x] `sesion.getUsuario().setPerfilClinico(...)` después de guardar (otras vistas leen el perfil de la sesión)
+- [x] Compila (`clean dist` en una copia del proyecto: `BUILD SUCCESSFUL`, 0 warnings)
+- [x] Pruebas HTTP (41 comprobaciones, todas OK; el script crea y borra su propio usuario): perfil nuevo y actualizado, tipo o
+      Rh vacíos, ubicación inválida o incompleta, redondeo a 6 decimales, consentimiento, datos de solo lectura y sin sesión
+      o con rol equivocado
+- [ ] Revisión visual en el navegador, incluido el botón "Usar mi ubicación" con permiso aceptado y denegado
 
 ---
 
@@ -740,55 +734,64 @@ notificaciones hasta que comparta su ubicación (D1). El `radioNotificacion=5` y
 
 **Objetivo:** el donador elige el radio (3, 5 o 10 km) en que quiere recibir avisos.
 
+**Estado:** implementada en la misma vista `cuentas/miPerfil` (D7: `UIAjustes` = miPerfil), como una tarjeta con su propio
+formulario `formRadio` (no se pueden anidar formularios).
+
 **Secuencia (`.vpp`)**
 
 | # | Mensaje en el diagrama | Equivalente en código |
 |---|---|---|
 | 1 | `Donador → Dashboard.seleccionarAjustes()` | Menú "Mi perfil" |
-| 1.1 | `Dashboard → UIAjustes.mostrar()` | `cuentas/miPerfil.xhtml`, sección "Radio de notificación" (decisión D7: `UIAjustes` = miPerfil) |
-| 2 | `UIAjustes → ControlCuentas.obtenerRadio(): int` | `lnCuentas.obtenerRadio(usuario)` |
-| 2.1 | `ControlCuentas → DBMS: consultarRadio(usuarioId)` → `return radioNotificacion` | `perfilF.find(u.getId())` |
-| 3 | `Donador → UIAjustes.seleccionarRadio(int radioNotificacion)` | `p:selectOneButton` 3/5/10 → `#{cuentasController.perfil.radioNotificacion}` |
-| 3.1 | `UIAjustes → ControlCuentas.configurarRadio(int radioNotificacion): boolean` | `lnCuentas.configurarRadio(perfil)` |
-| 3.1.1 | `ControlCuentas → ControlCuentas.validarRadio(int radioNotificacion): boolean` → `return valido` | Privado en el Ln: `radio ∈ {3, 5, 10}`, que es el CHECK de la BD |
-| 3.1.2 | `alt[valido == true]` `DBMS: actualizarRadio(usuarioId, radioNotificacion)` → `return true` | `perfilF.edit(p)` |
+| 1.1 | `Dashboard → UIAjustes.mostrar()` | `cuentas/miPerfil.xhtml`, tarjeta "Radio de notificación" |
+| 2 | `UIAjustes → ControlCuentas.obtenerRadio(): int` | `lnCuentas.obtenerRadio(usuario)` al cargar; la vista muestra "Radio guardado: N km" |
+| 2.1 | `ControlCuentas → DBMS: consultarRadio(usuarioId)` → `return radioNotificacion` | `perfilF.find(u.getId())`; si no hay perfil regresa 5 (el default de la entidad) |
+| 3 | `Donador → UIAjustes.seleccionarRadio(int radioNotificacion)` | `p:selectOneButton` 3 / 5 / 10 → `#{perfilController.perfil.radioNotificacion}` |
+| 3.1 | `UIAjustes → ControlCuentas.configurarRadio(int radioNotificacion): boolean` | `perfilController.guardarRadio()` → `lnCuentas.configurarRadio(perfil)` |
+| 3.1.1 | `ControlCuentas → ControlCuentas.validarRadio(int radioNotificacion): boolean` → `return valido` | `validarRadio` privado en el Ln: radio ∈ {3, 5, 10} (CHECK de la BD) |
+| 3.1.2 | `alt[valido == true]` `DBMS: actualizarRadio(usuarioId, radioNotificacion)` → `return true` | `perfilF.edit(perfil)` |
 | — | `alt[valido == false]` `return false` | Mensaje de error |
 
-**Firmas corregidas (LnCuentas)**
+**Firmas (hechas, en `LnCuentas`)**
 
 ```java
-public int obtenerRadio(Usuario u)             // si no tiene PerfilClinico → 5 (default)
-public boolean configurarRadio(PerfilClinico p)
+public int obtenerRadio(Usuario u)                 // 5 si no hay perfil
+public boolean configurarRadio(PerfilClinico p)    // false si el radio no es 3, 5 o 10, o si el usuario no tiene perfil
 ```
 
-**Archivos**
+**Mensajes del controller:** si `configurarRadio` regresa `false` y el perfil aún no existe → "Primero completa tu perfil
+clínico"; si existe → "El radio debe ser de 3, 5 o 10 km". Si va bien: "Tu radio de notificación ahora es de N km".
+Cambiar el radio **no** modifica grupo, Rh ni ubicación.
 
-| Acción | Archivo |
-|---|---|
-| Modificar | `-ejb/src/java/ln/LnCuentas.java` |
-| Modificar | `-war/src/java/controller/CuentasController.java` |
-| Modificar | `-war/web/vista/cuentas/miPerfil.xhtml` (copiar el `p:selectOneButton id="radio"` que hoy está en `notificaciones.xhtml`) |
-| Avisar | `notificaciones/notificaciones.xhtml` ([Alex]): por D7, su selector de radio se reemplaza por el radio actual + un enlace a miPerfil (tarea de [Alex] en HU-3.1) |
+**Archivos (hechos):** los mismos de HU-1.3 (`LnCuentas`, `PerfilController`, `miPerfil.xhtml`).
 
-**Facade:** no necesita métodos nuevos.
+**Facade:** sin métodos nuevos.
 
 **Navegación**
 
 - Usuario → miPerfil.
 - Activity *AD - Notificaciones*: `ConfigurarRadio (HU-3.4)`.
+- **[Alex]:** el selector de radio de `notificaciones.xhtml` sigue estático. Se reemplaza por el radio actual
+  (`#{sesionController.usuario.perfilClinico.radioNotificacion}`, que `PerfilController` mantiene actualizado en la sesión)
+  y un enlace a miPerfil (D7).
 
 **Terminado cuando**
 
-- Elegir 10 km y guardar, luego recargar: queda seleccionado 10.
-- Un usuario **sin** perfil clínico ve el mensaje "Primero completa tu perfil clínico" (requiere HU-1.3).
-- SQL de verificación: `SELECT radioNotificacion FROM PerfilClinico WHERE Usuarioid = 903;`
+- Elegir 10 km y guardar, luego recargar: queda seleccionado 10 y "Radio guardado: 10 km".
+- Un usuario **sin** perfil clínico ve "Primero completa tu perfil clínico" y no se crea nada.
+- Guardar el perfil clínico después no cambia el radio guardado.
+- SQL de verificación: `SELECT radioNotificacion FROM PerfilClinico WHERE Usuarioid = <id>;`
 
 **Checklist**
 
-- [ ] `obtenerRadio(Usuario)`, `configurarRadio(PerfilClinico)` y `validarRadio` privado
-- [ ] Selector 3/5/10 en miPerfil
-- [ ] Avisar a [Alex] cuando el selector de miPerfil esté en `main` (D7)
-- [ ] Pruebas + SQL
+- [x] `obtenerRadio(Usuario)`, `configurarRadio(PerfilClinico)` y `validarRadio` privado
+- [x] Selector 3 / 5 / 10 en miPerfil, ligado a la entidad
+- [x] Mensaje "Primero completa tu perfil clínico"
+- [x] Compila (`BUILD SUCCESSFUL`, 0 warnings)
+- [x] Pruebas HTTP (parte de las 41 de HU-1.3): radio 3, 5 y 10, radio sin perfil, radio inválido y que no altere el resto del perfil.
+      El radio inválido (7) lo rechaza la validación de JSF (no está en la lista del selector); la rama `validarRadio` falsa del
+      Ln no se puede forzar por HTTP
+- [ ] Avisar a [Alex] cuando esté en `main` (reemplaza su selector, D7)
+- [ ] Revisión visual en el navegador (el selector `p:selectOneButton` y los mensajes)
 
 ---
 
@@ -2106,18 +2109,22 @@ quedó el trabajo en este documento.
 
 | # | Tema | Decisión | Tarea |
 |---|---|---|---|
-| D1 | Ubicación del donador | En `cuentas/miPerfil` el combo "Región" se reemplaza por el botón **"Usar mi ubicación"**: Geolocation API del navegador → `h:inputHidden` de `PerfilClinico.latitud/longitud`. **Sin coordenadas no se notifica a ese donador.** | [DAVID] HU-1.3 (vista miPerfil); [Alex] HU-3.1 (`buscarDonadoresActivos` exige `latitud/longitud` no nulas) |
+| D1 | Ubicación del donador | **Implementada** en `cuentas/miPerfil`: el combo "Región" se eliminó y se reemplazó por el botón **"Usar mi ubicación"**: Geolocation API del navegador → `h:inputHidden` de `PerfilClinico.latitud/longitud`. **Sin coordenadas no se notifica a ese donador.** | [DAVID] HU-1.3 (vista miPerfil); [Alex] HU-3.1 (`buscarDonadoresActivos` exige `latitud/longitud` no nulas) |
 | D2 | Respuestas del cuestionario (HU-4.1) | El controller arma `CuestionarioRespuesta` con su `List<RespuestaCriterio>`. El Ln calcula `resultado` (y `tiempoEsperaDias`) **antes** de `create`. | [Alex] HU-4.1 / HU-4.2 |
 | D3 | Valores de resultado | En código se usan exactamente `'Apto'` y `'NoApto'` (CHECK de la BD). La vista puede mostrar "No apto". | [Alex] HU-4.2 |
 | D4 | Formato de folio | `^CETS-OAX-\d{4}-\d{4}$`. **Decisión del equipo (regla de negocio).** | [Galilea] HU-2.4 |
 | D5 | QR | Librería JS de QR **local** en `-war/web/resources/js/` (sin CDN). El QR codifica la URL pública con `uuidPublico` (`/faces/vista/publico/publicacion.xhtml?uuid=…`); nunca con el id. | [Galilea] HU-2.2 |
 | D6 | Falta la clase `Interes` en el diagrama | Se agrega al diagrama de clases. | [DAVID] T-final |
 | D7 | Vistas que no existen (`UIAjustes`, `UIBuscarDonador`, `UIFichaDonador`) | `UIAjustes` → `cuentas/miPerfil` (HU-3.4) y `cets/criteriosExclusion` (HU-4.3). `UIBuscarDonador`/`UIFichaDonador` → `cets/donadores` (HU-5.4, HU-7.3). | [DAVID] HU-3.4; [Alex] HU-4.3 y vista notificaciones; [Galilea] HU-5.4/7.3; [DAVID] T-final (diagrama) |
-| D8 | HU-1.4 (privacidad) | Se queda con [Galilea] (`ControlSolicitud` → `LnSolicitud`). [DAVID] solo agrega el checkbox `consentimientoContacto` en miPerfil. | [Galilea] HU-1.4; [DAVID] HU-1.3 |
+| D8 | HU-1.4 (privacidad) | Se queda con [Galilea] (`ControlSolicitud` → `LnSolicitud`). [DAVID] solo agrega el toggle `consentimientoContacto` en miPerfil (**implementado**). | [Galilea] HU-1.4; [DAVID] HU-1.3 |
 | D9 | Secuencia contra navegación | Cuando no coinciden, **se sigue el *Diagrama de navegación SIVIDO***: `capturarSolicitud → misSolicitudes`, `notificaciones → cuestionario`, `confirmarInteres → notificaciones`. | Todos |
 | D10 | Exclusión permanente: dos fuentes de verdad | **Fuente única: `Usuario.exclusionPermanente`.** Se marca `true` al registrar un `HistorialClinico` con criterio `Permanente`. `verificarExclusion()` y `esElegible()` leen ese campo; no recorren padecimientos. | [Diego] HU-5.3; datos de prueba 2.4 |
 | D11 | Valores de `criteriosExclusion` | Solo `SiNo` / `SeleccionSimple`; se quita "Selección múltiple". `tipoExclusion` va como `Temporal` / `Permanente` (sin minúsculas). | [Alex] HU-4.3 |
 | D12 | Diagrama desactualizado | Actualizar el diagrama de clases y las secuencias: firmas con entidad completa, `Interes`, `SesionController`, `iniciarSesion` devuelve `Usuario`, métodos de entidades movidos a los Controls y mensajes del Ln delgado. | [DAVID] T-final |
+| D13 | `consentimientoContacto` | **Opt-in: apagado por defecto** (manda el `DEFAULT FALSE` de la BD). Se activa solo si el donador lo elige en miPerfil. | [DAVID] HU-1.3 (hecho) |
+| D14 | Toggles sin columna | "Compartir mi contacto solo cuando yo confirme interés" y "Recibir avisos de solicitudes compatibles" quedan **deshabilitados** en miPerfil, con una nota, sin conectarlos a nada. | [DAVID] HU-1.3 (hecho) |
+| D15 | Combo "Región" | Se **elimina**: no existe columna y la ubicación (D1) lo reemplaza. | [DAVID] HU-1.3 (hecho) |
+| D16 | Controller de miPerfil | `PerfilController` (`@ViewScoped`) y no `CuentasController` (`@RequestScoped`): el perfil debe conservarse entre los clics de la vista. Los dos usan `LnCuentas`. | [DAVID] HU-1.3 / HU-3.4 (hecho) |
 
 ---
 
@@ -2147,9 +2154,10 @@ Siguen **abiertas**: necesitan una decisión del equipo o del profe. Lo ya resue
 ### Por HU
 
 4. **HU-1.3:** `PerfilClinico.marcarElegibilidadPreliminar(): boolean` regresa `elegible`, pero **no hay columna**
-   para guardarlo.
+   para guardarlo. **No se implementó** (tampoco hay regla definida).
 5. **HU-1.3, miPerfil:** el toggle "Recibir avisos" no tiene columna en la BD, y la edición de datos personales
-   (nombre/teléfono) no tiene HU.
+   (nombre/teléfono) no tiene HU. Los toggles sin columna quedaron deshabilitados (D14) y los datos personales son de
+   solo lectura.
 6. **HU-1.4 / HU-3.3:** `PublicacionSolicitud.mostrarContactoDonador(int solicitudId)` (HU-3.3, 1.1.4) contradice la
    vista pública, que no lleva sesión. No está definido **a quién** se le muestra el contacto del donador (¿al familiar
    en misSolicitudes?) ni cómo entra `consentimientoContacto`.
@@ -2233,3 +2241,27 @@ Siguen **abiertas**: necesitan una decisión del equipo o del profe. Lo ya resue
     sesión vencida) devuelve la página de error 500 del servidor, aunque no cambia ningún dato. No es de HU-6.4: pasa en
     cualquier formulario JSF del proyecto. Decidir si se agrega un `<error-page>` para `ViewExpiredException` en
     `web.xml` que redirija al login.
+27. **HU-1.3 / HU-3.4, controller:** el diagrama pone todo en `ControlCuentas`, pero `CuentasController` es
+    `@RequestScoped` (registro e inicio de sesión) y miPerfil necesita conservar el perfil entre clics. Se creó
+    `PerfilController` (`@ViewScoped`, D16); ambos controllers llaman a `LnCuentas`. Decidir si el diagrama de clases
+    debe mostrar los dos controllers.
+28. **Métodos de `LnCuentas` que no están en el diagrama:**
+    - `obtenerPerfilClinico(Usuario)`: lee el perfil y el usuario actualizados (la sesión puede estar desactualizada).
+    - `receptoresCompatibles(PerfilClinico)`: tabla donador → receptores de glóbulos rojos para el texto "puedes
+      donar a...". **[Alex]** puede reutilizarla en `validarCompatibilidad` (HU-3.1) en lugar de repetir la tabla.
+29. **HU-1.3, reglas que el diagrama no dice:**
+    - El diagrama solo contempla el alta (`opt[perfilClinico == null]`). Se implementó crear **o actualizar**.
+    - Validaciones de ubicación: latitud y longitud juntas, dentro de rango y redondeadas a 6 decimales.
+    - Enviar coordenadas vacías **no borra** la ubicación guardada, así que hoy el donador no puede quitarla (ninguna HU
+      lo pide). Decidir si hace falta un "Quitar mi ubicación".
+    - `guardarPerfilClinico` también guarda `Usuario.consentimientoContacto` (no está en la secuencia, ver #6 y D8).
+30. **Dos toggles de contacto en miPerfil:** el activo (`consentimientoContacto`) y el deshabilitado "solo cuando yo
+    confirme interés" dicen casi lo mismo. Decidir si el segundo se elimina o si es otro concepto que necesita columna.
+31. **Precisión de la ubicación:** se guardan las coordenadas exactas del dispositivo (6 decimales, ~0.1 m). La maqueta
+    decía "tu dirección exacta nunca se guarda ni se muestra"; se cambió la nota porque ya no es cierto del todo (nunca se
+    muestra ni se comparte; solo se informa una distancia aproximada, HU-3.2). Decidir si conviene guardarlas con menos
+    precisión (por ejemplo, 3 decimales ≈ 110 m) para proteger al donador.
+32. **Geolocalización y HTTPS:** el navegador solo da la ubicación en `localhost` o con HTTPS. Un despliegue real del CETS
+    sin HTTPS no podrá capturar ubicaciones; hay que contemplarlo en el despliegue.
+33. **UX de errores en miPerfil:** tras un rechazo, la vista vuelve a leer la BD y descarta lo que el usuario había elegido
+    (los combos regresan a lo guardado). Es consistente con HU-6.4, pero se puede mejorar conservando la captura.
