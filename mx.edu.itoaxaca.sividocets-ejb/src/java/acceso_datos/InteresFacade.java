@@ -8,6 +8,7 @@ import jakarta.ejb.Stateless;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import modelo.Interes;
+import modelo.SolicitudReposicion;
 
 /**
  *
@@ -27,5 +28,13 @@ public class InteresFacade extends AbstractFacade<Interes> {
     public InteresFacade() {
         super(Interes.class);
     }
-    
+
+    // HU-6.3: cuántos donadores confirmaron interés en la solicitud
+    public int contarPorSolicitud(SolicitudReposicion s) {
+        Long total = getEntityManager()
+                .createQuery("SELECT COUNT(i) FROM Interes i WHERE i.solicitudReposicion = :s", Long.class)
+                .setParameter("s", s)
+                .getSingleResult();
+        return total.intValue();
+    }
 }

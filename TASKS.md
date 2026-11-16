@@ -238,6 +238,9 @@ Estas reglas las marcó el profe y aplican a todo el código nuevo.
    - `*/nbproject/project.properties`, `*/nbproject/project.xml`
    - Las **facades** sí las puede editar cualquiera, pero **solo agregando métodos nuevos al final**.
      Si dos personas agregan métodos al mismo archivo, git normalmente lo une sin conflicto.
+8. **Los controllers solo llaman al Ln, nunca a los facades.** Si el Ln solo lee una entidad, igual lleva el método
+   (es el mensaje del diagrama de secuencia). Ejemplo: `LnPanelCETS.obtenerDetalle(s)` solo hace un `find`, pero existe
+   porque el controller no puede inyectar `SolicitudReposicionFacade`.
 
 ---
 
@@ -400,7 +403,7 @@ Rama: `feature/panel-cets`
 | # | Mensaje en el diagrama | Equivalente en código |
 |---|---|---|
 | 1 | `UIPanelCETS → ControlPanelCETS.listarSolicitudesActivas(): List<SolicitudReposicion>` | `f:viewAction="#{panelCetsController.listarSolicitudesActivas}"` → `lnPanelCETS.listarSolicitudesActivas()` |
-| 1.1 | `ControlPanelCETS → DBMS: consultarSolicitudesActivas()` → `return solicitudes` | `solicitudF.buscarActivas()` |
+| 1.1 | `ControlPanelCETS → DBMS: consultarSolicitudesActivas()` → `return solicitudes` | `solicitudF.buscarFiltradas(filtro)` con el filtro por defecto (la entidad nueva ya trae `estatus = "Activa"`) |
 | 2 | `PersonalInstitucional → UIPanelCETS.filtrar(estatus, tipoSanguineo, factorRh)` | Botón "Refrescar" → `#{panelCetsController.filtrarSolicitudes}` |
 | 2.1 | `UIPanelCETS → ControlPanelCETS.filtrarSolicitudes(String estatus, String tipoSanguineo, String factorRh)` | `lnPanelCETS.filtrarSolicitudes(filtro)` |
 | 2.1.1 | `ControlPanelCETS → DBMS: consultarSolicitudesFiltradas(estatus, tipoSanguineo, factorRh)` → `return solicitudes` | `solicitudF.buscarFiltradas(filtro)` |
@@ -408,8 +411,8 @@ Rama: `feature/panel-cets`
 **Firmas corregidas (LnPanelCETS)**
 
 ```java
-public List<SolicitudReposicion> listarSolicitudesActivas()                       // 1 línea a la facade (permitido)
-public List<SolicitudReposicion> filtrarSolicitudes(SolicitudReposicion filtro)   // filtro.estatus / tipoSanguineo / factorRh; null = todos
+public List<SolicitudReposicion> listarSolicitudesActivas()                       // = filtrarSolicitudes(new SolicitudReposicion()): el constructor ya trae "Activa"
+public List<SolicitudReposicion> filtrarSolicitudes(SolicitudReposicion filtro)   // normaliza: "" o null = todos; llama a la facade con un filtro limpio
 ```
 
 **Archivos**
@@ -427,22 +430,19 @@ public List<SolicitudReposicion> filtrarSolicitudes(SolicitudReposicion filtro) 
 **Facade nueva (`SolicitudReposicionFacade`)**
 
 ```java
-public List<SolicitudReposicion> buscarActivas() {
-    // JPQL: SELECT s FROM SolicitudReposicion s WHERE s.estatus = 'Activa' ORDER BY s.fechaHoraRegistro DESC
-}
-public List<SolicitudReposicion> buscarFiltradas(SolicitudReposicion f) {
-    // JPQL: SELECT s FROM SolicitudReposicion s
-    //       WHERE (:estatus IS NULL OR s.estatus = :estatus)
-    //         AND (:tipo IS NULL OR s.tipoSanguineo = :tipo)
-    //         AND (:rh IS NULL OR s.factorRh = :rh)
-    //       ORDER BY s.fechaHoraRegistro DESC
-}
+// Hecho. Un solo método cubre los mensajes 1.1 y 2.1.1: arma el JPQL solo con las condiciones que no son null
+// (así no se usa "? IS NULL"), ordena por fechaHoraRegistro DESC.
+public List<SolicitudReposicion> buscarFiltradas(SolicitudReposicion filtro)
 ```
 
 **Vista:**
 
-- Cambia las 6 filas fijas de la tabla por un `ui:repeat value="#{panelCetsController.solicitudes}" var="s"`.
-  Deja las mismas `<tr>`/`<td>` y clases.
+- Hecho: las 6 filas fijas pasaron a un `p:dataTable` (`styleClass="tabla"`, paginador de 10 filas) sobre
+  `#{panelCetsController.solicitudes}`. Se agregó un bloque de CSS `body .ui-datatable.tabla …` en `estilos.css`
+  para conservar el aspecto de `.tabla`; **falta revisarlo a ojo en el navegador**.
+- `PanelCetsController` pasó a `@ViewScoped` (la lista debe sobrevivir al paginador); la contraseña del login se borra
+  del bean después de cada intento.
+- Las tarjetas de resumen se calculan sobre las solicitudes mostradas (ver [Inconsistencias](#10-inconsistencias-a-revisar) #20).
 - Quita los contadores fijos "(24)", "(15)"… del combo de estatus.
 - Los values del combo de estatus deben coincidir con la BD: `Activa`, `Atendida`, `Cerrada`, `Cancelada`, y vacío para "Todas".
 - El combo "grupo" (`O+`, `A-`…) mezcla tipo y Rh. Sepáralo en dos combos (`filtro.tipoSanguineo` y `filtro.factorRh`).
@@ -465,11 +465,12 @@ public List<SolicitudReposicion> buscarFiltradas(SolicitudReposicion f) {
 
 **Checklist**
 
-- [ ] `buscarActivas()` y `buscarFiltradas(...)` en `SolicitudReposicionFacade`
-- [ ] `listarSolicitudesActivas()` y `filtrarSolicitudes(SolicitudReposicion)` en `LnPanelCETS`
-- [ ] Controller: lista, filtro y método para el `f:viewAction`
-- [ ] Vista: `ui:repeat`, combos separados, `f:param id`, sin datos fijos
-- [ ] Pruebas en navegador + SQL
+- [x] `buscarFiltradas(...)` en `SolicitudReposicionFacade` (no hizo falta `buscarActivas`)
+- [x] `listarSolicitudesActivas()` y `filtrarSolicitudes(SolicitudReposicion)` en `LnPanelCETS`
+- [x] Controller: lista, filtro y método para el `f:viewAction`
+- [x] Vista: `p:dataTable`, combos separados, `f:param id`, sin datos fijos
+- [x] Pruebas HTTP automáticas (login, listado, 4 filtros, sin sesión y rol equivocado): todas pasan
+- [ ] Revisión visual en el navegador (tabla, paginador, tarjetas)
 - [ ] Regresión (sección 8)
 
 ---
@@ -486,7 +487,7 @@ public List<SolicitudReposicion> buscarFiltradas(SolicitudReposicion f) {
 | 1 | `PersonalInstitucional → UIPanelCETS.seleccionarSolicitud(int solicitudId)` | Clic "Ver solicitud" (`?id=`) |
 | 1.1 | `UIPanelCETS → UIDetalleSolicitud.mostrar(int solicitudId)` | Navega a `cets/detalleSolicitud` |
 | 2 | `UIDetalleSolicitud → ControlPanelCETS.obtenerDetalle(int solicitudId): SolicitudReposicion` | `f:viewParam id` → `solicitud.id`; `f:viewAction` → `lnPanelCETS.obtenerDetalle(solicitud)` |
-| 2.1 | `ControlPanelCETS → DBMS: consultarSolicitudPorId(solicitudId)` → `return solicitud` | `solicitudF.find(s.getId())` |
+| 2.1 | `ControlPanelCETS → DBMS: consultarSolicitudPorId(solicitudId)` → `return solicitud` | `solicitudF.find(s.getId())` (devuelve null si no hay id) |
 | 3 | `UIDetalleSolicitud → ControlPanelCETS.obtenerCantidadInteresados(int solicitudId): int` | `lnPanelCETS.obtenerCantidadInteresados(solicitud)` |
 | 3.1 | `ControlPanelCETS → DBMS: contarInteresados(solicitudId)` → `return cantidadInteresados` | `interesF.contarPorSolicitud(s)` |
 | neg | `ControlPanelCETS → UIDetalleSolicitud: enviarUbicacionDonador()` `neg[mostrarUbicacion == true]` | **Prohibido:** la vista nunca muestra `PerfilClinico.latitud/longitud` |
@@ -530,73 +531,92 @@ public int contarPorSolicitud(SolicitudReposicion s) {
 
 **Checklist**
 
-- [ ] `contarPorSolicitud` en `InteresFacade`
-- [ ] `obtenerDetalle` y `obtenerCantidadInteresados` en `LnPanelCETS`
-- [ ] `f:viewParam` y `f:viewAction` en la vista (requiere T0.1)
-- [ ] Vista sin datos fijos y sin ubicación
-- [ ] Pruebas + SQL
+- [x] `contarPorSolicitud` en `InteresFacade`
+- [x] `obtenerDetalle` y `obtenerCantidadInteresados` en `LnPanelCETS`
+- [x] `f:viewParam` y `f:viewAction` en la vista (requiere T0.1)
+- [x] Vista sin datos fijos y sin ubicación (se retiró la tabla de donadores de ejemplo y el historial de cambios de
+      ejemplo; el bloque "Actualizar estatus" lo activa la HU-6.4)
+- [x] Pruebas HTTP: id válido, 0 y 1 interesados, id inexistente, sin id, id no numérico, sin sesión y rol equivocado
 
 ---
 
 #### HU-6.4 Actualizar estatus de una solicitud
 
-**Objetivo:** el CETS cambia el estatus de una solicitud (Activa / Atendida / Cerrada / Cancelada) y queda bitácora
-de quién lo cambió y cuándo.
+**Objetivo:** el CETS cambia el estatus de una solicitud y queda bitácora de quién lo cambió y cuándo.
+
+**Regla de transición (la única que definen los diagramas).** La nota del atributo `SolicitudReposicion.estatus` en el
+diagrama de clases dice: *"Activa al crearse; el personal del CETS la pasa a Atendida, Cerrada o Cancelada"*. Los
+valores válidos son los 4 del CHECK de la BD. Por eso el Ln acepta el cambio solo si:
+
+1. el nuevo estatus es **Atendida, Cerrada o Cancelada** (nunca "Activa": solo es el estado al crearse), y
+2. es **distinto del estatus actual**.
+
+Los diagramas **no** definen transiciones entre los otros estatus (¿Atendida → Cerrada?, ¿reabrir una Cerrada?). No se
+inventó ninguna restricción más: ver [Inconsistencias](#10-inconsistencias-a-revisar) #18.
 
 **Secuencia (`.vpp`)**
 
 | # | Mensaje en el diagrama | Equivalente en código |
 |---|---|---|
-| 1 | `PersonalInstitucional → UIDetalleSolicitud.cambiarEstatus(int solicitudId, String nuevoEstatus)` | Combo `nuevoEstatus` + botón "Guardar cambio de estatus" |
-| 1.1 | `UIDetalleSolicitud → ControlPanelCETS.actualizarEstatus(int solicitudId, String nuevoEstatus): boolean` | `lnPanelCETS.actualizarEstatus(historial)` |
-| 1.1.1 | `ControlPanelCETS → ControlPanelCETS.validarEstatus(String nuevoEstatus): boolean` → `return valido` | Validación privada en el Ln: uno de los 4 valores y distinto del actual |
-| 1.1.2 | `alt[valido == true]` `DBMS: consultarSolicitudPorId(solicitudId)` → `return solicitud` | `solicitudF.find(...)` |
-| 1.1.3 | `SolicitudReposicion.actualizarEstatus(String nuevoEstatus)` | **En el Ln:** `s.setEstatus(nuevo)` y `s.setPersonalCETSUsuarioid(personal)` |
-| 1.1.4 | `DBMS: actualizarSolicitud(solicitud)` → `return true` | `solicitudF.edit(s)` |
-| 1.1.5 | `«create» HistorialEstatusSolicitud(solicitudId, personalId, estatusAnterior, estatusNuevo)` | El controller arma la entidad `HistorialEstatusSolicitud`; el Ln pone `estatusAnterior` y `fechaCambio` |
-| 1.1.6 | `DBMS: guardarHistorialEstatus(historial)` → `return true` | `historialEstatusF.create(h)` |
-| — | `alt[valido == false]` `return false` | Mensaje de error en la vista |
+| 1 | `PersonalInstitucional → UIDetalleSolicitud.cambiarEstatus(int solicitudId, String nuevoEstatus)` | Combo "Nuevo estatus" → `#{panelCetsController.solicitud.estatus}` + botón "Guardar cambio de estatus" |
+| 1.1 | `UIDetalleSolicitud → ControlPanelCETS.actualizarEstatus(int solicitudId, String nuevoEstatus): boolean` | `panelCetsController.actualizarEstatus()` → `lnPanelCETS.actualizarEstatus(solicitud)` |
+| 1.1.1 | `ControlPanelCETS → ControlPanelCETS.validarEstatus(String nuevoEstatus): boolean` → `return valido` | `validarEstatus(actual, nuevo)` privado en el Ln (la regla de arriba) |
+| 1.1.2 | `alt[valido == true]` `DBMS: consultarSolicitudPorId(solicitudId)` → `return solicitud` | `solicitudF.find(s.getId())` |
+| 1.1.3 | `SolicitudReposicion.actualizarEstatus(String nuevoEstatus)` | En el Ln: `solicitud.setEstatus(...)` y `solicitud.setPersonalCETSUsuarioid(personal)` |
+| 1.1.4 | `DBMS: actualizarSolicitud(solicitud)` → `return true` | `solicitudF.edit(solicitud)` |
+| 1.1.5 | `«create» HistorialEstatusSolicitud(solicitudId, personalId, estatusAnterior, estatusNuevo)` | En el Ln: `new HistorialEstatusSolicitud()` con solicitud, personal, estatus anterior, nuevo y `fechaCambio` |
+| 1.1.6 | `DBMS: guardarHistorialEstatus(historial)` → `return true` | `historialEstatusF.create(historial)` (misma transacción que 1.1.4) |
+| — | `alt[valido == false]` `return false` | `p:messages` con el error; la vista vuelve a leer el estatus real de la BD |
 
-**Firma corregida (LnPanelCETS).** La entidad completa es la bitácora:
+**Firma (hecha).** La entidad completa es la `SolicitudReposicion`: la vista llena `estatus`; el controller agrega el
+personal CETS de la sesión; el Ln lo guarda todo en una transacción.
 
 ```java
-// h.solicitudReposicionid (con id), h.estatusNuevo, h.personalCETSUsuarioid (de la sesión)
-public boolean actualizarEstatus(HistorialEstatusSolicitud h)
+// s.id, s.estatus (el nuevo) y s.personalCETSUsuarioid (el controller lo toma de sesion.getUsuario().getPersonalCETS())
+public boolean actualizarEstatus(SolicitudReposicion s)
 ```
 
-El personal en sesión es `sesion.getUsuario().getPersonalCETS()` (relación `@OneToOne` de `Usuario`), así que
-no hay que cambiar `SesionController`.
-
-**Archivos**
+**Archivos (hechos)**
 
 | Acción | Archivo |
 |---|---|
-| Modificar | `-ejb/src/java/ln/LnPanelCETS.java` (`@EJB HistorialEstatusSolicitudFacade historialEstatusF`) |
-| Modificar | `-war/src/java/controller/PanelCetsController.java` (`HistorialEstatusSolicitud cambio` y `actualizarEstatus()`) |
-| Modificar | `-war/web/vista/cets/detalleSolicitud.xhtml` (`p:commandButton` en lugar de `p:button`) |
+| Modificado | `-ejb/src/java/ln/LnPanelCETS.java`: `actualizarEstatus(SolicitudReposicion)`, `validarEstatus` privado y `@EJB HistorialEstatusSolicitudFacade` |
+| Modificado | `-war/src/java/controller/PanelCetsController.java`: acción `actualizarEstatus()` y `info(...)` |
+| Modificado | `-war/web/vista/cets/detalleSolicitud.xhtml`: bloque "Actualizar estatus" activo (`p:commandButton`, `ajax="false"`) |
 
 **Facade:** no necesita métodos nuevos (`find`, `edit`, `create`).
 
-**Navegación:** se queda en `detalleSolicitud?id=…`, con mensaje de éxito o error.
-En el diagrama de actividad (*AD - Panel CETS*): `DetalleSolicitud (HU-6.3) → ActualizarEstatus (HU-6.4) [cambiarEstatus == true]`.
+**Navegación:** se queda en `detalleSolicitud?id=…` con mensaje de éxito o error. Ni el *Diagrama de navegación* ni
+*AD - Panel CETS* (`DetalleSolicitud → ActualizarEstatus [cambiarEstatus == true] → MergeNode`) definen otra pantalla.
 
 **Terminado cuando**
 
-- Cambiar la 901 a "Atendida" la saca de solicitudesActivas (HU-6.2) y crea un renglón de bitácora.
-- Elegir el mismo estatus que ya tiene muestra un error y no inserta nada.
+- Activa → Atendida muestra "El estatus de la solicitud cambió a Atendida", saca la solicitud del listado de activas
+  (HU-6.2) y crea un renglón de bitácora.
+- Atendida → Cerrada también funciona (queda otro renglón).
+- Elegir el mismo estatus, o volver a "Activa", muestra un error, no cambia nada y no inserta bitácora.
+- Una solicitud inexistente no muestra el formulario de estatus.
 - SQL de verificación:
   ```sql
   SELECT estatus, PersonalCETSUsuarioid FROM SolicitudReposicion WHERE id = 901;          -- Atendida, 901
   SELECT estatusAnterior, estatusNuevo, PersonalCETSUsuarioid, fechaCambio
     FROM HistorialEstatusSolicitud WHERE SolicitudReposicionid = 901 ORDER BY id DESC;    -- Activa → Atendida
   ```
+  Para volver a probar, restaura la solicitud:
+  ```sql
+  UPDATE SolicitudReposicion SET estatus = 'Activa', PersonalCETSUsuarioid = NULL WHERE id = 901;
+  DELETE FROM HistorialEstatusSolicitud WHERE SolicitudReposicionid = 901;
+  ```
 
 **Checklist**
 
-- [ ] `actualizarEstatus(HistorialEstatusSolicitud)` + `validarEstatus` privado en `LnPanelCETS`
-- [ ] Controller con la entidad `cambio` inicializada en el constructor (`cambio.setSolicitudReposicionid(new SolicitudReposicion())`)
-- [ ] Vista con `p:commandButton` y `p:messages`
-- [ ] Pruebas + SQL
+- [x] `actualizarEstatus(SolicitudReposicion)` + `validarEstatus` privado en `LnPanelCETS`
+- [x] Controller con la acción (el personal viene de la sesión; la protección CETS ya existía, no se duplicó)
+- [x] Vista con `p:commandButton` y `p:messages`
+- [x] Compila (`clean dist`, 0 errores y 0 warnings)
+- [x] Pruebas HTTP (23 comprobaciones, todas OK): transición válida (2), inválida (mismo estatus, reabrir y valor
+      inventado), id inexistente, sin sesión y rol equivocado; la BD se restauró al terminar
+- [ ] Revisión visual en el navegador
 
 ---
 
@@ -835,8 +855,8 @@ public boolean validarFolio(SolicitudReposicion s)
 
 **Facade nueva (`SolicitudReposicionFacade`):** `existeFolioActivo(String folio)`, con el JPQL de la sección 4.
 
-**Formato (decisión D4):** `^CETS-OAX-\d{4}-\d{4}$`. Está **pendiente de confirmar con el profe**; mientras
-tanto, deja la regex en una sola constante del Ln para cambiarla fácil.
+**Formato (decisión D4):** `^CETS-OAX-\d{4}-\d{4}$`. Es una **decisión del equipo (regla de negocio)**; deja la
+regex en una sola constante del Ln para cambiarla fácil si el CETS pide otro formato.
 
 **Terminado cuando**
 
@@ -2089,7 +2109,7 @@ quedó el trabajo en este documento.
 | D1 | Ubicación del donador | En `cuentas/miPerfil` el combo "Región" se reemplaza por el botón **"Usar mi ubicación"**: Geolocation API del navegador → `h:inputHidden` de `PerfilClinico.latitud/longitud`. **Sin coordenadas no se notifica a ese donador.** | [DAVID] HU-1.3 (vista miPerfil); [Alex] HU-3.1 (`buscarDonadoresActivos` exige `latitud/longitud` no nulas) |
 | D2 | Respuestas del cuestionario (HU-4.1) | El controller arma `CuestionarioRespuesta` con su `List<RespuestaCriterio>`. El Ln calcula `resultado` (y `tiempoEsperaDias`) **antes** de `create`. | [Alex] HU-4.1 / HU-4.2 |
 | D3 | Valores de resultado | En código se usan exactamente `'Apto'` y `'NoApto'` (CHECK de la BD). La vista puede mostrar "No apto". | [Alex] HU-4.2 |
-| D4 | Formato de folio | `^CETS-OAX-\d{4}-\d{4}$`. **Pendiente confirmar con el profe.** | [Galilea] HU-2.4 |
+| D4 | Formato de folio | `^CETS-OAX-\d{4}-\d{4}$`. **Decisión del equipo (regla de negocio).** | [Galilea] HU-2.4 |
 | D5 | QR | Librería JS de QR **local** en `-war/web/resources/js/` (sin CDN). El QR codifica la URL pública con `uuidPublico` (`/faces/vista/publico/publicacion.xhtml?uuid=…`); nunca con el id. | [Galilea] HU-2.2 |
 | D6 | Falta la clase `Interes` en el diagrama | Se agrega al diagrama de clases. | [DAVID] T-final |
 | D7 | Vistas que no existen (`UIAjustes`, `UIBuscarDonador`, `UIFichaDonador`) | `UIAjustes` → `cuentas/miPerfil` (HU-3.4) y `cets/criteriosExclusion` (HU-4.3). `UIBuscarDonador`/`UIFichaDonador` → `cets/donadores` (HU-5.4, HU-7.3). | [DAVID] HU-3.4; [Alex] HU-4.3 y vista notificaciones; [Galilea] HU-5.4/7.3; [DAVID] T-final (diagrama) |
@@ -2165,13 +2185,51 @@ Siguen **abiertas**: necesitan una decisión del equipo o del profe. Lo ya resue
     - El nombre dice "solicitudes activas", pero la vista filtra por cualquier estatus, con contadores fijos.
     - La vista combina tipo y Rh en un solo combo (`O+`) y el diagrama los maneja por separado.
 17. **HU-6.3:** el título habla de "detalle de **donadores** vinculados", pero la secuencia solo obtiene la
-    **cantidad** de interesados. Definir si el CETS debe ver la lista (nombres, sin ubicación).
+    **cantidad** de interesados. Definir si el CETS debe ver la lista (nombres, sin ubicación). Mientras tanto
+    `detalleSolicitud` muestra solo la cantidad; se retiró la tabla de identificadores "DON-OAX-…" de la maqueta
+    porque eran datos inventados.
 18. **HU-6.4:**
     - `«create» HistorialEstatusSolicitud(solicitudId, personalId, …)` no indica de dónde sale `personalId`. Se toma de
       la sesión.
     - No se menciona `SolicitudReposicion.PersonalCETSUsuarioid`.
-    - Las transiciones de estatus permitidas (¿se puede reabrir una Cerrada?) no están definidas.
+    - **Transiciones:** los diagramas solo dicen (nota del atributo `SolicitudReposicion.estatus`) que la solicitud
+      nace "Activa" y que el personal del CETS la pasa a Atendida, Cerrada o Cancelada. No dicen si desde esos estados
+      se puede seguir cambiando (¿Atendida → Cerrada?, ¿reabrir una Cerrada o Cancelada?). **Implementado:** se puede
+      asignar Atendida, Cerrada o Cancelada desde cualquier estado, siempre distinto al actual; "Activa" nunca se asigna
+      (no se puede reabrir). Falta que el equipo confirme si hace falta restringir más o permitir reabrir.
 19. **Navegación general:**
     - El *Diagrama de navegación* no tiene transiciones para `donadores → capturarDonacion`, ni para
       `misSolicitudes → capturarSolicitud`, aunque las vistas tienen esos botones.
     - El botón "Descargar" de miHistorial y "Descargar imagen"/"Imprimir ficha" de publicación no tienen HU.
+20. **HU-6.2 (vista `solicitudesActivas`) tiene elementos que el diagrama no define:**
+    - El buscador "Buscar por folio u hospital": el diagrama solo filtra por estatus, tipo y Rh. Quedó deshabilitado.
+    - Las tarjetas de resumen: "Solicitudes activas", "Donadores interesados" y "Sin donador interesado" se calculan
+      sobre las solicitudes mostradas. La maqueta decía "interesados hoy" y "14% vs ayer"; se cambió el texto porque no
+      hay dato que lo respalde.
+    - La columna "Donadores interesados" de la tabla reutiliza `obtenerCantidadInteresados` de HU-6.3 (una consulta por
+      fila). Decidir si el diagrama de HU-6.2 debe incluirla o si conviene una consulta agrupada.
+    - El diagrama menciona `listarSolicitudesActivas()` y `filtrarSolicitudes(...)` como dos mensajes; en código son un
+      solo camino (el primero llama al segundo con el filtro por defecto).
+21. **HU-6.3 y HU-6.4 comparten la vista `detalleSolicitud`:** la HU-6.4 guarda la bitácora
+    (`HistorialEstatusSolicitud`), pero ninguna HU define mostrarla. El bloque "Historial de cambios" de la maqueta se
+    quitó porque eran datos de ejemplo; decidir si se agrega a HU-6.3 (con quién y cuándo cambió el estatus).
+22. **Sesión CETS en dos lugares:** `plantillaInstitucional` verifica el rol en `preRenderView`, pero los `f:viewAction`
+    corren antes. Por eso `PanelCetsController` vuelve a llamar `sesion.verificarCETS()` antes de consultar la BD. No se
+    agregó un segundo `f:event` en cada vista para no intentar redirigir dos veces en la misma respuesta (la plantilla
+    ya lo hace). **Mejora opcional** (un filtro en `web.xml` para todo `/vista/cets/*`); **se deja como está**.
+23. **HU-6.4, firmas del diagrama:**
+    - `actualizarEstatus(int solicitudId, String nuevoEstatus)` pasa a `actualizarEstatus(SolicitudReposicion s)` (regla de
+      la entidad completa). El `personalId` de `«create» HistorialEstatusSolicitud(...)` no dice de dónde sale; se toma
+      de la sesión y viaja en `s.personalCETSUsuarioid`.
+    - `validarEstatus(String nuevoEstatus)` solo recibe el estatus nuevo, pero para rechazar "el mismo estatus" también
+      necesita el actual; en código es `validarEstatus(actual, nuevo)`.
+24. **HU-6.4, mensaje de error genérico:** `actualizarEstatus` regresa `boolean`, así que el Ln no puede decir por qué
+    falló (estatus no asignable, igual al actual, solicitud inexistente o personal inactivo). La vista muestra un solo
+    mensaje con la regla. Si se quieren mensajes distintos, habría que cambiar el tipo de retorno en el diagrama.
+25. **HU-6.4, efecto sobre los donadores:** la ayuda de la maqueta dice que el estatus "define si la solicitud sigue
+    visible para los donadores", pero ningún diagrama lo define. Hoy cambiar el estatus solo afecta el listado del
+    panel CETS; falta decidir si la publicación pública y las notificaciones deben ocultar las solicitudes no activas.
+26. **Vista expirada o sin sesión en un POST:** enviar un formulario con un `ViewState` inválido (por ejemplo, con la
+    sesión vencida) devuelve la página de error 500 del servidor, aunque no cambia ningún dato. No es de HU-6.4: pasa en
+    cualquier formulario JSF del proyecto. Decidir si se agrega un `<error-page>` para `ViewExpiredException` en
+    `web.xml` que redirija al login.
