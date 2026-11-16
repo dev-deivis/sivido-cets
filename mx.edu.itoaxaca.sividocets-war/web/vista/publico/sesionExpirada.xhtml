@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Sesión expirada: la muestra web.xml cuando se lanza ViewExpiredException (formulario enviado con la
+     sesión o la vista vencida). Es una página pública: no verifica sesión. Si la vista de origen era del
+     panel CETS (/vista/cets/), se destaca el acceso institucional. -->
+<!DOCTYPE html>
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:h="jakarta.faces.html"
+                xmlns:f="jakarta.faces.core"
+                xmlns:ui="jakarta.faces.facelets"
+                xmlns:p="primefaces"
+                template="/plantillas/plantillaPublica.xhtml">
+
+    <ui:param name="desdeCets" value="#{not empty requestScope['jakarta.servlet.error.request_uri'] and requestScope['jakarta.servlet.error.request_uri'].contains('/vista/cets/')}"/>
+
+    <ui:define name="titulo">Tu sesión expiró · SIVIDO</ui:define>
+
+    <ui:define name="content">
+        <div class="encabezado-pagina">
+            <h1><i class="pi pi-clock texto-rojo"></i> Tu sesión expiró</h1>
+            <p>Por seguridad, la sesión se cierra después de un tiempo sin actividad.</p>
+        </div>
+
+        <div class="tarjeta">
+            <p class="texto-sec">No se guardó ningún cambio de la pantalla anterior. Vuelve a iniciar sesión para continuar.</p>
+            <div class="fila">
+                <p:button outcome="/vista/cuentas/iniciarSesion" value="Iniciar sesión" icon="pi pi-sign-in"
+                          styleClass="#{desdeCets ? 'ui-button-secondary' : ''}"/>
+                <p:button outcome="/vista/cets/loginInstitucional" value="Acceso personal CETS" icon="pi pi-lock"
+                          styleClass="#{desdeCets ? '' : 'ui-button-secondary'}"/>
+            </div>
+        </div>
+    </ui:define>
+</ui:composition>
