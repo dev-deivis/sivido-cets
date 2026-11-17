@@ -2297,3 +2297,17 @@ Siguen **abiertas**: necesitan una decisión del equipo o del profe. Lo ya resue
     actual: **redesplegar la app (Run en NetBeans) después de correr esos scripts**. Opción de fondo, que toca un archivo
     compartido y debe decidir el equipo: `<shared-cache-mode>NONE</shared-cache-mode>` en `persistence.xml`. Tampoco
     conviene reiniciar el contador de ids (`ALTER TABLE ... AUTO_INCREMENT = 1`) después de borrar usuarios de prueba.
+35. **Caché compartido y referencias inversas (`Usuario.perfilClinico`):** `Usuario.perfilClinico` es el lado inverso
+    (`mappedBy = "usuario"`) de la relación con `PerfilClinico`. Al guardar el perfil, `guardarPerfilClinico` solo creaba el
+    `PerfilClinico`: el `Usuario` que EclipseLink tenía en su caché compartido seguía con `perfilClinico = null` hasta
+    redesplegar. Efecto visible: un donador que acababa de guardar su perfil aparecía sin grupo sanguíneo ("—") en la
+    búsqueda de donadores del CETS (`donadores.xhtml`), aunque la BD sí tenía el perfil (la consulta filtra bien en SQL,
+    pero la entidad que devuelve viene del caché).
+    - **Arreglo:** `LnCuentas.guardarPerfilClinico` asigna `usuario.setPerfilClinico(perfil)` después de crear o actualizar
+      el perfil. El consentimiento no necesita lo mismo: es un campo del propio `Usuario` administrado, que ya se actualiza
+      en el caché al terminar la transacción.
+    - **Regla para el equipo:** en relaciones bidireccionales, al crear o cambiar el lado dueño hay que actualizar también
+      el lado inverso en el mismo método del Ln (como ya hace `LnDonacion.registrarDonacion` con `registroDonacionList`).
+      Revisar las demás: `Usuario.notificacionList` / `interesList`, `SolicitudReposicion.interesList` e
+      `historialEstatusSolicitudList`, etc.
+    - Relacionada con #34 (cambios por SQL directo): ambas son formas de que el caché quede desactualizado.
