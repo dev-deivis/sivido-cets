@@ -9,6 +9,13 @@
                 template="/plantillas/plantillaInstitucional.xhtml">
 
     <ui:param name="menuActivo" value="donadores"/>
+
+    <ui:define name="metadata">
+        <f:metadata>
+            <f:viewParam name="id" value="#{donacionController.donador.id}"/>
+            <f:viewAction action="#{donacionController.seleccionarDonador}"/>
+        </f:metadata>
+    </ui:define>
     <ui:define name="titulo">Padrón de donadores · SIVIDO CETS</ui:define>
 
     <ui:define name="content">
@@ -30,14 +37,14 @@
                 <h2><i class="pi pi-search texto-rojo"></i> Buscar expediente</h2>
                 <div class="grid" style="grid-template-columns:1fr auto;align-items:end">
                     <div class="campo mb-0">
-                        <p:outputLabel for="termino">Nombre, correo o id del donador <span class="requerido">*</span></p:outputLabel>
-                        <p:inputText id="termino" value="#{donacionController.criterio}" placeholder="Ej. Mateo Vásquez o 15">
+                        <p:outputLabel for="termino">Nombre o correo del donador <span class="requerido">*</span></p:outputLabel>
+                        <p:inputText id="termino" value="#{donacionController.criterio.nombreCompleto}" placeholder="Ej. Mateo Vásquez o mateo@correo.com">
                             <f:passThroughAttribute name="onkeydown"
                                                     value="if(event.key==='Enter'){document.getElementById('formDonadores:btnBuscar').click();return false;}"/>
                         </p:inputText>
                     </div>
                     <p:commandButton id="btnBuscar" value="Consultar padrón" icon="pi pi-search"
-                                     action="#{donacionController.buscar}" process="@this termino" update="@form"/>
+                                     action="#{donacionController.buscarDonador}" process="@this termino" update="@form"/>
                 </div>
 
                 <h:panelGroup rendered="#{not empty donacionController.resultados}" layout="block" styleClass="tabla-contenedor mt-2">
@@ -48,9 +55,9 @@
                                 <tr>
                                     <td><strong>#{u.nombreCompleto}</strong><span class="sub mono">ID #{u.id}</span></td>
                                     <td class="mono">#{donacionController.enmascararCorreo(u.correo)}</td>
-                                    <td><span class="grupo-sangre">#{empty donacionController.grupo(u) ? '—' : donacionController.grupo(u)}</span></td>
-                                    <td><p:commandButton value="Ver expediente" icon="pi pi-eye" styleClass="boton-suave"
-                                                         action="#{donacionController.seleccionar(u.id)}" process="@this" update="@form"/></td>
+                                    <td><span class="grupo-sangre">#{empty u.perfilClinico ? '—' : u.perfilClinico.tipoSanguineo.concat(u.perfilClinico.factorRh)}</span></td>
+                                    <td><h:link outcome="/vista/cets/donadores" styleClass="boton suave chico">
+                                        <f:param name="id" value="#{u.id}"/><i class="pi pi-eye"></i> Ver expediente</h:link></td>
                                 </tr>
                             </ui:repeat>
                         </tbody>
@@ -58,7 +65,7 @@
                 </h:panelGroup>
             </div>
 
-            <h:panelGroup rendered="#{not empty donacionController.donador}" layout="block" styleClass="grid grid-lateral">
+            <h:panelGroup rendered="#{not empty donacionController.donador.id}" layout="block" styleClass="grid grid-lateral">
                 <!-- Expediente -->
                 <div class="columna">
                     <div class="tarjeta" style="padding-top:0">
@@ -71,13 +78,11 @@
 
                         <div class="tarjeta-plana fila mt-2">
                             <span class="grupo-sangre grande" style="min-width:56px;height:52px;font-size:20px">
-                                #{empty donacionController.grupo(donacionController.donador) ? '—' : donacionController.grupo(donacionController.donador)}
+                                #{empty donacionController.donador.perfilClinico ? '—' : donacionController.donador.perfilClinico.tipoSanguineo.concat(donacionController.donador.perfilClinico.factorRh)}
                             </span>
                             <div style="flex:1"><strong>Grupo y factor Rh</strong><br/>
-                                <span class="texto-chico texto-sec">#{empty donacionController.grupo(donacionController.donador) ? 'Sin perfil clínico' : 'Perfil clínico'}</span></div>
-                            <span class="estatus #{donacionController.elegible ? 'activa' : 'cancelada'}">
-                                #{donacionController.elegible ? 'Puede donar' : 'En espera'}
-                            </span>
+                                <span class="texto-chico texto-sec">#{empty donacionController.donador.perfilClinico ? 'Sin perfil clínico' : 'Perfil clínico'}</span></div>
+                            <h:panelGroup rendered="#{donacionController.donador.exclusionPermanente}" styleClass="estatus cancelada">Exclusión permanente</h:panelGroup>
                         </div>
 
                         <!-- HU-1.4 Contacto enmascarado -->
@@ -92,20 +97,12 @@
                     <div class="tarjeta">
                         <h3><i class="pi pi-calendar" style="color:var(--azul)"></i> Próxima fecha para donar</h3>
                         <div class="tarjeta-plana">
+                            <!-- TODO HU-5.4 (4): lnDonacion.obtenerElegibilidad / verificarExclusion de [Diego] (HU-5.3) -->
                             <h:panelGroup rendered="#{donacionController.donador.exclusionPermanente}">
                                 <span class="numero-grande" style="font-size:22px">Exclusión permanente</span>
                             </h:panelGroup>
-                            <h:panelGroup rendered="#{not donacionController.donador.exclusionPermanente and empty donacionController.proximaFecha}">
-                                <span class="numero-grande" style="font-size:22px">Sin donaciones previas</span>
-                                <p class="texto-chico texto-sec mt-1 mb-0">Puede donar desde hoy.</p>
-                            </h:panelGroup>
-                            <h:panelGroup rendered="#{not donacionController.donador.exclusionPermanente and not empty donacionController.proximaFecha}">
-                                <span class="numero-grande" style="font-size:24px">
-                                    <h:outputText value="#{donacionController.proximaFecha}">
-                                        <f:convertDateTime pattern="dd 'de' MMMM 'de' yyyy" locale="es_MX" timeZone="America/Mexico_City"/>
-                                    </h:outputText>
-                                </span>
-                                <p class="texto-chico texto-sec mt-1 mb-0">Última donación + #{donacionController.semanasExclusion} semanas.</p>
+                            <h:panelGroup rendered="#{not donacionController.donador.exclusionPermanente}">
+                                <span class="texto-sec">Se calcula con HU-5.3 (pendiente de integrar).</span>
                             </h:panelGroup>
                             <p class="texto-chico texto-sec mt-1 mb-0"><i class="pi pi-info-circle"></i> Fecha orientativa, sujeta a valoración médica del CETS.</p>
                         </div>
@@ -127,14 +124,15 @@
                                 <f:param name="donador" value="#{donacionController.donador.id}"/>
                             </p:button>
                         </div>
-                        <h:panelGroup rendered="#{empty donacionController.historial}" layout="block" styleClass="texto-centro texto-sec" style="padding:1.5rem">
+                        <!-- TODO HU-5.4 (3): cambiar por lnDonacion.obtenerHistorial(donador) de [Diego] (HU-5.2) -->
+                        <h:panelGroup rendered="#{empty donacionController.donador.registroDonacionList}" layout="block" styleClass="texto-centro texto-sec" style="padding:1.5rem">
                             Este donador aún no tiene donaciones registradas en el CETS.
                         </h:panelGroup>
-                        <h:panelGroup rendered="#{not empty donacionController.historial}" layout="block" styleClass="tabla-contenedor">
+                        <h:panelGroup rendered="#{not empty donacionController.donador.registroDonacionList}" layout="block" styleClass="tabla-contenedor">
                             <table class="tabla">
                                 <thead><tr><th>Fecha de la donación</th><th>Solicitud asociada</th><th>Próxima fecha</th></tr></thead>
                                 <tbody>
-                                    <ui:repeat value="#{donacionController.historial}" var="r">
+                                    <ui:repeat value="#{donacionController.donador.registroDonacionList}" var="r">
                                         <tr>
                                             <td><div class="fila" style="flex-wrap:nowrap"><i class="pi pi-check-circle" style="color:var(--verde)"></i>
                                                 <strong class="mono"><h:outputText value="#{r.fechaDonacion}">
@@ -154,7 +152,7 @@
                                     </ui:repeat>
                                 </tbody>
                             </table>
-                            <div class="pie-tabla"><span>#{donacionController.historial.size()} donaciones registradas</span></div>
+                            <div class="pie-tabla"><span>#{donacionController.donador.registroDonacionList.size()} donaciones registradas</span></div>
                         </h:panelGroup>
                     </div>
 

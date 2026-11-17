@@ -19,15 +19,17 @@ import modelo.Usuario;
 
 /**
  * Lógica de negocio del paquete donaciones (ControlDonacion → LnDonacion).
- * HU-5.1 Capturar donación, HU-5.4 Historial de un donador,
- * HU-7.3 Historial recibido de institución externa.
+ *
+ * Bloque [Galilea]: registro y búsqueda (HU-5.1, HU-5.4) e historial externo (HU-7.3).
+ * Bloque [Diego]: métodos de consulta obtenerHistorial, obtenerElegibilidad, verificarExclusion y esElegible
+ * (HU-5.2, HU-5.3). Van al final del archivo para no editar las mismas líneas.
  */
 @Stateless
 @LocalBean
 public class LnDonacion {
 
-    // HU-5.3 Periodo mínimo entre donaciones (valor de prueba)
-    public static final int SEMANAS_EXCLUSION = 8;
+    // HU-5.1 Periodo mínimo entre donaciones: 56 días (8 semanas)
+    private static final int DIAS_EXCLUSION = 56;
     private static final ZoneId ZONA = ZoneId.of("America/Mexico_City");
 
     @EJB
@@ -45,81 +47,51 @@ public class LnDonacion {
     @EJB
     private HistorialExternoFacade historialExternoF;
 
-    // HU-5.1 r trae usuarioid (donador), personalCETSUsuarioid (quien captura),
-    // fechaDonacion y, opcional, solicitudReposicionid. Regresa false si algo no es válido.
+    // ===================== [Galilea] =====================
+
+    // HU-5.1 (1.1) registrarDonacion. r trae usuarioid (id del donador), personalCETSUsuarioid (personal en
+    // sesión), fechaDonacion y, opcional, solicitudReposicionid (id o vacío = donación general).
     public boolean registrarDonacion(RegistroDonacion r) {
         Usuario donador = usuarioF.find(r.getUsuarioid().getId());
         if (donador == null || r.getFechaDonacion() == null
-                || aLocalDate(r.getFechaDonacion()).isAfter(hoy())) {
+                || aLocalDate(r.getFechaDonacion()).isAfter(LocalDate.now(ZONA))) {
             return false;
         }
         r.setUsuarioid(donador);
         r.setPersonalCETSUsuarioid(personalF.find(r.getPersonalCETSUsuarioid().getUsuarioid()));
         if (r.getPersonalCETSUsuarioid() == null) {
-            return false; // solo el personal del CETS captura donaciones
+            return false;                                  // solo el personal del CETS registra donaciones
         }
         SolicitudReposicion s = r.getSolicitudReposicionid();
         r.setSolicitudReposicionid(s == null || s.getId() == null ? null : solicitudF.find(s.getId()));
-        r.setProximaFechaElegible(calcularProximaFecha(r.getFechaDonacion()));
-        registroF.create(r);
+        r.setProximaFechaElegible(calcularProximaFecha(r.getFechaDonacion()));   // 1.1.1.2
+        registroF.create(r);                                                     // 1.1.2
+        donador.getRegistroDonacionList().add(r);        // relación bidireccional al día (caché de JPA)
         return true;
     }
 
-    // HU-5.3 Fecha de la donación + periodo de exclusión
-    public Date calcularProximaFecha(Date fechaDonacion) {
-        LocalDate proxima = aLocalDate(fechaDonacion).plusWeeks(SEMANAS_EXCLUSION);
-        return Date.from(proxima.atStartOfDay(ZONA).toInstant());
-    }
-
-    // HU-5.4 Buscar donador por nombre, correo o id
-    public List<Usuario> buscarDonador(String criterio) {
-        if (criterio == null || criterio.isBlank()) {
+    // HU-5.4 (1.1) buscarDonador: criterio.nombreCompleto = texto a buscar (nombre o correo)
+    public List<Usuario> buscarDonador(Usuario criterio) {
+        if (criterio.getNombreCompleto() == null || criterio.getNombreCompleto().isBlank()) {
             return List.of();
         }
-        return usuarioF.buscarDonadores(criterio);
+        return usuarioF.buscarDonadores(criterio.getNombreCompleto().trim());
     }
 
-    public Usuario obtenerDonador(Integer id) {
-        return id == null ? null : usuarioF.find(id);
+    // HU-5.4 (2.1) UIFichaDonador.mostrar(donadorId): lee el donador seleccionado
+    public Usuario obtenerDonador(Usuario u) {
+        return u.getId() == null ? null : usuarioF.find(u.getId());
     }
 
-    // HU-5.4 Historial de donaciones en el CETS
-    public List<RegistroDonacion> obtenerHistorial(Usuario donador) {
-        return registroF.consultarDonaciones(donador);
-    }
-
-    // HU-5.4 Próxima fecha de elegibilidad (null si nunca ha donado)
-    public Date obtenerElegibilidad(Usuario donador) {
-        RegistroDonacion ultima = registroF.consultarUltimaDonacion(donador);
-        if (ultima == null) {
-            return null;
-        }
-        return ultima.getProximaFechaElegible() != null
-                ? ultima.getProximaFechaElegible()
-                : calcularProximaFecha(ultima.getFechaDonacion());
-    }
-
-    // HU-5.4 Elegible si no tiene exclusión permanente y ya pasó su próxima fecha
-    public boolean esElegible(Usuario donador) {
-        if (donador.getExclusionPermanente()) {
-            return false;
-        }
-        Date proxima = obtenerElegibilidad(donador);
-        return proxima == null || !aLocalDate(proxima).isAfter(hoy());
-    }
-
-    // HU-7.3 Historial compartido por instituciones externas
+    // HU-7.3 (1.1) obtenerHistorialExterno
     public List<HistorialExterno> obtenerHistorialExterno(Usuario donador) {
-        return historialExternoF.consultarHistorialExterno(donador);
+        return historialExternoF.buscarPorUsuario(donador);
     }
 
-    // HU-5.1 Solicitudes activas para vincular la donación
-    public List<SolicitudReposicion> listarSolicitudesActivas() {
-        return solicitudF.listarActivas();
-    }
-
-    private LocalDate hoy() {
-        return LocalDate.now(ZONA);
+    // HU-5.1 (1.1.1.2) RegistroDonacion.calcularProximaFecha: fechaDonacion + 56 días
+    private Date calcularProximaFecha(Date fechaDonacion) {
+        LocalDate proxima = aLocalDate(fechaDonacion).plusDays(DIAS_EXCLUSION);
+        return Date.from(proxima.atStartOfDay(ZONA).toInstant());
     }
 
     private LocalDate aLocalDate(Date fecha) {
@@ -128,4 +100,7 @@ public class LnDonacion {
         }
         return fecha.toInstant().atZone(ZONA).toLocalDate();
     }
+
+    // ===================== [Diego] =====================
+    // HU-5.2 / HU-5.3: obtenerHistorial, obtenerElegibilidad, verificarExclusion, esElegible
 }

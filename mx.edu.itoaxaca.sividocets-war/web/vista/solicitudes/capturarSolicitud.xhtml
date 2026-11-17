@@ -94,7 +94,7 @@
                     <!-- Hospital autocompletable: el menú permite escribir para filtrar -->
                     <div class="campo">
                         <p:outputLabel for="hospital">Hospital / unidad médica de destino <span class="requerido">*</span></p:outputLabel>
-                        <p:selectOneMenu id="hospital" value="#{solicitudController.hospitalId}"
+                        <p:selectOneMenu id="hospital" value="#{solicitudController.solicitud.hospitalid.id}"
                                          filter="true" filterMatchMode="contains">
                             <f:converter converterId="jakarta.faces.Integer"/>
                             <f:selectItem itemLabel="Escribe o elige el hospital..." itemValue="#{null}" noSelectionOption="true"/>
@@ -125,7 +125,7 @@
                         <p:button outcome="/vista/solicitudes/misSolicitudes" value="Cancelar" icon="pi pi-times" styleClass="ui-button-secondary"/>
                         <!-- HU-2.1 Publicar deshabilitado hasta completar los obligatorios -->
                         <p:commandButton id="btnPublicar" value="Publicar solicitud" icon="pi pi-megaphone"
-                                         action="#{solicitudController.publicar}" update="@form"
+                                         action="#{solicitudController.registrarSolicitud}" update="@form"
                                          disabled="#{not solicitudController.completo}"/>
                     </div>
                 </div>
@@ -165,7 +165,7 @@
                             <div class="qr chico"><i class="pi pi-qrcode"></i></div>
                             <div>
                                 <strong>Código QR al publicar</strong>
-                                <p class="texto-chico texto-sec mb-0">Al publicar se genera un enlace único con su código QR para compartir.</p>
+                                <p class="texto-chico texto-sec mb-0">Al publicar, la solicitud tendrá un enlace único con su código QR (en "Mis solicitudes").</p>
                             </div>
                         </div>
 

@@ -9,6 +9,12 @@
                 template="/plantillas/plantillaUsuario.xhtml">
 
     <ui:param name="menuActivo" value="misSolicitudes"/>
+
+    <ui:define name="metadata">
+        <f:metadata>
+            <f:viewAction action="#{solicitudController.listarMisSolicitudes}"/>
+        </f:metadata>
+    </ui:define>
     <ui:define name="titulo">Mis solicitudes · SIVIDO</ui:define>
 
     <ui:define name="content">
@@ -21,7 +27,7 @@
             <div class="fila">
                 <span class="etiqueta verde">Activas: #{solicitudController.contar('Activa')}</span>
                 <span class="etiqueta azul">Atendidas: #{solicitudController.contar('Atendida')}</span>
-                <span class="etiqueta">Total: #{solicitudController.misSolicitudes.size()}</span>
+                <span class="etiqueta">Total: #{empty solicitudController.misSolicitudes ? 0 : solicitudController.misSolicitudes.size()}</span>
             </div>
         </div>
 
@@ -79,7 +85,7 @@
                                     <td><span class="estatus #{s.estatus.toLowerCase()}">#{s.estatus}</span></td>
                                     <td>
                                         <h:link outcome="/vista/publico/publicacion" styleClass="boton suave chico">
-                                            <f:param name="id" value="#{s.uuidPublico}"/>
+                                            <f:param name="uuid" value="#{s.uuidPublico}"/>
                                             <i class="pi pi-qrcode"></i> Ver publicación y QR
                                         </h:link>
                                     </td>

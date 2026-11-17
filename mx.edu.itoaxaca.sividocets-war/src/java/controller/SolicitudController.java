@@ -2,6 +2,7 @@ package controller;
 
 import jakarta.ejb.EJB;
 import jakarta.faces.application.FacesMessage;
+import jakarta.faces.context.ExternalContext;
 import jakarta.faces.context.FacesContext;
 import jakarta.faces.view.ViewScoped;
 import jakarta.inject.Inject;
@@ -14,8 +15,11 @@ import modelo.SolicitudReposicion;
 
 /**
  * Controller del paquete solicitudes (ControlSolicitud → LnSolicitud).
- * Vistas: vista/solicitudes/capturarSolicitud (HU-2.1, HU-2.4)
- * y vista/solicitudes/misSolicitudes (HU-2.3).
+ * Vistas: solicitudes/capturarSolicitud (HU-2.1, HU-2.4), solicitudes/misSolicitudes (HU-2.3)
+ * y publico/publicacion (HU-2.2, HU-1.4).
+ * La vista llena la entidad: #{solicitudController.solicitud.campo}.
+ *
+ * @author Galilea
  */
 @Named
 @ViewScoped
@@ -29,76 +33,85 @@ public class SolicitudController implements Serializable {
     @Inject
     private SesionController sesion;
 
-    // Entidad que llena la vista: #{solicitudController.solicitud.campo}
-    private SolicitudReposicion solicitud = new SolicitudReposicion();
-    private Integer hospitalId;
+    // Entidad que llena la vista (y que recibe ?uuid= en la publicación)
+    private SolicitudReposicion solicitud;
 
-    // HU-2.4 Resultado de validar el folio: "", "valido", "formato" o "duplicado"
-    private String estadoFolio = "";
+    // Campos propios de la vista (no existen en la entidad)
+    private String estadoFolio = "";            // HU-2.4: "", "valido", "formato" o "duplicado"
+    private String filtroEstatus = "Todas";     // HU-2.3: píldoras de estatus
+    private String urlPublicacion;              // HU-2.2: URL completa que codifica el QR
 
     private List<Hospital> hospitales;
     private List<SolicitudReposicion> misSolicitudes;
-    private String filtroEstatus = "Todas";
 
-    // HU-2.4 Se ejecuta al escribir el folio (ajax)
+    public SolicitudController() {
+        solicitud = new SolicitudReposicion();
+        solicitud.setHospitalid(new Hospital());
+    }
+
+    // HU-2.4 (1 ingresarFolio → 1.1 validarFolio), al escribir el folio (ajax)
     public void validarFolio() {
-        String folio = solicitud.getFolioCETS();
-        if (folio == null || folio.isBlank()) {
+        if (solicitud.getFolioCETS() == null || solicitud.getFolioCETS().isBlank()) {
             estadoFolio = "";
-        } else if (!lnSolicitud.validarFormatoFolio(folio)) {
-            estadoFolio = "formato";
-        } else if (!lnSolicitud.verificarFolioUnico(folio)) {
-            estadoFolio = "duplicado";
-        } else {
+        } else if (lnSolicitud.validarFolio(solicitud)) {
             estadoFolio = "valido";
+        } else if (!lnSolicitud.validarFormatoFolio(solicitud)) {
+            estadoFolio = "formato";
+        } else {
+            estadoFolio = "duplicado";
         }
     }
 
-    // HU-2.1 El botón Publicar se habilita solo con los campos obligatorios completos
+    // HU-2.1 El botón "Publicar" se habilita solo con los obligatorios completos
     public boolean isCompleto() {
         return "valido".equals(estadoFolio)
                 && noVacio(solicitud.getTipoSanguineo())
                 && noVacio(solicitud.getFactorRh())
-                && hospitalId != null;
+                && solicitud.getHospitalid().getId() != null;
     }
 
-    // HU-2.1 Publicar
-    public String publicar() {
-        validarFolio();
-        if (!isCompleto()) {
-            error("Revisa los campos obligatorios y el folio.");
-            return null;
-        }
-        solicitud.setHospitalid(new Hospital(hospitalId));
+    // HU-2.1 (2.1) registrarSolicitud. Navegación D9: capturarSolicitud → misSolicitudes
+    public String registrarSolicitud() {
         solicitud.setUsuarioid(sesion.getUsuario());
-        if (!lnSolicitud.registrarSolicitud(solicitud)) {
-            validarFolio();
-            error("El folio no es válido o ya tiene una solicitud activa.");
-            return null;
+        boolean valido = lnSolicitud.registrarSolicitud(solicitud);
+        if (valido) {
+            return "/vista/solicitudes/misSolicitudes?faces-redirect=true";
         }
-        // HU-2.2 Al publicar se muestra la publicación con su QR
-        return "/vista/publico/publicacion?faces-redirect=true&id=" + solicitud.getUuidPublico();
+        validarFolio();
+        error("duplicado".equals(estadoFolio)
+                ? "Ya existe una solicitud activa con ese folio"
+                : "El folio debe tener el formato CETS-OAX-AAAA-NNNN");
+        return null;
     }
 
-    // HU-2.3
-    public List<SolicitudReposicion> getMisSolicitudes() {
-        if (misSolicitudes == null) {
+    // HU-2.3 (2) listarMisSolicitudes (f:viewAction al abrir misSolicitudes)
+    public void listarMisSolicitudes() {
+        if (sesion.getUsuario() != null) {
             misSolicitudes = lnSolicitud.listarMisSolicitudes(sesion.getUsuario());
         }
-        return misSolicitudes;
+    }
+
+    // HU-2.2 / HU-1.4 obtenerPublicacion (f:viewAction al abrir publicacion?uuid=)
+    public void obtenerPublicacion() {
+        SolicitudReposicion encontrada = lnSolicitud.obtenerPublicacion(solicitud);
+        if (encontrada == null) {
+            solicitud = null;
+            return;
+        }
+        solicitud = encontrada;
+        urlPublicacion = servidor() + lnSolicitud.generarPublicacion(solicitud);   // HU-2.2 generarPublicacion
     }
 
     public List<SolicitudReposicion> getMisSolicitudesFiltradas() {
-        if ("Todas".equals(filtroEstatus)) {
-            return getMisSolicitudes();
+        if (misSolicitudes == null || "Todas".equals(filtroEstatus)) {
+            return misSolicitudes;
         }
-        return getMisSolicitudes().stream()
-                .filter(s -> filtroEstatus.equals(s.getEstatus()))
-                .toList();
+        return misSolicitudes.stream().filter(s -> filtroEstatus.equals(s.getEstatus())).toList();
     }
 
     public long contar(String estatus) {
-        return getMisSolicitudes().stream().filter(s -> estatus.equals(s.getEstatus())).count();
+        return misSolicitudes == null ? 0
+                : misSolicitudes.stream().filter(s -> estatus.equals(s.getEstatus())).count();
     }
 
     public List<Hospital> getHospitales() {
@@ -110,15 +123,20 @@ public class SolicitudController implements Serializable {
 
     // Nombre del hospital elegido, para la vista previa
     public String getNombreHospital() {
-        if (hospitalId == null) {
+        Integer id = solicitud.getHospitalid().getId();
+        if (id == null) {
             return null;
         }
-        return getHospitales().stream().filter(h -> h.getId().equals(hospitalId))
+        return getHospitales().stream().filter(h -> h.getId().equals(id))
                 .map(Hospital::getNombre).findFirst().orElse(null);
     }
 
-    public String getFormatoFolio() {
-        return LnSolicitud.FORMATO_FOLIO;
+    // http://servidor:puerto/contexto
+    private String servidor() {
+        ExternalContext ec = FacesContext.getCurrentInstance().getExternalContext();
+        int puerto = ec.getRequestServerPort();
+        return ec.getRequestScheme() + "://" + ec.getRequestServerName()
+                + (puerto == 80 || puerto == 443 ? "" : ":" + puerto) + ec.getRequestContextPath();
     }
 
     private boolean noVacio(String s) {
@@ -138,14 +156,6 @@ public class SolicitudController implements Serializable {
         this.solicitud = solicitud;
     }
 
-    public Integer getHospitalId() {
-        return hospitalId;
-    }
-
-    public void setHospitalId(Integer hospitalId) {
-        this.hospitalId = hospitalId;
-    }
-
     public String getEstadoFolio() {
         return estadoFolio;
     }
@@ -156,5 +166,17 @@ public class SolicitudController implements Serializable {
 
     public void setFiltroEstatus(String filtroEstatus) {
         this.filtroEstatus = filtroEstatus;
+    }
+
+    public String getUrlPublicacion() {
+        return urlPublicacion;
+    }
+
+    public List<SolicitudReposicion> getMisSolicitudes() {
+        return misSolicitudes;
+    }
+
+    public String getFormatoFolio() {
+        return "CETS-OAX-AAAA-NNNN";
     }
 }

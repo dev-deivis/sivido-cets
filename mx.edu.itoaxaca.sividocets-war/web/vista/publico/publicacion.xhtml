@@ -9,14 +9,21 @@
                 template="/plantillas/plantillaPublica.xhtml">
 
     <ui:param name="menuActivo" value="publicacion"/>
-    <ui:define name="titulo">Solicitud #{publicacionController.solicitud.folioCETS} · SIVIDO</ui:define>
+
+    <ui:define name="metadata">
+        <f:metadata>
+            <f:viewParam name="uuid" value="#{solicitudController.solicitud.uuidPublico}"/>
+            <f:viewAction action="#{solicitudController.obtenerPublicacion}"/>
+        </f:metadata>
+    </ui:define>
+    <ui:define name="titulo">Solicitud #{solicitudController.solicitud.folioCETS} · SIVIDO</ui:define>
 
     <ui:define name="content">
         <section class="seccion">
             <div class="contenedor">
 
                 <!-- Enlace inválido o inexistente -->
-                <h:panelGroup rendered="#{empty publicacionController.solicitud}" layout="block"
+                <h:panelGroup rendered="#{empty solicitudController.solicitud}" layout="block"
                               styleClass="tarjeta texto-centro" style="padding:2.5rem 1.5rem">
                     <span class="icono-caja" style="width:56px;height:56px"><i class="pi pi-link" style="font-size:24px"></i></span>
                     <h2 class="mt-2">Publicación no encontrada</h2>
@@ -24,9 +31,9 @@
                     <p:button outcome="/vista/publico/index" value="Ir al inicio" icon="pi pi-home"/>
                 </h:panelGroup>
 
-                <ui:fragment rendered="#{not empty publicacionController.solicitud}">
+                <ui:fragment rendered="#{not empty solicitudController.solicitud}">
                 <div class="fila mb-2">
-                    <span class="estatus #{publicacionController.solicitud.estatus.toLowerCase()}">Solicitud #{publicacionController.solicitud.estatus.toLowerCase()}</span>
+                    <span class="estatus #{solicitudController.solicitud.estatus.toLowerCase()}">Solicitud #{solicitudController.solicitud.estatus.toLowerCase()}</span>
                     <span class="etiqueta">SIVIDO · Red estatal Oaxaca</span>
                 </div>
 
@@ -38,14 +45,14 @@
                         <p class="texto-sec">Centro Estatal de la Transfusión Sanguínea de Oaxaca (CETS) · Servicios de Salud de Oaxaca</p>
 
                         <div class="fila mt-2" style="gap:1.25rem">
-                            <span class="grupo-sangre grande">#{publicacionController.solicitud.tipoSanguineo}#{publicacionController.solicitud.factorRh}<small>#{publicacionController.solicitud.factorRh eq '-' ? 'NEGATIVO' : 'POSITIVO'}</small></span>
+                            <span class="grupo-sangre grande">#{solicitudController.solicitud.tipoSanguineo}#{solicitudController.solicitud.factorRh}<small>#{solicitudController.solicitud.factorRh eq '-' ? 'NEGATIVO' : 'POSITIVO'}</small></span>
                             <dl class="datos">
-                                <dt>Folio CETS</dt><dd class="mono texto-rojo">#{publicacionController.solicitud.folioCETS}</dd>
+                                <dt>Folio CETS</dt><dd class="mono texto-rojo">#{solicitudController.solicitud.folioCETS}</dd>
                                 <dt>Publicada</dt>
-                                <dd><h:outputText value="#{publicacionController.solicitud.fechaHoraRegistro}">
+                                <dd><h:outputText value="#{solicitudController.solicitud.fechaHoraRegistro}">
                                     <f:convertDateTime pattern="dd MMM yyyy, HH:mm 'hrs'" locale="es_MX" timeZone="America/Mexico_City"/>
                                 </h:outputText></dd>
-                                <dt>Grupo requerido</dt><dd>#{publicacionController.solicitud.tipoSanguineo} #{publicacionController.solicitud.factorRh eq '-' ? 'negativo' : 'positivo'} (#{publicacionController.solicitud.tipoSanguineo}#{publicacionController.solicitud.factorRh})</dd>
+                                <dt>Grupo requerido</dt><dd>#{solicitudController.solicitud.tipoSanguineo} #{solicitudController.solicitud.factorRh eq '-' ? 'negativo' : 'positivo'} (#{solicitudController.solicitud.tipoSanguineo}#{solicitudController.solicitud.factorRh})</dd>
                             </dl>
                         </div>
 
@@ -54,13 +61,13 @@
                             <span class="icono-caja"><i class="pi pi-building"></i></span>
                             <div>
                                 <span class="sobretitulo">Hospital</span>
-                                <h3 class="mb-0">#{publicacionController.solicitud.hospitalid.nombre}</h3>
+                                <h3 class="mb-0">#{solicitudController.solicitud.hospitalid.nombre}</h3>
                             </div>
                         </div>
 
-                        <h:panelGroup rendered="#{not empty publicacionController.solicitud.descripcion}" layout="block" styleClass="tarjeta-plana mt-2">
+                        <h:panelGroup rendered="#{not empty solicitudController.solicitud.descripcion}" layout="block" styleClass="tarjeta-plana mt-2">
                             <strong><i class="pi pi-info-circle texto-rojo"></i> Descripción</strong>
-                            <p class="mt-1 mb-0">#{publicacionController.solicitud.descripcion}</p>
+                            <p class="mt-1 mb-0">#{solicitudController.solicitud.descripcion}</p>
                         </h:panelGroup>
 
                         <div class="aviso mt-2">
@@ -89,20 +96,19 @@
                         <div class="tarjeta texto-centro">
                             <span class="sobretitulo">Código QR oficial</span>
                             <h3>Comparte esta solicitud</h3>
-                            <img src="#{publicacionController.qrDataUri}" alt="Código QR de la solicitud #{publicacionController.solicitud.folioCETS}"
-                                 width="220" height="220" style="image-rendering:pixelated;max-width:100%"/>
+                            <!-- HU-2.2 / D5: el navegador dibuja el QR con la URL pública (uuidPublico) -->
+                            <div id="qrPublicacion" style="display:inline-block;padding:8px;background:#fff"></div>
                             <p class="texto-sec texto-chico mt-2">Escanea este código con tu teléfono para abrir esta solicitud en SIVIDO.</p>
                             <input id="urlPublicacion" type="text" readonly="readonly" class="mono texto-chico"
-                                   value="#{publicacionController.url}" style="width:100%;margin-bottom:.5rem"/>
+                                   value="#{solicitudController.urlPublicacion}" style="width:100%;margin-bottom:.5rem"/>
                             <div class="columna">
                                 <button type="button" class="boton suave bloque"
                                         onclick="navigator.clipboard.writeText(document.getElementById('urlPublicacion').value);this.innerText='Enlace copiado';">
                                     <i class="pi pi-copy"></i> Copiar enlace
                                 </button>
-                                <a class="boton secundario bloque" href="#{publicacionController.qrDataUri}"
-                                   download="#{publicacionController.nombreArchivoQr}">
+                                <button type="button" class="boton secundario bloque" onclick="descargarQr()">
                                     <i class="pi pi-download"></i> Descargar QR (PNG)
-                                </a>
+                                </button>
                                 <button type="button" class="boton secundario bloque" onclick="window.print()">
                                     <i class="pi pi-print"></i> Imprimir ficha
                                 </button>
@@ -118,5 +124,23 @@
                 </ui:fragment>
             </div>
         </section>
+
+        <ui:fragment rendered="#{not empty solicitudController.solicitud}">
+            <h:outputScript name="js/qrcode.min.js"/>
+            <script>
+                // HU-2.2 / D5: QR de 320x320 px con la URL pública de la solicitud
+                new QRCode(document.getElementById('qrPublicacion'), {
+                    text: '#{solicitudController.urlPublicacion}',
+                    width: 320, height: 320, correctLevel: QRCode.CorrectLevel.M
+                });
+                function descargarQr() {
+                    var canvas = document.querySelector('#qrPublicacion canvas');
+                    var a = document.createElement('a');
+                    a.href = canvas.toDataURL('image/png');
+                    a.download = 'SIVIDO-#{solicitudController.solicitud.folioCETS}.png';
+                    a.click();
+                }
+            </script>
+        </ui:fragment>
     </ui:define>
 </ui:composition>

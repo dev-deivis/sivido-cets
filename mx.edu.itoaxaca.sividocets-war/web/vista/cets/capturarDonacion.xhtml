@@ -9,6 +9,13 @@
                 template="/plantillas/plantillaInstitucional.xhtml">
 
     <ui:param name="menuActivo" value="capturarDonacion"/>
+
+    <ui:define name="metadata">
+        <f:metadata>
+            <f:viewParam name="donador" value="#{donacionController.registro.usuarioid.id}"/>
+            <f:viewAction action="#{donacionController.cargarDonadorCaptura}"/>
+        </f:metadata>
+    </ui:define>
     <ui:define name="titulo">Capturar donación · SIVIDO CETS</ui:define>
 
     <ui:define name="content">
@@ -28,17 +35,17 @@
                     <!-- 1. Donador -->
                     <div class="campo">
                         <div class="fila-campo">
-                            <p:outputLabel for="criterio">Buscar donador (nombre, correo o id) <span class="requerido">*</span></p:outputLabel>
+                            <p:outputLabel for="criterio">Buscar donador (nombre o correo) <span class="requerido">*</span></p:outputLabel>
                             <span class="ayuda">Padrón SIVIDO</span>
                         </div>
                         <div class="fila" style="flex-wrap:nowrap">
-                            <p:inputText id="criterio" value="#{donacionController.criterio}" style="flex:1"
+                            <p:inputText id="criterio" value="#{donacionController.criterio.nombreCompleto}" style="flex:1"
                                          placeholder="Nombre o correo del donador...">
                                 <f:passThroughAttribute name="onkeydown"
                                                         value="if(event.key==='Enter'){document.getElementById('formDonacion:btnBuscar').click();return false;}"/>
                             </p:inputText>
                             <p:commandButton id="btnBuscar" value="Buscar" icon="pi pi-search" styleClass="ui-button-secondary"
-                                             action="#{donacionController.buscar}" process="@this criterio"
+                                             action="#{donacionController.buscarDonador}" process="@this criterio"
                                              update="resultados mensajes"/>
                         </div>
                     </div>
@@ -53,10 +60,10 @@
                                             <tr>
                                                 <td><strong>#{u.nombreCompleto}</strong>
                                                     <span class="sub mono">ID #{u.id} · #{donacionController.enmascararCorreo(u.correo)}</span></td>
-                                                <td><span class="grupo-sangre">#{empty donacionController.grupo(u) ? '—' : donacionController.grupo(u)}</span></td>
+                                                <td><span class="grupo-sangre">#{empty u.perfilClinico ? '—' : u.perfilClinico.tipoSanguineo.concat(u.perfilClinico.factorRh)}</span></td>
                                                 <td>
                                                     <p:commandButton value="Seleccionar" icon="pi pi-check" styleClass="boton-suave"
-                                                                     action="#{donacionController.seleccionar(u.id)}"
+                                                                     action="#{donacionController.elegirDonador(u)}"
                                                                      process="@this" update="@form"/>
                                                 </td>
                                             </tr>
@@ -68,20 +75,13 @@
                     </h:panelGroup>
 
                     <!-- Donador seleccionado -->
-                    <h:panelGroup rendered="#{not empty donacionController.donador}" layout="block"
-                                  styleClass="aviso #{donacionController.elegible ? 'verde' : ''}" style="padding:.6rem .9rem">
-                        <i class="pi #{donacionController.elegible ? 'pi-verified' : 'pi-exclamation-triangle'}"></i>
+                    <h:panelGroup rendered="#{not empty donacionController.registro.usuarioid.id}" layout="block"
+                                  styleClass="aviso verde" style="padding:.6rem .9rem">
+                        <i class="pi pi-verified"></i>
                         <p class="texto-chico">
-                            <strong>#{donacionController.donador.nombreCompleto}</strong> (ID #{donacionController.donador.id}).
-                            <h:outputText rendered="#{donacionController.elegible}" value="Puede donar según su historial."/>
-                            <h:outputText rendered="#{not donacionController.elegible and donacionController.donador.exclusionPermanente}"
-                                          value="Tiene exclusión permanente registrada."/>
-                            <h:panelGroup rendered="#{not donacionController.elegible and not donacionController.donador.exclusionPermanente}">
-                                Su próxima fecha para donar es el
-                                <h:outputText value="#{donacionController.proximaFecha}">
-                                    <f:convertDateTime pattern="dd 'de' MMMM 'de' yyyy" locale="es_MX" timeZone="America/Mexico_City"/>
-                                </h:outputText>. Verifica antes de registrar.
-                            </h:panelGroup>
+                            Donador: <strong>#{donacionController.donador.nombreCompleto}</strong> (ID #{donacionController.registro.usuarioid.id})
+                            <h:outputText rendered="#{donacionController.donador.exclusionPermanente}"
+                                          value=" · Tiene exclusión permanente registrada." style="color:var(--rojo)"/>
                         </p>
                     </h:panelGroup>
 
@@ -90,18 +90,18 @@
                         <div class="fila-campo">
                             <p:outputLabel for="fecha">Fecha de la donación <span class="requerido">*</span></p:outputLabel>
                         </div>
-                        <p:datePicker id="fecha" value="#{donacionController.fechaDonacion}" required="true"
+                        <p:datePicker id="fecha" value="#{donacionController.registro.fechaDonacion}" required="true"
                                       requiredMessage="Indica la fecha de la donación"
                                       maxdate="#{donacionController.hoy}" pattern="dd/MM/yyyy" locale="es"
                                       timeZone="America/Mexico_City" showIcon="true"/>
                         <span class="ayuda">Fecha en que se realizó la extracción. La próxima fecha para donar se calcula
-                            sumando #{donacionController.semanasExclusion} semanas.</span>
+                            sumando 56 días (8 semanas).</span>
                     </div>
 
                     <!-- 3. Solicitud asociada (opcional) -->
                     <div class="campo">
                         <p:outputLabel for="solicitud">Solicitud asociada <span class="texto-tenue">(opcional)</span></p:outputLabel>
-                        <p:selectOneMenu id="solicitud" value="#{donacionController.solicitudId}" filter="true" filterMatchMode="contains">
+                        <p:selectOneMenu id="solicitud" value="#{donacionController.registro.solicitudReposicionid.id}" filter="true" filterMatchMode="contains">
                             <f:converter converterId="jakarta.faces.Integer"/>
                             <f:selectItem itemLabel="Sin vincular / Donación voluntaria general" itemValue="#{null}" noSelectionOption="true"/>
                             <f:selectItems value="#{donacionController.solicitudesActivas}" var="s"
@@ -116,7 +116,7 @@
                         <p:commandButton value="Registrar donación" icon="pi pi-check-circle"
                                          action="#{donacionController.registrarDonacion}"
                                          process="@this fecha solicitud" update="@form"
-                                         disabled="#{empty donacionController.donador}"/>
+                                         disabled="#{empty donacionController.registro.usuarioid.id}"/>
                     </div>
                 </h:form>
             </div>
