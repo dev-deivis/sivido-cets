@@ -109,14 +109,14 @@
                             <h:panelGroup rendered="#{not donacionController.exclusionPermanente and not donacionController.sinDonaciones}">
                                 <span class="numero-grande" style="font-size:22px">
                                     <h:outputText value="#{donacionController.proximaFecha}">
-                                        <f:convertDateTime pattern="dd-MMM-yyyy" locale="es_MX" timeZone="UTC"/>
+                                        <f:convertDateTime pattern="dd-MMM-yyyy" locale="es_MX"/>
                                     </h:outputText>
                                 </span>
                                 <span class="etiqueta #{donacionController.puedeDonar ? 'verde' : 'ambar'}" style="margin-left:.5rem">
                                     #{donacionController.puedeDonar ? 'Ya puede donar' : 'En periodo de espera'}</span>
                                 <p class="texto-chico texto-sec mt-1 mb-0">Última donación:
                                     <h:outputText value="#{donacionController.ultimaDonacion.fechaDonacion}">
-                                        <f:convertDateTime pattern="dd-MMM-yyyy" locale="es_MX" timeZone="UTC"/>
+                                        <f:convertDateTime pattern="dd-MMM-yyyy" locale="es_MX"/>
                                     </h:outputText></p>
                             </h:panelGroup>
                             <p class="texto-chico texto-sec mt-1 mb-0"><i class="pi pi-info-circle"></i> Fecha orientativa, sujeta a valoración médica del CETS.</p>
@@ -157,7 +157,7 @@
                                         <tr>
                                             <td><div class="fila" style="flex-wrap:nowrap"><i class="pi pi-check-circle" style="color:var(--verde)"></i>
                                                 <strong class="mono"><h:outputText value="#{r.fechaDonacion}">
-                                                    <f:convertDateTime pattern="dd-MMM-yyyy" locale="es_MX" timeZone="UTC"/>
+                                                    <f:convertDateTime pattern="dd-MMM-yyyy" locale="es_MX"/>
                                                 </h:outputText></strong></div></td>
                                             <td>
                                                 <h:panelGroup rendered="#{not empty r.solicitudReposicionid}">
@@ -167,7 +167,7 @@
                                                 <h:panelGroup rendered="#{empty r.solicitudReposicionid}" styleClass="texto-tenue">Donación voluntaria general</h:panelGroup>
                                             </td>
                                             <td class="mono"><h:outputText value="#{r.proximaFechaElegible}">
-                                                <f:convertDateTime pattern="dd-MMM-yyyy" locale="es_MX" timeZone="UTC"/>
+                                                <f:convertDateTime pattern="dd-MMM-yyyy" locale="es_MX"/>
                                             </h:outputText></td>
                                         </tr>
                                     </ui:repeat>
@@ -200,7 +200,7 @@
                                     <ui:repeat value="#{donacionController.historialExterno}" var="h">
                                         <tr>
                                             <td class="mono"><h:outputText value="#{h.fechaDonacion}">
-                                                <f:convertDateTime pattern="dd-MMM-yyyy" locale="es_MX" timeZone="UTC"/>
+                                                <f:convertDateTime pattern="dd-MMM-yyyy" locale="es_MX"/>
                                             </h:outputText></td>
                                             <td><strong>#{h.institucionExternaid.nombreInstitucion}</strong></td>
                                             <td>#{empty h.observaciones ? '—' : h.observaciones}</td>

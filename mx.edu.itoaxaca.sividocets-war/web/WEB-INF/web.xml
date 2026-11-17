@@ -8,6 +8,13 @@
         <param-name>jakarta.faces.PROJECT_STAGE</param-name>
         <param-value>Development</param-value>
     </context-param>
+    <!-- Fechas: f:convertDateTime sin timeZone usa la zona del sistema (la misma con la que JDBC lee y escribe),
+         no UTC. Las fechas con hora llevan timeZone="America/Mexico_City" explícito; las de solo día no llevan
+         timeZone para que nunca cambien de día. -->
+    <context-param>
+        <param-name>jakarta.faces.DATETIMECONVERTER_DEFAULT_TIMEZONE_IS_SYSTEM_TIMEZONE</param-name>
+        <param-value>true</param-value>
+    </context-param>
     <servlet>
         <servlet-name>Faces Servlet</servlet-name>
         <servlet-class>jakarta.faces.webapp.FacesServlet</servlet-class>
