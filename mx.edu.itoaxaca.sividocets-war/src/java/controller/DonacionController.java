@@ -6,6 +6,7 @@ import jakarta.faces.context.FacesContext;
 import jakarta.faces.view.ViewScoped;
 import jakarta.inject.Inject;
 import jakarta.inject.Named;
+import java.io.IOException;
 import java.io.Serializable;
 import java.util.Date;
 import java.util.List;
@@ -60,7 +61,10 @@ public class DonacionController implements Serializable {
     }
 
     // HU-5.4 (1 buscar → 1.1 buscarDonador)
-    public void buscarDonador() {
+    public void buscarDonador() throws IOException {
+        if (!sesionCETSValida()) {
+            return;
+        }
         resultados = lnDonacion.buscarDonador(criterio);
         if (resultados.isEmpty()) {
             aviso("No se encontraron donadores con ese nombre o correo.");
@@ -68,7 +72,10 @@ public class DonacionController implements Serializable {
     }
 
     // HU-5.4 (2.1 mostrar) + HU-7.3 (1.1 obtenerHistorialExterno). f:viewAction de donadores?id=
-    public void seleccionarDonador() {
+    public void seleccionarDonador() throws IOException {
+        if (!sesionCETSValida()) {
+            return;
+        }
         donador = lnDonacion.obtenerDonador(donador);
         if (donador == null) {
             donador = new Usuario();
@@ -80,7 +87,10 @@ public class DonacionController implements Serializable {
     }
 
     // HU-5.1 f:viewAction de capturarDonacion?donador=: muestra el nombre del donador elegido
-    public void cargarDonadorCaptura() {
+    public void cargarDonadorCaptura() throws IOException {
+        if (!sesionCETSValida()) {
+            return;
+        }
         if (registro.getUsuarioid().getId() != null) {
             donador = lnDonacion.obtenerDonador(registro.getUsuarioid());
             if (donador == null) {
@@ -98,7 +108,10 @@ public class DonacionController implements Serializable {
     }
 
     // HU-5.1 (1.1) registrarDonacion. Navegación: capturarDonacion → donadores (con la ficha del donador)
-    public String registrarDonacion() {
+    public String registrarDonacion() throws IOException {
+        if (!sesionCETSValida()) {
+            return null;
+        }
         Integer donadorId = registro.getUsuarioid().getId();
         if (donadorId == null) {
             error("Selecciona al donador.");
@@ -141,6 +154,13 @@ public class DonacionController implements Serializable {
             return "•••";
         }
         return "••• ••• ••" + tel.substring(tel.length() - 2);
+    }
+
+    // Los f:viewAction corren antes que el preRenderView de plantillaInstitucional: se verifica la sesión CETS aquí
+    // para no consultar la BD sin ella (verificarCETS redirige al login institucional), igual que PanelCetsController.
+    private boolean sesionCETSValida() throws IOException {
+        sesion.verificarCETS();
+        return !FacesContext.getCurrentInstance().getResponseComplete();
     }
 
     private void error(String texto) {

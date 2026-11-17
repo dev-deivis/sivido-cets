@@ -347,6 +347,10 @@ Enlace hacia esa vista:
 
 ### Cuidados que ya nos costaron tiempo
 
+- **Los `f:viewAction` corren antes que el `preRenderView` de las plantillas**, que es donde se verifica la sesión. Si el
+  controller consulta la BD en un `f:viewAction` (o en una acción), llama primero a `sesion.verificar()` (vistas de usuario)
+  o `sesion.verificarCETS()` (vistas CETS) y regresa si `FacesContext...getResponseComplete()` es `true`, como
+  `PanelCetsController`, `PerfilController` y `DonacionController`.
 - `@PostConstruct` **no compila** en el war porque falta `jakarta.annotation`. Inicializa en el constructor
   o usa `f:viewAction`.
 - Las entidades con **PK compartida** (`PerfilClinico`, `PersonalCETS`, `Interes`) no tienen `@GeneratedValue`.
@@ -872,9 +876,9 @@ regex en una sola constante del Ln para cambiarla fácil si el CETS pide otro fo
 
 **Checklist**
 
-- [ ] `existeFolioActivo` en `SolicitudReposicionFacade`
-- [ ] `validarFolio(SolicitudReposicion)` con la regex en una constante del Ln
-- [ ] Mensajes distintos para formato y duplicado
+- [x] `existeFolioActivo` en `SolicitudReposicionFacade`
+- [x] `validarFolio(SolicitudReposicion)` con la regex en una constante del Ln
+- [x] Mensajes distintos para formato y duplicado
 - [ ] Pruebas + SQL
 
 ---
@@ -938,11 +942,11 @@ public List<Hospital> listarHospitales()     // NO está en el diagrama; lo nece
 
 **Checklist**
 
-- [ ] `LnSolicitud.registrarSolicitud` + `listarHospitales`
-- [ ] `SolicitudController` + vista
+- [x] `LnSolicitud.registrarSolicitud` + `listarHospitales` (valida en el Ln folio, grupo, Rh, y que el hospital y el usuario existan; si algo falla regresa `false`, sin excepción)
+- [x] `SolicitudController` + vista
 - [ ] (Integración) llamar `lnNotificacion.buscarDonadoresCercanos(s)` cuando [Alex] lo suba
 - [ ] Pruebas + SQL
-- [ ] **Merge a `main` lo antes posible** (los demás dependen de solicitudes reales)
+- [x] **Merge a `main` lo antes posible** (los demás dependen de solicitudes reales) (PR #4)
 
 ---
 
@@ -1005,10 +1009,10 @@ public SolicitudReposicion buscarPorUuid(String uuid)
 
 **Checklist**
 
-- [ ] `buscarPorUuid` en la facade
-- [ ] `generarPublicacion` y `obtenerPublicacion` en `LnSolicitud`
-- [ ] Librería QR local en `-war/web/resources/js/` + QR con la URL de `uuidPublico` (D5)
-- [ ] Vista sin datos fijos ni contacto del familiar
+- [x] `buscarPorUuid` en la facade
+- [x] `generarPublicacion` y `obtenerPublicacion` en `LnSolicitud` (`generarPublicacion` regresa `null` si la solicitud no existe)
+- [x] Librería QR local en `-war/web/resources/js/` + QR con la URL de `uuidPublico` (D5)
+- [x] Vista sin datos fijos ni contacto del familiar
 - [ ] Pruebas + SQL
 
 ---
@@ -1062,8 +1066,8 @@ public SolicitudReposicion obtenerPublicacion(SolicitudReposicion s)   // s.uuid
 
 **Checklist**
 
-- [ ] `obtenerPublicacion` sin modificar la entidad
-- [ ] `publicacion.xhtml` sin datos de contacto del familiar (`neg`)
+- [x] `obtenerPublicacion` sin modificar la entidad
+- [x] `publicacion.xhtml` sin datos de contacto del familiar (`neg`)
 - [ ] Pruebas + SQL
 
 ---
@@ -1113,8 +1117,8 @@ public List<SolicitudReposicion> buscarPorUsuario(Usuario u)
 
 **Checklist**
 
-- [ ] `buscarPorUsuario` + `listarMisSolicitudes`
-- [ ] Vista con `ui:repeat`, estado vacío y `f:param uuid`
+- [x] `buscarPorUsuario` + `listarMisSolicitudes`
+- [x] Vista con `ui:repeat`, estado vacío y `f:param uuid` (`misSolicitudes` rechaza sin sesión y también al rol CETS)
 - [ ] Pruebas + SQL
 
 ---
@@ -1174,8 +1178,8 @@ public boolean registrarDonacion(RegistroDonacion r)
 
 **Checklist**
 
-- [ ] `registrarDonacion(RegistroDonacion)` + `calcularProximaFecha` privado
-- [ ] `DonacionController` + vista
+- [x] `registrarDonacion(RegistroDonacion)` + `calcularProximaFecha` privado (sin excepción con nulos; exige personal CETS activo y, si hay solicitud, que exista y esté Activa)
+- [x] `DonacionController` + vista (las acciones y los `f:viewAction` verifican la sesión CETS antes de consultar)
 - [ ] Pruebas + SQL
 
 ---
@@ -1233,8 +1237,8 @@ public List<Usuario> buscarDonadores(String texto)
 
 **Checklist**
 
-- [ ] `buscarDonadores` en `UsuarioFacade`
-- [ ] `buscarDonador(Usuario)` en `LnDonacion`
+- [x] `buscarDonadores` en `UsuarioFacade`
+- [x] `buscarDonador(Usuario)` en `LnDonacion`
 - [ ] Ficha usando los métodos de [Diego]
 - [ ] Pruebas + SQL
 
@@ -1279,9 +1283,9 @@ public List<HistorialExterno> buscarPorUsuario(Usuario u)
 
 **Checklist**
 
-- [ ] `buscarPorUsuario` en `HistorialExternoFacade`
-- [ ] `obtenerHistorialExterno(Usuario)`
-- [ ] Vista con los dos casos (`alt`)
+- [x] `buscarPorUsuario` en `HistorialExternoFacade`
+- [x] `obtenerHistorialExterno(Usuario)`
+- [x] Vista con los dos casos (`alt`)
 - [ ] Pruebas + SQL
 
 ---
@@ -2311,3 +2315,32 @@ Siguen **abiertas**: necesitan una decisión del equipo o del profe. Lo ya resue
       Revisar las demás: `Usuario.notificacionList` / `interesList`, `SolicitudReposicion.interesList` e
       `historialEstatusSolicitudList`, etc.
     - Relacionada con #34 (cambios por SQL directo): ambas son formas de que el caché quede desactualizado.
+36. **HU-2.x, 5.x, 7.3 y 1.4: métodos y firmas que difieren de los diagramas (todos aceptados):**
+    - `LnSolicitud.listarHospitales()` y `LnDonacion.obtenerDonador(Usuario)` no están en el diagrama (la ficha del donador
+      es `UIFichaDonador.mostrar`).
+    - `LnSolicitud.validarFormatoFolio` es público (en el diagrama es de la entidad) y `verificarFolioUnico` quedó dentro de
+      `validarFolio`.
+    - `generarPublicacion` regresa la **ruta** pública y no el `imagenQR` (D5); `generarQR`, `obtenerUuidPublico` y
+      `ocultarDatosContacto` no existen como métodos. `contarRegistros` (HU-7.3) se resolvió en la vista (#15).
+37. **Enmascarado de contacto en el panel CETS (no está en el diagrama):** `DonacionController.enmascararCorreo` y
+    `enmascararTelefono` ocultan el correo y el teléfono del **donador** en `donadores` y `capturarDonacion`. La HU-1.4 trata el
+    contacto del **familiar** en la publicación (eso sí se cumple: la vista no lo pinta). Decidir si el CETS no debe ver el
+    contacto de los donadores (¿cómo los contactará?) y, de mantenerlo, mover el enmascarado al Ln o a un convertidor.
+38. **TODOs pendientes de otros módulos:** `registrarSolicitud` no llama todavía a `lnNotificacion.buscarDonadoresCercanos`
+    ([Alex], HU-3.1); la ficha del donador no muestra historial ni elegibilidad (HU-5.4 pasos 3 y 4, [Diego], HU-5.2/5.3).
+39. **URL del QR:** el controller la arma con el esquema, el servidor y el puerto de la petición (`ec.getRequestServerName()`,
+    cabecera Host) y la vista la escribe dentro de un `<script>` sin escapar para JavaScript. Riesgo bajo (solo se refleja en
+    la petición de quien la manipula), pero detrás de un proxy o HTTPS el esquema puede salir mal. Pendiente: configurar la URL
+    base o leerla de un atributo HTML escapado.
+40. **`obtenerPublicacion` regresa la entidad completa** (con `usuarioid`: nombre, teléfono, correo y `passwordHash` del
+    familiar). Hoy es seguro solo porque `publicacion.xhtml` no lo pinta; cualquier EL nuevo que lo toque lo expondría
+    (aceptado en HU-1.4 por la regla de no modificar la entidad).
+41. **`buscarDonadores` no escapa `%` ni `_`:** la consulta está parametrizada (sin inyección SQL), pero buscar `%` lista a
+    todos los donadores con perfil. Solo lo usa el CETS. Pendiente.
+42. **Donaciones duplicadas el mismo día (pendiente, NO implementado):** `registrarDonacion` permite registrar dos veces al
+    mismo donador en la misma fecha; el diagrama no define la regla y la BD no tiene unicidad. Decidir la regla (y si
+    también debe respetar el periodo de 56 días desde la última donación) antes de agregarla.
+43. **Validación en el Ln de `registrarSolicitud` y `registrarDonacion`:** se agregaron (grupo ∈ {A,B,AB,O}, Rh ∈ {+,−},
+    hospital y usuario existentes; donación con donador y personal CETS **activo** existentes, y solicitud asociada Activa).
+    No están en los diagramas; los diagramas tampoco dicen qué mensaje mostrar cuando el Ln regresa `false`, así que los
+    controllers muestran un mensaje general.

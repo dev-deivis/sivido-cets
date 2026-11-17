@@ -30,6 +30,8 @@ public class LnSolicitud {
     private static final String RUTA_PUBLICACION = "/faces/vista/publico/publicacion.xhtml?uuid=";
 
     private static final int MAX_DESCRIPCION = 250;
+    private static final List<String> TIPOS_SANGUINEOS = List.of("A", "B", "AB", "O");
+    private static final List<String> FACTORES_RH = List.of("+", "-");
 
     @EJB
     private SolicitudReposicionFacade solicitudF;
@@ -62,12 +64,20 @@ public class LnSolicitud {
     // el controller pone el usuario de la sesión. estatus = "Activa" ya viene del constructor.
     public boolean registrarSolicitud(SolicitudReposicion s) {
         boolean valido = validarFolio(s);                                  // 2.1.1
-        if (!valido) {
+        if (!valido || !validarTipoSangre(s)) {
+            return false;
+        }
+        // El hospital y el usuario deben existir (un id nulo o inexistente no lanza excepción: regresa false)
+        Hospital hospital = s.getHospitalid() == null || s.getHospitalid().getId() == null
+                ? null : hospitalF.find(s.getHospitalid().getId());
+        Usuario usuario = s.getUsuarioid() == null || s.getUsuarioid().getId() == null
+                ? null : usuarioF.find(s.getUsuarioid().getId());
+        if (hospital == null || usuario == null) {
             return false;
         }
         s.setDescripcion(sanitizar(s.getDescripcion()));
-        s.setHospitalid(hospitalF.find(s.getHospitalid().getId()));
-        s.setUsuarioid(usuarioF.find(s.getUsuarioid().getId()));
+        s.setHospitalid(hospital);
+        s.setUsuarioid(usuario);
         s.setUuidPublico(UUID.randomUUID().toString());                  // 2.1.2.1.1 generarUuidPublico
         s.setFechaHoraRegistro(new Date());
         solicitudF.create(s);                                            // 2.1.3 guardarSolicitud
@@ -80,10 +90,12 @@ public class LnSolicitud {
         return hospitalF.findAll();
     }
 
-    // HU-2.2 (1) generarPublicacion: ruta pública de la solicitud (1.1 obtenerUuidPublico).
+    // HU-2.2 (1) generarPublicacion: ruta pública de la solicitud (1.1 obtenerUuidPublico);
+    // null si la solicitud no existe.
     // El controller le antepone el servidor y el contexto; el navegador dibuja el QR (D5).
     public String generarPublicacion(SolicitudReposicion s) {
-        return RUTA_PUBLICACION + solicitudF.find(s.getId()).getUuidPublico();
+        SolicitudReposicion solicitud = s.getId() == null ? null : solicitudF.find(s.getId());
+        return solicitud == null ? null : RUTA_PUBLICACION + solicitud.getUuidPublico();
     }
 
     // HU-2.2 / HU-1.4 obtenerPublicacion: s.uuidPublico lleno; regresa la solicitud o null.
@@ -98,6 +110,12 @@ public class LnSolicitud {
     // HU-2.3 (2) listarMisSolicitudes
     public List<SolicitudReposicion> listarMisSolicitudes(Usuario u) {
         return solicitudF.buscarPorUsuario(u);
+    }
+
+    // HU-2.1 tipoSanguineo ∈ {A, B, AB, O} y factorRh ∈ {+, -} (CHECK de la BD)
+    private boolean validarTipoSangre(SolicitudReposicion s) {
+        return s.getTipoSanguineo() != null && TIPOS_SANGUINEOS.contains(s.getTipoSanguineo())
+                && s.getFactorRh() != null && FACTORES_RH.contains(s.getFactorRh());
     }
 
     // HU-2.1 Descripción opcional: sin etiquetas HTML ni caracteres de control, máximo 250
