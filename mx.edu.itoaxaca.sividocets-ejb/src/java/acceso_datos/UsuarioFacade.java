@@ -44,4 +44,14 @@ public class UsuarioFacade extends AbstractFacade<Usuario> {
                 .getResultList();
         return r.isEmpty() ? null : r.get(0);
     }
+
+    // HU-5.4: donadores (con perfil clínico) cuyo nombre o correo contiene el texto
+    public List<Usuario> buscarDonadores(String texto) {
+        return getEntityManager()
+                .createQuery("SELECT u FROM Usuario u WHERE u.perfilClinico IS NOT NULL "
+                        + "AND (LOWER(u.nombreCompleto) LIKE :t OR LOWER(u.correo) LIKE :t) "
+                        + "ORDER BY u.nombreCompleto", Usuario.class)
+                .setParameter("t", "%" + texto.toLowerCase() + "%")
+                .getResultList();
+    }
 }

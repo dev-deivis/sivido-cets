@@ -1,13 +1,20 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- Mis solicitudes — panel de usuario estático (diseño Stitch v3) -->
+<!-- Mis solicitudes — HU-2.3 (lista cronológica con estatus y acceso a la publicación con QR) -->
 <!DOCTYPE html>
 <ui:composition xmlns="http://www.w3.org/1999/xhtml"
                 xmlns:h="jakarta.faces.html"
+                xmlns:f="jakarta.faces.core"
                 xmlns:ui="jakarta.faces.facelets"
                 xmlns:p="primefaces"
                 template="/plantillas/plantillaUsuario.xhtml">
 
     <ui:param name="menuActivo" value="misSolicitudes"/>
+
+    <ui:define name="metadata">
+        <f:metadata>
+            <f:viewAction action="#{solicitudController.listarMisSolicitudes}"/>
+        </f:metadata>
+    </ui:define>
     <ui:define name="titulo">Mis solicitudes · SIVIDO</ui:define>
 
     <ui:define name="content">
@@ -18,112 +25,79 @@
                 <p>Consulta el estado de las solicitudes que capturaste y comparte su ficha con código QR.</p>
             </div>
             <div class="fila">
-                <span class="etiqueta verde">Activas: 1</span>
-                <span class="etiqueta azul">Atendidas: 1</span>
-                <span class="etiqueta">Históricas: 2</span>
+                <span class="etiqueta verde">Activas: #{solicitudController.contar('Activa')}</span>
+                <span class="etiqueta azul">Atendidas: #{solicitudController.contar('Atendida')}</span>
+                <span class="etiqueta">Total: #{empty solicitudController.misSolicitudes ? 0 : solicitudController.misSolicitudes.size()}</span>
             </div>
         </div>
 
-        <div class="tarjeta mb-2">
-            <h:form id="formFiltros" styleClass="fila-entre">
-                <p:inputText placeholder="Buscar por folio u hospital..." style="min-width:260px"/>
-                <div class="pildoras">
-                    <span class="pildora activa">Todas (4)</span>
-                    <span class="pildora">Activa (1)</span>
-                    <span class="pildora">Atendida (1)</span>
-                    <span class="pildora">Cerrada (1)</span>
-                    <span class="pildora">Cancelada (1)</span>
+        <h:form id="formLista">
+            <!-- Estado vacío: sin solicitudes capturadas -->
+            <h:panelGroup rendered="#{empty solicitudController.misSolicitudes}" layout="block"
+                          styleClass="tarjeta texto-centro" style="padding:2.5rem 1.5rem;border-style:dashed;box-shadow:none">
+                <span class="icono-caja" style="width:56px;height:56px"><i class="pi pi-inbox" style="font-size:24px"></i></span>
+                <h3 class="mt-2">Aún no has capturado solicitudes</h3>
+                <p class="texto-sec">Cuando captures una solicitud con el folio del CETS aparecerá aquí con su estatus.</p>
+                <p:button outcome="/vista/solicitudes/capturarSolicitud" value="Crear nueva solicitud" icon="pi pi-plus-circle"/>
+            </h:panelGroup>
+
+            <h:panelGroup rendered="#{not empty solicitudController.misSolicitudes}" layout="block">
+                <div class="tarjeta mb-2">
+                    <div class="fila-entre">
+                        <div class="pildoras">
+                            <ui:repeat value="#{['Todas','Activa','Atendida','Cerrada','Cancelada']}" var="e">
+                                <p:commandLink update="@form" styleClass="pildora #{solicitudController.filtroEstatus eq e ? 'activa' : ''}">
+                                    <f:setPropertyActionListener target="#{solicitudController.filtroEstatus}" value="#{e}"/>
+                                    #{e} (#{e eq 'Todas' ? solicitudController.misSolicitudes.size() : solicitudController.contar(e)})
+                                </p:commandLink>
+                            </ui:repeat>
+                        </div>
+                        <p:button outcome="/vista/solicitudes/capturarSolicitud" value="Capturar nueva solicitud" icon="pi pi-plus-circle"/>
+                    </div>
                 </div>
-                <p:button outcome="/vista/solicitudes/capturarSolicitud" value="Capturar nueva solicitud" icon="pi pi-plus-circle"/>
-            </h:form>
-        </div>
 
-        <div class="tabla-contenedor">
-            <table class="tabla">
-                <thead>
-                    <tr>
-                        <th>Folio</th>
-                        <th>Fecha de registro</th>
-                        <th>Grupo / Rh</th>
-                        <th>Hospital</th>
-                        <th>Estatus</th>
-                        <th>Acciones</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr>
-                        <td><span class="folio">CETS-OAX-2024-1102</span></td>
-                        <td>12 mar 2024<span class="sub">08:42 hrs</span></td>
-                        <td><span class="grupo-sangre">O+</span></td>
-                        <td><strong>Hospital Civil Dr. Aurelio Valdivieso</strong><span class="sub">Oaxaca de Juárez</span></td>
-                        <td><span class="estatus activa">Activa</span></td>
-                        <td>
-                            <div class="fila" style="gap:.4rem">
-                                <h:link outcome="/vista/publico/publicacion" styleClass="boton suave chico"><i class="pi pi-qrcode"></i> Ver QR</h:link>
-                                <h:link outcome="/vista/publico/publicacion" styleClass="boton secundario chico"><i class="pi pi-share-alt"></i> Compartir</h:link>
-                            </div>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td><span class="folio">CETS-OAX-2024-0985</span></td>
-                        <td>08 mar 2024<span class="sub">11:15 hrs</span></td>
-                        <td><span class="grupo-sangre">A-</span></td>
-                        <td><strong>Hospital de la Niñez Oaxaqueña</strong><span class="sub">San Bartolo Coyotepec</span></td>
-                        <td><span class="estatus atendida">Atendida</span></td>
-                        <td>
-                            <div class="fila" style="gap:.4rem">
-                                <h:link outcome="/vista/publico/publicacion" styleClass="boton suave chico"><i class="pi pi-qrcode"></i> Ver QR</h:link>
-                                <h:link outcome="/vista/publico/publicacion" styleClass="boton secundario chico"><i class="pi pi-share-alt"></i> Compartir</h:link>
-                            </div>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td><span class="folio">CETS-OAX-2024-0741</span></td>
-                        <td>25 feb 2024<span class="sub">17:30 hrs</span></td>
-                        <td><span class="grupo-sangre claro">B+</span></td>
-                        <td><strong>H. Regional Pte. Juárez (ISSSTE)</strong><span class="sub">Oaxaca de Juárez</span></td>
-                        <td><span class="estatus cerrada">Cerrada</span></td>
-                        <td>
-                            <div class="fila" style="gap:.4rem">
-                                <h:link outcome="/vista/publico/publicacion" styleClass="boton suave chico"><i class="pi pi-qrcode"></i> Ver QR</h:link>
-                                <h:link outcome="/vista/publico/publicacion" styleClass="boton secundario chico"><i class="pi pi-share-alt"></i> Compartir</h:link>
-                            </div>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td><span class="folio">CETS-OAX-2023-4521</span></td>
-                        <td>15 nov 2023<span class="sub">14:05 hrs</span></td>
-                        <td><span class="grupo-sangre claro">O-</span></td>
-                        <td><strong>HGZ No. 1 IMSS</strong><span class="sub">Oaxaca de Juárez</span></td>
-                        <td><span class="estatus cancelada">Cancelada</span></td>
-                        <td>
-                            <div class="fila" style="gap:.4rem">
-                                <h:link outcome="/vista/publico/publicacion" styleClass="boton suave chico"><i class="pi pi-qrcode"></i> Ver QR</h:link>
-                                <h:link outcome="/vista/publico/publicacion" styleClass="boton secundario chico"><i class="pi pi-share-alt"></i> Compartir</h:link>
-                            </div>
-                        </td>
-                    </tr>
-                </tbody>
-            </table>
-            <div class="pie-tabla">
-                <span>Mostrando 1 a 4 de 4 registros</span>
-                <div class="paginador"><span><i class="pi pi-chevron-left"></i></span><span class="actual">1</span><span><i class="pi pi-chevron-right"></i></span></div>
-            </div>
-        </div>
-
-        <div class="grid grid-3 mt-3">
-            <div class="tarjeta-plana fila" style="flex-wrap:nowrap;align-items:flex-start">
-                <span class="icono-caja"><i class="pi pi-verified"></i></span>
-                <div><h4 class="mb-0">Validación oficial</h4><span class="texto-chico texto-sec">El CETS verifica cada folio antes de publicarlo.</span></div>
-            </div>
-            <div class="tarjeta-plana fila" style="flex-wrap:nowrap;align-items:flex-start">
-                <span class="icono-caja"><i class="pi pi-qrcode"></i></span>
-                <div><h4 class="mb-0">Ficha con QR</h4><span class="texto-chico texto-sec">Lista para compartir en redes y mensajería.</span></div>
-            </div>
-            <div class="tarjeta-plana fila" style="flex-wrap:nowrap;align-items:flex-start">
-                <span class="icono-caja"><i class="pi pi-chart-line"></i></span>
-                <div><h4 class="mb-0">Estatus actualizado</h4><span class="texto-chico texto-sec">Revisa si tu solicitud sigue activa.</span></div>
-            </div>
-        </div>
+                <div class="tabla-contenedor">
+                    <table class="tabla">
+                        <thead>
+                            <tr>
+                                <th>Folio</th>
+                                <th>Fecha de registro</th>
+                                <th>Grupo / Rh</th>
+                                <th>Hospital</th>
+                                <th>Estatus</th>
+                                <th>Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <ui:repeat value="#{solicitudController.misSolicitudesFiltradas}" var="s">
+                                <tr>
+                                    <td><span class="folio">#{s.folioCETS}</span></td>
+                                    <td>
+                                        <h:outputText value="#{s.fechaHoraRegistro}">
+                                            <f:convertDateTime pattern="dd MMM yyyy" locale="es_MX" timeZone="America/Mexico_City"/>
+                                        </h:outputText>
+                                        <span class="sub"><h:outputText value="#{s.fechaHoraRegistro}">
+                                            <f:convertDateTime pattern="HH:mm 'hrs'" timeZone="America/Mexico_City"/>
+                                        </h:outputText></span>
+                                    </td>
+                                    <td><span class="grupo-sangre">#{s.tipoSanguineo}#{s.factorRh}</span></td>
+                                    <td><strong>#{s.hospitalid.nombre}</strong></td>
+                                    <td><span class="estatus #{s.estatus.toLowerCase()}">#{s.estatus}</span></td>
+                                    <td>
+                                        <h:link outcome="/vista/publico/publicacion" styleClass="boton suave chico">
+                                            <f:param name="uuid" value="#{s.uuidPublico}"/>
+                                            <i class="pi pi-qrcode"></i> Ver publicación y QR
+                                        </h:link>
+                                    </td>
+                                </tr>
+                            </ui:repeat>
+                        </tbody>
+                    </table>
+                    <div class="pie-tabla">
+                        <span>Mostrando #{solicitudController.misSolicitudesFiltradas.size()} de #{solicitudController.misSolicitudes.size()} solicitudes</span>
+                    </div>
+                </div>
+            </h:panelGroup>
+        </h:form>
     </ui:define>
 </ui:composition>

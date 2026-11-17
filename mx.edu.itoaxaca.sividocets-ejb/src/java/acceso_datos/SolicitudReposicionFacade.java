@@ -5,6 +5,7 @@
 package acceso_datos;
 
 import jakarta.ejb.Stateless;
+import modelo.Usuario;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import jakarta.persistence.TypedQuery;
@@ -56,5 +57,32 @@ public class SolicitudReposicionFacade extends AbstractFacade<SolicitudReposicio
             q.setParameter("rh", filtro.getFactorRh());
         }
         return q.getResultList();
+    }
+
+    // HU-2.4: ¿existe otra solicitud Activa con el mismo folio?
+    public boolean existeFolioActivo(String folio) {
+        return getEntityManager()
+                .createQuery("SELECT COUNT(s) FROM SolicitudReposicion s "
+                        + "WHERE s.folioCETS = :folio AND s.estatus = 'Activa'", Long.class)
+                .setParameter("folio", folio)
+                .getSingleResult() > 0;
+    }
+
+    // HU-2.2 / HU-1.4: solicitud por su uuid público (null si no existe)
+    public SolicitudReposicion buscarPorUuid(String uuid) {
+        List<SolicitudReposicion> r = getEntityManager()
+                .createNamedQuery("SolicitudReposicion.findByUuidPublico", SolicitudReposicion.class)
+                .setParameter("uuidPublico", uuid)
+                .getResultList();
+        return r.isEmpty() ? null : r.get(0);
+    }
+
+    // HU-2.3: solicitudes que capturó el usuario, más recientes primero
+    public List<SolicitudReposicion> buscarPorUsuario(Usuario u) {
+        return getEntityManager()
+                .createQuery("SELECT s FROM SolicitudReposicion s WHERE s.usuarioid = :u "
+                        + "ORDER BY s.fechaHoraRegistro DESC", SolicitudReposicion.class)
+                .setParameter("u", u)
+                .getResultList();
     }
 }
