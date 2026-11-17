@@ -60,12 +60,12 @@
                         <div>
                             <span class="numero-grande">
                                 <h:outputText value="#{historialController.proximaFecha}">
-                                    <f:convertDateTime pattern="dd/MM/yyyy" timeZone="America/Mexico_City"/>
+                                    <f:convertDateTime pattern="dd/MM/yyyy"/>
                                 </h:outputText>
                             </span><br/>
                             <span class="texto-sec texto-chico">Última donación:
                                 <h:outputText value="#{historialController.ultima.fechaDonacion}">
-                                    <f:convertDateTime pattern="dd/MM/yyyy" timeZone="America/Mexico_City"/>
+                                    <f:convertDateTime pattern="dd/MM/yyyy"/>
                                 </h:outputText>
                             </span>
                         </div>
@@ -134,7 +134,7 @@
                                 <tr>
                                     <td>
                                         <h:outputText value="#{r.fechaDonacion}">
-                                            <f:convertDateTime pattern="dd/MM/yyyy" timeZone="America/Mexico_City"/>
+                                            <f:convertDateTime pattern="dd/MM/yyyy"/>
                                         </h:outputText>
                                     </td>
                                     <td>

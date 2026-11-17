@@ -81,7 +81,7 @@
                             <span><i class="pi pi-map-marker"></i> A unos
                                 <h:outputText value="#{n.distanciaAproximada}"><f:convertNumber maxFractionDigits="1" minFractionDigits="0"/></h:outputText> km</span>
                             <span><i class="pi pi-clock"></i>
-                                <h:outputText value="#{n.fechaEnvio}"><f:convertDateTime pattern="dd/MM/yyyy HH:mm"/></h:outputText></span>
+                                <h:outputText value="#{n.fechaEnvio}"><f:convertDateTime pattern="dd/MM/yyyy HH:mm" timeZone="America/Mexico_City"/></h:outputText></span>
                         </div>
                         <hr class="separador"/>
                         <ui:fragment rendered="#{n.solicitudReposicionid.estatus == 'Activa'}">

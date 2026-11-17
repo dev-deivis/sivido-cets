@@ -2364,11 +2364,22 @@ Siguen **abiertas**: necesitan una decisión del equipo o del profe. Lo ya resue
     hospital y usuario existentes; donación con donador y personal CETS **activo** existentes, y solicitud asociada Activa).
     No están en los diagramas; los diagramas tampoco dicen qué mensaje mostrar cuando el Ln regresa `false`, así que los
     controllers muestran un mensaje general.
-44. **Badge "3" del menú lateral del donador:** `plantillaUsuario.xhtml` (línea ~29) pinta `<span class="menu-contador">3</span>`
-    con un valor fijo; no refleja los avisos reales. Pendiente: calcularlo con `LnNotificacion.listarMisNotificaciones`
-    (avisos de solicitudes Activas) o quitarlo. Toca una plantilla compartida: coordinarlo con el equipo.
-45. **Fechas con 6 horas de diferencia (UTC):** las vistas con fechas usan `f:convertDateTime` con zonas distintas
-    (`donadores.xhtml` usa `timeZone="UTC"`; `miHistorial.xhtml` usa `America/Mexico_City`) y los valores con hora se ven 6 horas
-    corridos respecto a `America/Mexico_City`. Revisar la zona horaria de la JVM de Payara (`user.timezone`) y unificar el
-    `timeZone` en todas las vistas: las columnas `DATE` (`fechaDonacion`) y las `DATETIME` (`fechaEnvio`, `fechaHoraRegistro`) no
-    se deben convertir igual. Sin verificar en ejecución.
+44. **Badge "3" del menú lateral del donador (cerrada):** se quitó el `<span class="menu-contador">3</span>` fijo de
+    `plantillaUsuario.xhtml`; quedan el ícono y el enlace a Notificaciones. Si más adelante se quiere un contador real, debe
+    salir de `LnNotificacion.listarMisNotificaciones` (avisos de solicitudes Activas).
+45. **Fechas con 6 horas de diferencia (cerrada):** causa: `f:convertDateTime` sin `timeZone` convierte en **UTC** y Java guarda
+    la hora en la zona del sistema (`America/Mexico_City`); solo `notificaciones.xhtml` (`Notificacion.fechaEnvio`) no tenía
+    `timeZone` y mostraba, por ejemplo, 07:25 para un aviso de las 01:25. Todas las entidades usan `java.util.Date`; no hay
+    `LocalDate` ni `LocalDateTime`. Arreglo:
+    - **Con hora** (`@Temporal(TIMESTAMP)`: `fechaEnvio`, `fechaHoraRegistro`): `timeZone="America/Mexico_City"` explícito
+      (es un instante, así que es correcto sin importar la zona de la JVM). Se agregó a `notificaciones.xhtml`.
+    - **Solo día** (`@Temporal(DATE)`: `fechaDonacion`, `proximaFechaElegible`, `fechaRegistro`): **sin** `timeZone`, para que se
+      lean con la misma zona con la que JDBC las construyó y nunca cambien de día. Se quitó `timeZone="UTC"` de `donadores.xhtml`
+      y `timeZone="America/Mexico_City"` de `miHistorial.xhtml`; ahora la misma fecha se ve igual en ambas.
+    - `web.xml`: `jakarta.faces.DATETIMECONVERTER_DEFAULT_TIMEZONE_IS_SYSTEM_TIMEZONE=true`, para que un convertidor sin
+      `timeZone` use la zona del sistema y no UTC. Se eligió esta combinación (y no solo el parámetro) porque un `DATE` leído por
+      JDBC es medianoche en la zona de la JVM: con `America/Mexico_City` explícito se movería un día si el servidor corriera en
+      UTC, y con el parámetro las fechas de solo día siguen a la JVM.
+    - Pendiente (sin verificar): los datos del seed se insertan con `NOW()` de MySQL; si la zona de la sesión de MySQL no es la
+      de la JVM, esas horas pueden verse desplazadas. Las fechas creadas desde la aplicación no tienen ese problema.
+    - Regla para vistas nuevas: fecha con hora → `timeZone="America/Mexico_City"`; fecha de solo día → sin `timeZone`.
