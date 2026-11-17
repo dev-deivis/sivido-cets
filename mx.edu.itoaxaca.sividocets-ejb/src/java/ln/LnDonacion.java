@@ -1,6 +1,7 @@
 package ln;
 
 import acceso_datos.HistorialExternoFacade;
+import acceso_datos.PerfilClinicoFacade;
 import acceso_datos.PersonalCETSFacade;
 import acceso_datos.RegistroDonacionFacade;
 import acceso_datos.SolicitudReposicionFacade;
@@ -13,6 +14,7 @@ import java.time.ZoneId;
 import java.util.Date;
 import java.util.List;
 import modelo.HistorialExterno;
+import modelo.PerfilClinico;
 import modelo.PersonalCETS;
 import modelo.RegistroDonacion;
 import modelo.SolicitudReposicion;
@@ -48,6 +50,14 @@ public class LnDonacion {
     @EJB
     private HistorialExternoFacade historialExternoF;
 
+    // [David] HU-5.1: perfil del donador y tabla de compatibilidad ABO/Rh (LnCuentas.receptoresCompatibles, la misma
+    // que usa LnNotificacion; LnCuentas solo depende de facades, así que no hay dependencia circular)
+    @EJB
+    private PerfilClinicoFacade perfilF;
+
+    @EJB
+    private LnCuentas lnCuentas;
+
 
     // HU-5.1 (1.1) registrarDonacion. r trae usuarioid (id del donador), personalCETSUsuarioid (personal en
     // sesión), fechaDonacion y, opcional, solicitudReposicionid (id o vacío = donación general; si viene, debe estar Activa).
@@ -62,6 +72,10 @@ public class LnDonacion {
         PersonalCETS personal = personalF.find(r.getPersonalCETSUsuarioid().getUsuarioid());
         if (donador == null || personal == null || !personal.getActivo()) {
             return false;                                  // solo el personal CETS activo registra donaciones
+        }
+        // [David] D18: exclusión permanente, mismo día, intervalo de 56 días y compatibilidad con la solicitud
+        if (motivoRechazoDonacion(r) != null) {
+            return false;
         }
         // La solicitud es opcional (donación general); si viene, debe existir y estar Activa
         SolicitudReposicion s = r.getSolicitudReposicionid();
@@ -78,7 +92,77 @@ public class LnDonacion {
         r.setProximaFechaElegible(calcularProximaFecha(r.getFechaDonacion()));   // 1.1.1.2
         registroF.create(r);                                                     // 1.1.2
         donador.getRegistroDonacionList().add(r);        // relación bidireccional al día (caché de JPA)
+        if (solicitud != null && solicitud.getRegistroDonacionList() != null) {
+            solicitud.getRegistroDonacionList().add(r);  // [David] #35: el otro lado de la solicitud
+        }
+        if (personal.getRegistroDonacionList() != null) {
+            personal.getRegistroDonacionList().add(r);   // [David] #35: el personal que la registró
+        }
         return true;
+    }
+
+    // [David] D18 / #42: ¿se puede registrar una donación de este donador para esta solicitud (null = donación
+    // general)? null si sí; si no, el motivo en texto para la vista. donador y solicitud traen su id. No revisa
+    // el "mismo día" porque no conoce la fecha: para eso está motivoRechazoDonacion(RegistroDonacion).
+    public String motivoRechazoDonacion(Usuario donador, SolicitudReposicion solicitud) {
+        return motivoRechazo(donador, solicitud, null);
+    }
+
+    // [David] D18 / #42: igual, con la fecha de la donación (también rechaza si ya donó ese día)
+    public String motivoRechazoDonacion(RegistroDonacion r) {
+        return motivoRechazo(r.getUsuarioid(), r.getSolicitudReposicionid(), r.getFechaDonacion());
+    }
+
+    private String motivoRechazo(Usuario d, SolicitudReposicion s, Date fecha) {
+        Usuario donador = d == null || d.getId() == null ? null : usuarioF.find(d.getId());
+        if (donador == null) {
+            return "El donador no existe.";
+        }
+        if (verificarExclusion(donador)) {
+            return "El donador tiene exclusión permanente y no puede donar.";
+        }
+        if (fecha != null && yaDonoEseDia(donador, fecha)) {
+            return "El donador ya tiene una donación registrada ese día.";
+        }
+        if (!esElegible(donador)) {
+            Date proxima = obtenerProximaFecha(obtenerElegibilidad(donador));
+            return "El donador está dentro del intervalo de " + DIAS_EXCLUSION + " días entre donaciones"
+                    + (proxima == null ? "." : "; podrá donar a partir del " + formatear(aLocalDate(proxima)) + ".");
+        }
+        if (s == null || s.getId() == null) {
+            return null;                                   // donación general: sin compatibilidad que revisar
+        }
+        SolicitudReposicion solicitud = solicitudF.find(s.getId());
+        if (solicitud == null) {
+            return "La solicitud no existe.";
+        }
+        if (!"Activa".equals(solicitud.getEstatus())) {
+            return "La solicitud ya no está activa (estatus: " + solicitud.getEstatus() + ").";
+        }
+        PerfilClinico perfil = perfilF.find(donador.getId());
+        if (perfil == null || perfil.getTipoSanguineo() == null || perfil.getFactorRh() == null) {
+            return "El donador no tiene grupo sanguíneo y Rh capturados; no se puede validar la compatibilidad con la solicitud.";
+        }
+        if (!lnCuentas.receptoresCompatibles(perfil).contains(solicitud.getTipoSanguineo() + solicitud.getFactorRh())) {
+            return "El grupo del donador (" + perfil.getTipoSanguineo() + perfil.getFactorRh()
+                    + ") no es compatible con la solicitud (" + solicitud.getTipoSanguineo()
+                    + solicitud.getFactorRh() + ").";
+        }
+        return null;
+    }
+
+    private boolean yaDonoEseDia(Usuario donador, Date fecha) {
+        LocalDate dia = aLocalDate(fecha);
+        for (RegistroDonacion previa : registroF.buscarPorDonador(donador)) {
+            if (aLocalDate(previa.getFechaDonacion()).equals(dia)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private String formatear(LocalDate fecha) {
+        return String.format("%02d/%02d/%d", fecha.getDayOfMonth(), fecha.getMonthValue(), fecha.getYear());
     }
 
     // HU-5.4 (1.1) buscarDonador: criterio.nombreCompleto = texto a buscar (nombre o correo)

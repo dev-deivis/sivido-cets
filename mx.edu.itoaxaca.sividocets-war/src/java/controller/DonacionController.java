@@ -58,6 +58,9 @@ public class DonacionController implements Serializable {
     private boolean exclusionPermanente;
     private boolean puedeDonar;
 
+    // D18: por qué no se puede registrar la donación (null = se puede). Lo decide LnDonacion.
+    private String motivoRechazo;
+
     public DonacionController() {
         registro = new RegistroDonacion();
         registro.setUsuarioid(new Usuario());
@@ -94,6 +97,7 @@ public class DonacionController implements Serializable {
         proximaFecha = lnDonacion.obtenerProximaFecha(ultimaDonacion);
         exclusionPermanente = lnDonacion.verificarExclusion(donador);
         puedeDonar = lnDonacion.esElegible(donador);
+        motivoRechazo = lnDonacion.motivoRechazoDonacion(donador, null);     // D18: botón "Registrar donación" de la ficha
     }
 
     // HU-5.1 f:viewAction de capturarDonacion?donador=: muestra el nombre del donador elegido
@@ -107,7 +111,14 @@ public class DonacionController implements Serializable {
                 donador = new Usuario();
                 registro.getUsuarioid().setId(null);
             }
+            actualizarMotivo();
         }
+    }
+
+    // D18: recalcula el motivo de rechazo con el donador y la solicitud elegidos (también lo llama el p:ajax del combo)
+    public void actualizarMotivo() {
+        motivoRechazo = registro.getUsuarioid().getId() == null ? null
+                : lnDonacion.motivoRechazoDonacion(registro.getUsuarioid(), registro.getSolicitudReposicionid());
     }
 
     // HU-5.1 Elegir al donador desde los resultados de la búsqueda en capturarDonacion
@@ -115,6 +126,7 @@ public class DonacionController implements Serializable {
         registro.getUsuarioid().setId(u.getId());
         donador = u;
         resultados = null;
+        actualizarMotivo();
     }
 
     // HU-5.1 (1.1) registrarDonacion. Navegación: capturarDonacion → donadores (con la ficha del donador)
@@ -131,7 +143,9 @@ public class DonacionController implements Serializable {
         registro.setPersonalCETSUsuarioid(personal != null ? personal : new PersonalCETS(sesion.getUsuario().getId()));
         boolean valido = lnDonacion.registrarDonacion(registro);
         if (!valido) {
-            error("No se pudo registrar: revisa el donador y que la fecha no sea futura.");
+            String motivo = lnDonacion.motivoRechazoDonacion(registro);
+            error("No se pudo registrar la donación. " + (motivo == null
+                    ? "Revisa el donador y que la fecha no sea futura." : motivo));
             return null;
         }
         FacesContext ctx = FacesContext.getCurrentInstance();
@@ -229,6 +243,10 @@ public class DonacionController implements Serializable {
 
     public boolean isPuedeDonar() {
         return puedeDonar;
+    }
+
+    public String getMotivoRechazo() {
+        return motivoRechazo;
     }
 
     public boolean isSinDonaciones() {
