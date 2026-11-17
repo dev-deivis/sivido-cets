@@ -7,6 +7,7 @@ package acceso_datos;
 import jakarta.ejb.Stateless;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
+import java.util.List;
 import modelo.CriterioExclusion;
 
 /**
@@ -26,6 +27,13 @@ public class CriterioExclusionFacade extends AbstractFacade<CriterioExclusion> {
 
     public CriterioExclusionFacade() {
         super(CriterioExclusion.class);
+    }
+
+    // HU-4.1: criterios que entran al cuestionario (los inactivos solo se ven en el catálogo del CETS, HU-4.3)
+    public List<CriterioExclusion> buscarActivos() {
+        return getEntityManager()
+                .createQuery("SELECT c FROM CriterioExclusion c WHERE c.activo = true ORDER BY c.id", CriterioExclusion.class)
+                .getResultList();
     }
     
 }

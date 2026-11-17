@@ -48,7 +48,6 @@ public class LnDonacion {
     @EJB
     private HistorialExternoFacade historialExternoF;
 
-    // ===================== [Galilea] =====================
 
     // HU-5.1 (1.1) registrarDonacion. r trae usuarioid (id del donador), personalCETSUsuarioid (personal en
     // sesión), fechaDonacion y, opcional, solicitudReposicionid (id o vacío = donación general; si viene, debe estar Activa).
@@ -113,13 +112,6 @@ public class LnDonacion {
         return fecha.toInstant().atZone(ZONA).toLocalDate();
     }
 
-    
-    
-    
-    
-    
-    // ===================== [Diego] =====================
-
     // HU-5.2 (2) obtenerHistorial
     public List<RegistroDonacion> obtenerHistorial(Usuario donador) {
         return registroF.buscarPorDonador(donador);
@@ -170,6 +162,5 @@ public class LnDonacion {
     public int porcentajeRecuperacion(RegistroDonacion ultima) {
         return (int) Math.max(0, Math.min(100, diasDesdeUltimaDonacion(ultima) * 100 / DIAS_EXCLUSION));
     }
-    
     
 }

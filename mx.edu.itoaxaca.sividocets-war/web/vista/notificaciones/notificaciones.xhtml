@@ -1,5 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- Notificaciones y avisos compatibles — panel de usuario estático (diseño Stitch v3) -->
+<!-- Notificaciones y avisos compatibles — HU-3.1 (avisos), HU-3.2 (distancia aproximada, nunca coordenadas)
+     y D7 (el radio se configura en miPerfil). La sesión de usuario la verifica plantillaUsuario y,
+     antes de consultar la BD, notificacionController.cargarNotificaciones. -->
 <!DOCTYPE html>
 <ui:composition xmlns="http://www.w3.org/1999/xhtml"
                 xmlns:h="jakarta.faces.html"
@@ -11,6 +13,12 @@
     <ui:param name="menuActivo" value="notificaciones"/>
     <ui:define name="titulo">Notificaciones · SIVIDO</ui:define>
 
+    <ui:define name="metadata">
+        <f:metadata>
+            <f:viewAction action="#{notificacionController.cargarNotificaciones}"/>
+        </f:metadata>
+    </ui:define>
+
     <ui:define name="content">
         <div class="encabezado-pagina">
             <span class="sobretitulo">Avisos de compatibilidad</span>
@@ -18,97 +26,95 @@
             <p>Solicitudes publicadas por el CETS Oaxaca que coinciden con tu grupo sanguíneo dentro de tu radio de aviso.</p>
         </div>
 
-        <!-- Selector de radio de aviso -->
+        <p:messages id="mensajes" closable="true"/>
+
+        <!-- D1: sin ubicación no se notifica -->
+        <ui:fragment rendered="#{not notificacionController.conUbicacion}">
+            <div class="aviso ambar mb-2">
+                <i class="pi pi-map-marker"></i>
+                <div>
+                    <strong>Comparte tu ubicación para recibir avisos</strong>
+                    <p>Comparte tu ubicación en <h:link outcome="/vista/cuentas/miPerfil" value="Mi perfil"/> para recibir
+                        solicitudes cercanas.</p>
+                </div>
+            </div>
+        </ui:fragment>
+
+        <!-- Radio de aviso (D7: se configura en miPerfil, HU-3.4) -->
         <div class="tarjeta mb-2">
-            <h:form id="formRadio" styleClass="fila-entre">
+            <div class="fila-entre">
                 <div class="fila" style="flex-wrap:nowrap;max-width:620px">
                     <span class="icono-caja"><i class="pi pi-map-marker"></i></span>
                     <div>
-                        <strong>Radio de aviso</strong>
-                        <p class="texto-sec texto-chico mb-0">Recibe avisos según una distancia aproximada. Solo se calcula una
+                        <strong>Radio de aviso: #{notificacionController.radio} km</strong>
+                        <p class="texto-sec texto-chico mb-0">Recibes avisos según una distancia aproximada. Solo se calcula una
                             cobertura estimada, sin geolocalización exacta.</p>
                     </div>
                 </div>
-                <div class="fila">
-                    <span class="texto-chico negrita">Radio:</span>
-                    <p:selectOneButton id="radio" value="5">
-                        <f:selectItem itemLabel="3 km" itemValue="3"/>
-                        <f:selectItem itemLabel="5 km (recomendado)" itemValue="5"/>
-                        <f:selectItem itemLabel="10 km" itemValue="10"/>
-                    </p:selectOneButton>
-                </div>
-            </h:form>
+                <h:link outcome="/vista/cuentas/miPerfil" styleClass="enlace-flecha">Cambiar <i class="pi pi-arrow-right"></i></h:link>
+            </div>
         </div>
 
         <div class="grid grid-principal">
             <!-- Avisos -->
             <div class="columna">
-                <div class="tarjeta tarjeta-borde-izq">
-                    <div class="fila-entre">
-                        <div class="fila">
-                            <span class="grupo-sangre">O+</span>
-                            <span class="etiqueta roja"><i class="pi pi-bolt"></i> Urgente</span>
-                        </div>
-                        <span class="mono texto-chico texto-tenue">Folio CETS-OAX-2024-1102</span>
+                <ui:fragment rendered="#{empty notificacionController.notificaciones}">
+                    <div class="tarjeta tarjeta-plana">
+                        <h3><i class="pi pi-bell texto-rojo"></i> Aún no tienes avisos</h3>
+                        <p class="texto-sec texto-chico mb-0">Cuando se publique una solicitud compatible con tu grupo sanguíneo
+                            y dentro de tu radio, aparecerá aquí.</p>
                     </div>
-                    <h2 class="mt-2">Hospital General Dr. Aurelio Valdivieso</h2>
-                    <div class="fila-entre texto-chico texto-sec">
-                        <span><i class="pi pi-map-marker"></i> A menos de 3 km</span>
-                        <span><i class="pi pi-clock"></i> Hoy, hace 25 min</span>
-                    </div>
-                    <hr class="separador"/>
-                    <h:link outcome="/vista/notificaciones/cuestionario" styleClass="enlace-flecha">Ver solicitud y evaluar aptitud <i class="pi pi-arrow-right"></i></h:link>
-                </div>
+                </ui:fragment>
 
-                <div class="tarjeta tarjeta-borde-izq">
-                    <div class="fila-entre">
-                        <div class="fila">
-                            <span class="grupo-sangre">O+</span>
-                            <span class="etiqueta ambar"><i class="pi pi-heart"></i> Pediátrica</span>
+                <ui:repeat value="#{notificacionController.notificaciones}" var="n">
+                    <div class="tarjeta tarjeta-borde-izq">
+                        <div class="fila-entre">
+                            <div class="fila">
+                                <span class="grupo-sangre">#{n.solicitudReposicionid.tipoSanguineo}#{n.solicitudReposicionid.factorRh}</span>
+                                <span class="estatus activa">#{n.solicitudReposicionid.estatus}</span>
+                            </div>
+                            <span class="mono texto-chico texto-tenue">Folio #{n.solicitudReposicionid.folioCETS}</span>
                         </div>
-                        <span class="mono texto-chico texto-tenue">Folio CETS-OAX-2024-1108</span>
-                    </div>
-                    <h2 class="mt-2">Hospital de la Niñez Oaxaqueña</h2>
-                    <div class="fila-entre texto-chico texto-sec">
-                        <span><i class="pi pi-map-marker"></i> A menos de 5 km</span>
-                        <span><i class="pi pi-clock"></i> Ayer a las 18:30 hrs</span>
-                    </div>
-                    <hr class="separador"/>
-                    <h:link outcome="/vista/notificaciones/cuestionario" styleClass="enlace-flecha">Ver solicitud y evaluar aptitud <i class="pi pi-arrow-right"></i></h:link>
-                </div>
-
-                <div class="tarjeta tarjeta-borde-izq azul">
-                    <div class="fila-entre">
-                        <div class="fila">
-                            <span class="grupo-sangre claro">O+</span>
-                            <span class="etiqueta azul"><i class="pi pi-calendar"></i> Programada</span>
+                        <h2 class="mt-2">#{n.solicitudReposicionid.hospitalid.nombre}</h2>
+                        <div class="fila-entre texto-chico texto-sec">
+                            <!-- Solo distancia aproximada: nunca coordenadas (HU-3.2) -->
+                            <span><i class="pi pi-map-marker"></i> A unos
+                                <h:outputText value="#{n.distanciaAproximada}"><f:convertNumber maxFractionDigits="1" minFractionDigits="0"/></h:outputText> km</span>
+                            <span><i class="pi pi-clock"></i>
+                                <h:outputText value="#{n.fechaEnvio}"><f:convertDateTime pattern="dd/MM/yyyy HH:mm"/></h:outputText></span>
                         </div>
-                        <span class="mono texto-chico texto-tenue">Folio CETS-OAX-2024-1115</span>
+                        <hr class="separador"/>
+                        <h:link outcome="/vista/notificaciones/cuestionario" styleClass="enlace-flecha">Ver solicitud y evaluar aptitud <i class="pi pi-arrow-right"></i>
+                            <f:param name="solicitud" value="#{n.solicitudReposicionid.id}"/>
+                        </h:link>
                     </div>
-                    <h2 class="mt-2">Hospital Regional Presidente Juárez (ISSSTE)</h2>
-                    <div class="fila-entre texto-chico texto-sec">
-                        <span><i class="pi pi-map-marker"></i> A menos de 5 km</span>
-                        <span><i class="pi pi-clock"></i> Hace 2 días</span>
-                    </div>
-                    <hr class="separador"/>
-                    <h:link outcome="/vista/notificaciones/cuestionario" styleClass="enlace-flecha">Ver solicitud y evaluar aptitud <i class="pi pi-arrow-right"></i></h:link>
-                </div>
+                </ui:repeat>
             </div>
 
             <!-- Columna lateral -->
             <div class="columna">
                 <div class="tarjeta">
                     <div class="tarjeta-cabecera roja"><h3><i class="pi pi-id-card"></i> Mi perfil de donante</h3></div>
-                    <div class="fila">
-                        <span class="grupo-sangre grande">O+<small>POSITIVO</small></span>
-                        <div>
-                            <strong>Donante altruista registrado</strong><br/>
-                            <span class="estatus activa">Puede donar</span>
+                    <ui:fragment rendered="#{notificacionController.perfilCompleto}">
+                        <div class="fila">
+                            <span class="grupo-sangre grande">#{notificacionController.perfil.tipoSanguineo}#{notificacionController.perfil.factorRh}<small>DECLARADO</small></span>
+                            <div>
+                                <strong>Perfil autodeclarado</strong>
+                            </div>
                         </div>
-                    </div>
+                    </ui:fragment>
+                    <ui:fragment rendered="#{not notificacionController.perfilCompleto}">
+                        <div class="fila">
+                            <span class="grupo-sangre grande claro">?<small>SIN CAPTURAR</small></span>
+                            <div>
+                                <strong>Perfil clínico pendiente</strong><br/>
+                                <h:link outcome="/vista/cuentas/miPerfil" value="Completar mi perfil"/>
+                            </div>
+                        </div>
+                    </ui:fragment>
                     <dl class="datos mt-2">
-                        <dt>Última donación</dt><dd>20 mar 2024</dd>
-                        <dt>Región</dt><dd>Valles Centrales</dd>
+                        <dt>Radio de aviso</dt><dd>#{notificacionController.radio} km</dd>
+                        <dt>Ubicación</dt><dd>#{notificacionController.conUbicacion ? 'Registrada' : 'Sin registrar'}</dd>
                     </dl>
                 </div>
 
@@ -122,9 +128,8 @@
 
                 <div class="tarjeta tarjeta-plana">
                     <h3><i class="pi pi-list-check texto-rojo"></i> Pre-evaluación digital</h3>
-                    <p class="texto-sec texto-chico">Ahorra tiempo contestando el cuestionario antes de acudir al CETS.</p>
-                    <p:button outcome="/vista/notificaciones/cuestionario" value="Cuestionario de elegibilidad" icon="pi pi-arrow-right"
-                              iconPos="right" styleClass="boton-bloque"/>
+                    <p class="texto-sec texto-chico">Ahorra tiempo contestando el cuestionario antes de acudir al CETS. Abre un aviso
+                        para evaluar tu aptitud para esa solicitud.</p>
                 </div>
             </div>
         </div>
