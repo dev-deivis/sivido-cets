@@ -85,4 +85,10 @@ public class SolicitudReposicionFacade extends AbstractFacade<SolicitudReposicio
                 .setParameter("u", u)
                 .getResultList();
     }
+
+    // HU-3.1: guarda la solicitud y fuerza el INSERT para que ya tenga id (la llave es IDENTITY)
+    public void crearYObtenerId(SolicitudReposicion s) {
+        create(s);
+        getEntityManager().flush();
+    }
 }

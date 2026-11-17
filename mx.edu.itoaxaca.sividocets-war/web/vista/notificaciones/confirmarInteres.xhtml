@@ -54,6 +54,9 @@
                     <ui:fragment rendered="#{notificacionController.compatible}">
                         <span class="etiqueta verde">Compatible</span>
                     </ui:fragment>
+                    <ui:fragment rendered="#{not notificacionController.compatible}">
+                        <span class="etiqueta roja">No compatible</span>
+                    </ui:fragment>
                 </div>
             </div>
 
@@ -87,9 +90,20 @@
                                 <strong>únicamente</strong> con la persona que creó la solicitud para coordinar tu asistencia al
                                 CETS Oaxaca. Tu información nunca será pública.</p>
                         </div>
+                        <!-- No puede confirmar: solicitud no Activa, propia, grupo/Rh incompatible o no elegible -->
+                        <ui:fragment rendered="#{not notificacionController.puedeConfirmar}">
+                            <div class="aviso ambar mb-2">
+                                <i class="pi pi-exclamation-triangle"></i>
+                                <div>
+                                    <strong>No puedes confirmar interés en esta solicitud</strong>
+                                    <p>#{notificacionController.motivoRechazo}</p>
+                                </div>
+                            </div>
+                        </ui:fragment>
                         <h:form id="formConfirmar">
                             <div class="check-linea mb-2">
-                                <p:selectBooleanCheckbox id="acepto" value="#{notificacionController.aceptaContacto}"/>
+                                <p:selectBooleanCheckbox id="acepto" value="#{notificacionController.aceptaContacto}"
+                                                         disabled="#{not notificacionController.puedeConfirmar}"/>
                                 <p:outputLabel for="acepto">Acepto compartir mis datos de contacto con el solicitante y coordinar mi
                                     asistencia al CETS Oaxaca.</p:outputLabel>
                             </div>
@@ -97,6 +111,7 @@
                                 <p:button outcome="/vista/notificaciones/notificaciones" value="Cancelar" icon="pi pi-times"
                                           styleClass="ui-button-secondary"/>
                                 <p:commandButton value="Confirmo que iré a donar" icon="pi pi-heart-fill" ajax="false"
+                                                 disabled="#{not notificacionController.puedeConfirmar}"
                                                  action="#{notificacionController.confirmarInteres}"/>
                             </div>
                         </h:form>

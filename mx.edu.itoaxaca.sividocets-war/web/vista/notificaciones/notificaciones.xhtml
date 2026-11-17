@@ -67,11 +67,11 @@
                 </ui:fragment>
 
                 <ui:repeat value="#{notificacionController.notificaciones}" var="n">
-                    <div class="tarjeta tarjeta-borde-izq">
+                    <div class="tarjeta tarjeta-borde-izq #{n.solicitudReposicionid.estatus != 'Activa' ? 'tarjeta-plana' : ''}">
                         <div class="fila-entre">
                             <div class="fila">
                                 <span class="grupo-sangre">#{n.solicitudReposicionid.tipoSanguineo}#{n.solicitudReposicionid.factorRh}</span>
-                                <span class="estatus activa">#{n.solicitudReposicionid.estatus}</span>
+                                <span class="estatus #{n.solicitudReposicionid.estatus.toLowerCase()}">#{n.solicitudReposicionid.estatus}</span>
                             </div>
                             <span class="mono texto-chico texto-tenue">Folio #{n.solicitudReposicionid.folioCETS}</span>
                         </div>
@@ -84,9 +84,14 @@
                                 <h:outputText value="#{n.fechaEnvio}"><f:convertDateTime pattern="dd/MM/yyyy HH:mm"/></h:outputText></span>
                         </div>
                         <hr class="separador"/>
-                        <h:link outcome="/vista/notificaciones/cuestionario" styleClass="enlace-flecha">Ver solicitud y evaluar aptitud <i class="pi pi-arrow-right"></i>
-                            <f:param name="solicitud" value="#{n.solicitudReposicionid.id}"/>
-                        </h:link>
+                        <ui:fragment rendered="#{n.solicitudReposicionid.estatus == 'Activa'}">
+                            <h:link outcome="/vista/notificaciones/cuestionario" styleClass="enlace-flecha">Ver solicitud y evaluar aptitud <i class="pi pi-arrow-right"></i>
+                                <f:param name="solicitud" value="#{n.solicitudReposicionid.id}"/>
+                            </h:link>
+                        </ui:fragment>
+                        <ui:fragment rendered="#{n.solicitudReposicionid.estatus != 'Activa'}">
+                            <span class="texto-sec texto-chico"><i class="pi pi-lock"></i> Esta solicitud ya no está activa (#{n.solicitudReposicionid.estatus}); ya no se puede responder.</span>
+                        </ui:fragment>
                     </div>
                 </ui:repeat>
             </div>

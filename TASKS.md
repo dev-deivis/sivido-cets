@@ -1380,11 +1380,11 @@ La BD tiene `UNIQUE(Usuarioid, SolicitudReposicionid)` en `Notificacion`: no cre
 
 **Checklist**
 
-- [ ] Facades: `buscarDonadoresActivos` (sin coordenadas no se notifica, D1) y `buscarPorUsuario`
-- [ ] Vista: selector de radio → radio actual + enlace a miPerfil (D7); aviso si no hay ubicación (D1)
-- [ ] `buscarDonadoresCercanos`, `obtenerNotificacion`, `listarMisNotificaciones` + compatibilidad privada
-- [ ] Avisar a [Galilea] para que lo llame desde `registrarSolicitud`
-- [ ] `NotificacionController` + vista
+- [x] Facades: `buscarDonadoresActivos` (sin coordenadas no se notifica, D1) y `buscarPorUsuario`
+- [x] Vista: selector de radio → radio actual + enlace a miPerfil (D7); aviso si no hay ubicación (D1)
+- [x] `buscarDonadoresCercanos`, `obtenerNotificacion`, `listarMisNotificaciones` + compatibilidad privada
+- [x] Avisar a [Galilea] para que lo llame desde `registrarSolicitud` — conectado en `LnSolicitud.registrarSolicitud` por [David]
+- [x] `NotificacionController` + vista
 - [ ] Pruebas + SQL
 
 ---
@@ -1422,8 +1422,8 @@ private boolean calcularRadioCercania(Notificacion n, PerfilClinico donador, Sol
 
 **Checklist**
 
-- [ ] `calcularRadioCercania` con haversine y redondeo
-- [ ] Revisar que ninguna vista pinte `perfilClinico.latitud/longitud`
+- [x] `calcularRadioCercania` con haversine y redondeo
+- [x] Revisar que ninguna vista pinte `perfilClinico.latitud/longitud`
 - [ ] Pruebas + SQL
 
 ---
@@ -1475,9 +1475,9 @@ public SolicitudReposicion registrarInteres(Interes i)   // i.usuario (sesión),
 
 **Checklist**
 
-- [ ] `registrarInteres(Interes)` con PK compartida
-- [ ] Stub temporal de `esElegible` hasta que [Diego] suba el real (no subir el stub)
-- [ ] Vista + los dos casos (elegible → notificaciones; no elegible → mensaje)
+- [x] `registrarInteres(Interes)` con PK compartida
+- [x] Stub temporal de `esElegible` hasta que [Diego] suba el real (no subir el stub) (ya no hace falta: se usa el `esElegible` real de [Diego])
+- [x] Vista + los dos casos (elegible → notificaciones; no elegible → mensaje)
 - [ ] Pruebas + SQL
 
 ---
@@ -1544,9 +1544,9 @@ Para que `create(c)` también guarde las respuestas, cada `RespuestaCriterio` de
 
 **Checklist**
 
-- [ ] `buscarActivos` en la facade
-- [ ] `obtenerCriterios` y `registrarRespuestas`
-- [ ] `CuestionarioController` `@ViewScoped` + vista dinámica
+- [x] `buscarActivos` en la facade
+- [x] `obtenerCriterios` y `registrarRespuestas`
+- [x] `CuestionarioController` `@ViewScoped` + vista dinámica
 - [ ] Pruebas + SQL
 
 ---
@@ -1600,9 +1600,9 @@ BD. La vista puede mostrar el texto "No apto".
 
 **Checklist**
 
-- [ ] `evaluarRespuestas`, `evaluarCriterio` y `calcularTiempoEspera` privados
-- [ ] `obtenerResultado`
-- [ ] Vista con los dos casos
+- [x] `evaluarRespuestas`, `evaluarCriterio` y `calcularTiempoEspera` privados
+- [x] `obtenerResultado`
+- [x] Vista con los dos casos
 - [ ] Pruebas + SQL
 
 ---
@@ -1660,8 +1660,8 @@ public boolean modificarCriterio(CriterioExclusion c)    // también sirve para 
 
 **Checklist**
 
-- [ ] `obtenerCatalogo`, `registrarCriterio`, `modificarCriterio` y `validarCriterio` privado
-- [ ] Vista dinámica con values iguales a los de la BD
+- [x] `obtenerCatalogo`, `registrarCriterio`, `modificarCriterio` y `validarCriterio` privado
+- [x] Vista dinámica con values iguales a los de la BD
 - [ ] Pruebas + SQL
 
 ---
@@ -2134,6 +2134,7 @@ quedó el trabajo en este documento.
 | D14 | Toggles sin columna | "Compartir mi contacto solo cuando yo confirme interés" y "Recibir avisos de solicitudes compatibles" quedan **deshabilitados** en miPerfil, con una nota, sin conectarlos a nada. | [DAVID] HU-1.3 (hecho) |
 | D15 | Combo "Región" | Se **elimina**: no existe columna y la ubicación (D1) lo reemplaza. | [DAVID] HU-1.3 (hecho) |
 | D16 | Controller de miPerfil | `PerfilController` (`@ViewScoped`) y no `CuentasController` (`@RequestScoped`): el perfil debe conservarse entre los clics de la vista. Los dos usan `LnCuentas`. | [DAVID] HU-1.3 / HU-3.4 (hecho) |
+| D17 | Cuestionario Apto y confirmar interés | El resultado **Apto** del cuestionario es **orientativo, no obligatorio**: `registrarInteres` no lo exige. Sí exige solicitud Activa, que el donador no sea el solicitante, compatibilidad tipo/Rh y `esElegible` (56 días y exclusión permanente). | [Alex] HU-3.3 / HU-4.2 |
 
 ---
 
@@ -2320,14 +2321,21 @@ Siguen **abiertas**: necesitan una decisión del equipo o del profe. Lo ya resue
       es `UIFichaDonador.mostrar`).
     - `LnSolicitud.validarFormatoFolio` es público (en el diagrama es de la entidad) y `verificarFolioUnico` quedó dentro de
       `validarFolio`.
+    - **HU-3.1 a 4.3 ([Alex]):** métodos extra que no están en los diagramas: `LnNotificacion.listarMisNotificaciones`,
+      `LnNotificacion.obtenerSolicitud` (la vista de confirmar interés y la del cuestionario necesitan los datos de la
+      solicitud) y `LnCuestionario.obtenerCatalogo` (el catálogo completo, con inactivos). `CuestionarioController` inyecta
+      `LnNotificacion` solo para usar `obtenerSolicitud` (aceptado; si se prefiere, moverlo a `LnSolicitud`). También se
+      agregaron `LnNotificacion.motivoRechazoInteres` (por qué no se puede confirmar interés; la usan `registrarInteres` y
+      el controller para avisar y deshabilitar el botón) y `SolicitudReposicionFacade.crearYObtenerId`.
     - `generarPublicacion` regresa la **ruta** pública y no el `imagenQR` (D5); `generarQR`, `obtenerUuidPublico` y
       `ocultarDatosContacto` no existen como métodos. `contarRegistros` (HU-7.3) se resolvió en la vista (#15).
 37. **Enmascarado de contacto en el panel CETS (no está en el diagrama):** `DonacionController.enmascararCorreo` y
     `enmascararTelefono` ocultan el correo y el teléfono del **donador** en `donadores` y `capturarDonacion`. La HU-1.4 trata el
     contacto del **familiar** en la publicación (eso sí se cumple: la vista no lo pinta). Decidir si el CETS no debe ver el
     contacto de los donadores (¿cómo los contactará?) y, de mantenerlo, mover el enmascarado al Ln o a un convertidor.
-38. **TODOs pendientes de otros módulos:** `registrarSolicitud` no llama todavía a `lnNotificacion.buscarDonadoresCercanos`
-    ([Alex], HU-3.1); la ficha del donador no muestra historial ni elegibilidad (HU-5.4 pasos 3 y 4, [Diego], HU-5.2/5.3).
+38. **TODOs pendientes de otros módulos:** ~~`registrarSolicitud` no llama todavía a `lnNotificacion.buscarDonadoresCercanos`~~
+    (**resuelto por [David]**: HU-3.1 quedó conectada en `LnSolicitud.registrarSolicitud`; el aviso va después de guardar y un
+    fallo al avisar no tumba la solicitud, aunque un error de BD al confirmar la transacción sí la revertiría); la ficha del donador no muestra historial ni elegibilidad (HU-5.4 pasos 3 y 4, [Diego], HU-5.2/5.3).
 39. **URL del QR:** el controller la arma con el esquema, el servidor y el puerto de la petición (`ec.getRequestServerName()`,
     cabecera Host) y la vista la escribe dentro de un `<script>` sin escapar para JavaScript. Riesgo bajo (solo se refleja en
     la petición de quien la manipula), pero detrás de un proxy o HTTPS el esquema puede salir mal. Pendiente: configurar la URL
