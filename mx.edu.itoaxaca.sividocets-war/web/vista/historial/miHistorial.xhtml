@@ -1,8 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- Mi historial de donaciones — panel de usuario estático (diseño Stitch v3) -->
+<!-- Mi historial de donaciones (HU-5.2 y HU-5.3) -->
 <!DOCTYPE html>
 <ui:composition xmlns="http://www.w3.org/1999/xhtml"
                 xmlns:h="jakarta.faces.html"
+                xmlns:f="jakarta.faces.core"
                 xmlns:ui="jakarta.faces.facelets"
                 xmlns:p="primefaces"
                 template="/plantillas/plantillaUsuario.xhtml">
@@ -10,108 +11,150 @@
     <ui:param name="menuActivo" value="miHistorial"/>
     <ui:define name="titulo">Mi historial · SIVIDO</ui:define>
 
+    <ui:define name="metadata">
+        <f:metadata>
+            <f:viewAction action="#{historialController.cargar}"/>
+        </f:metadata>
+    </ui:define>
+
     <ui:define name="content">
         <div class="encabezado-pagina">
-            <span class="sobretitulo">Expediente de donador · <span class="mono">DON-OAX-2024-984</span></span>
+            <span class="sobretitulo">Expediente de donador</span>
             <h1>Mi historial de donación</h1>
             <p>Registro de tus donaciones voluntarias, el tiempo de recuperación entre donaciones y las solicitudes a las que estuvieron vinculadas.</p>
         </div>
 
         <div class="grid grid-principal mb-2">
-            <!-- Próxima fecha -->
+            <!-- Próxima fecha (HU-5.3) -->
             <div class="tarjeta tarjeta-borde-rojo">
                 <div class="fila-entre">
                     <h2 class="mb-0">Próxima fecha en que puedes donar</h2>
-                    <span class="etiqueta ambar"><i class="pi pi-hourglass"></i> En periodo de espera</span>
+                    <h:panelGroup rendered="#{historialController.exclusionPermanente}">
+                        <span class="etiqueta roja"><i class="pi pi-ban"></i> No elegible</span>
+                    </h:panelGroup>
+                    <h:panelGroup rendered="#{!historialController.exclusionPermanente and !historialController.sinDonaciones and !historialController.puedeDonar}">
+                        <span class="etiqueta ambar"><i class="pi pi-hourglass"></i> En periodo de espera</span>
+                    </h:panelGroup>
+                    <h:panelGroup rendered="#{!historialController.exclusionPermanente and historialController.puedeDonar}">
+                        <span class="etiqueta verde"><i class="pi pi-check-circle"></i> Ya puedes donar</span>
+                    </h:panelGroup>
                 </div>
-                <div class="fila mt-2">
-                    <span class="icono-caja" style="width:56px;height:56px"><i class="pi pi-calendar-clock" style="font-size:24px"></i></span>
-                    <div>
-                        <span class="numero-grande">15 de mayo de 2024</span><br/>
-                        <span class="texto-sec texto-chico">Última donación: 20 de marzo de 2024</span>
+
+                <!-- Exclusión permanente -->
+                <h:panelGroup rendered="#{historialController.exclusionPermanente}">
+                    <div class="aviso rojo mt-2">
+                        <i class="pi pi-exclamation-triangle"></i>
+                        <p>Por una condición médica registrada en tu expediente, no puedes donar sangre.</p>
                     </div>
-                </div>
-                <div class="fila-entre mt-2 texto-chico">
-                    <span class="negrita">Recuperación</span>
-                    <span class="mono">44 de 56 días (78%)</span>
-                </div>
-                <div class="progreso mt-1"><span style="width:78%"></span></div>
-                <div class="aviso ambar mt-2">
-                    <i class="pi pi-exclamation-triangle"></i>
-                    <p>Por el intervalo mínimo entre donaciones (56 días hombres / 84 días mujeres), la confirmación de
-                        interés en nuevas solicitudes está deshabilitada hasta cumplir tu periodo de recuperación.</p>
-                </div>
+                </h:panelGroup>
+
+                <!-- Sin donaciones -->
+                <h:panelGroup rendered="#{!historialController.exclusionPermanente and historialController.sinDonaciones}">
+                    <p class="texto-sec mt-2">Aún no tienes donaciones registradas.</p>
+                </h:panelGroup>
+
+                <!-- Con donaciones y sin exclusión -->
+                <h:panelGroup rendered="#{!historialController.exclusionPermanente and !historialController.sinDonaciones}">
+                    <div class="fila mt-2">
+                        <span class="icono-caja" style="width:56px;height:56px"><i class="pi pi-calendar-clock" style="font-size:24px"></i></span>
+                        <div>
+                            <span class="numero-grande">
+                                <h:outputText value="#{historialController.proximaFecha}">
+                                    <f:convertDateTime pattern="dd/MM/yyyy" timeZone="America/Mexico_City"/>
+                                </h:outputText>
+                            </span><br/>
+                            <span class="texto-sec texto-chico">Última donación:
+                                <h:outputText value="#{historialController.ultima.fechaDonacion}">
+                                    <f:convertDateTime pattern="dd/MM/yyyy" timeZone="America/Mexico_City"/>
+                                </h:outputText>
+                            </span>
+                        </div>
+                    </div>
+                    <div class="fila-entre mt-2 texto-chico">
+                        <span class="negrita">Recuperación</span>
+                        <span class="mono">#{historialController.diasDesdeUltima} de 56 días (#{historialController.porcentaje}%)</span>
+                    </div>
+                    <div class="progreso mt-1"><span style="width:#{historialController.porcentaje}%"></span></div>
+                    <h:panelGroup rendered="#{!historialController.puedeDonar}">
+                        <div class="aviso ambar mt-2">
+                            <i class="pi pi-exclamation-triangle"></i>
+                            <p>Por el intervalo mínimo entre donaciones, la confirmación de interés en nuevas solicitudes
+                                está deshabilitada hasta cumplir tu periodo de recuperación.</p>
+                        </div>
+                    </h:panelGroup>
+                </h:panelGroup>
+
                 <p class="ayuda texto-chico texto-tenue mt-1 mb-0"><i class="pi pi-info-circle"></i> Fecha orientativa, sujeta a valoración médica en el CETS.</p>
             </div>
 
             <div class="columna">
                 <div class="tarjeta fila">
-                    <span class="grupo-sangre grande">O+<small>POSITIVO</small></span>
+                    <span class="grupo-sangre grande">#{empty sesionController.usuario.perfilClinico.tipoSanguineo ? '?' : sesionController.usuario.perfilClinico.tipoSanguineo}#{sesionController.usuario.perfilClinico.factorRh}<small>GRUPO Y RH</small></span>
                     <div>
                         <span class="texto-chico texto-tenue">Grupo y factor Rh</span><br/>
-                        <strong>O positivo</strong><br/>
-                        <span class="etiqueta verde">Validado CETS</span>
+                        <h:panelGroup rendered="#{empty sesionController.usuario.perfilClinico}">
+                            <span class="texto-chico texto-sec">Completa tu perfil clínico en "Mi perfil".</span>
+                        </h:panelGroup>
                     </div>
                 </div>
                 <div class="tarjeta metrica">
                     <span class="metrica-titulo">Días desde la última donación</span>
-                    <div class="metrica-valor">44 <span class="texto-chico texto-tenue">días</span></div>
+                    <div class="metrica-valor">#{historialController.diasDesdeUltima} <span class="texto-chico texto-tenue">días</span></div>
                     <span class="metrica-nota">Meta: 56 días</span>
                 </div>
             </div>
         </div>
 
-        <!-- Tabla de donaciones -->
+        <!-- Tabla de donaciones (HU-5.2) -->
         <div class="tarjeta mb-2">
             <div class="fila-entre mb-2">
                 <div>
                     <h2 class="mb-0"><i class="pi pi-history texto-rojo"></i> Donaciones registradas</h2>
                     <span class="texto-sec texto-chico">Donaciones capturadas por el personal del CETS Oaxaca.</span>
                 </div>
-                <h:form id="formBuscarHistorial">
-                    <p:inputText placeholder="Buscar folio u hospital..."/>
-                </h:form>
             </div>
-            <div class="tabla-contenedor">
-                <table class="tabla">
-                    <thead>
-                        <tr>
-                            <th>Folio de donación</th>
-                            <th>Fecha y hora</th>
-                            <th>Solicitud vinculada</th>
-                            <th>Estatus</th>
-                            <th>Constancia</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr>
-                            <td><span class="folio">CETS-DON-2024-0192</span></td>
-                            <td>20 mar 2024<span class="sub">08:15 hrs</span></td>
-                            <td><strong>Hospital General "Dr. Aurelio Valdivieso"</strong><span class="sub mono">CETS-OAX-2024-1102</span></td>
-                            <td><span class="estatus activa">Registrada</span></td>
-                            <td><p:button value="Descargar" icon="pi pi-download" styleClass="boton-suave" outcome="/vista/historial/miHistorial"/></td>
-                        </tr>
-                        <tr>
-                            <td><span class="folio">CETS-DON-2023-0845</span></td>
-                            <td>14 nov 2023<span class="sub">07:45 hrs</span></td>
-                            <td><strong>Hospital de la Niñez Oaxaqueña</strong><span class="sub mono">CETS-OAX-2023-8201</span></td>
-                            <td><span class="estatus activa">Registrada</span></td>
-                            <td><p:button value="Descargar" icon="pi pi-download" styleClass="boton-suave" outcome="/vista/historial/miHistorial"/></td>
-                        </tr>
-                        <tr>
-                            <td><span class="folio">CETS-DON-2023-0310</span></td>
-                            <td>10 jun 2023<span class="sub">09:30 hrs</span></td>
-                            <td><strong>Donación voluntaria general</strong><span class="sub">Sin solicitud vinculada</span></td>
-                            <td><span class="estatus activa">Registrada</span></td>
-                            <td><p:button value="Descargar" icon="pi pi-download" styleClass="boton-suave" outcome="/vista/historial/miHistorial"/></td>
-                        </tr>
-                    </tbody>
-                </table>
-                <div class="pie-tabla">
-                    <span>Mostrando 1 a 3 de 3 donaciones</span>
-                    <div class="paginador"><span><i class="pi pi-chevron-left"></i></span><span class="actual">1</span><span><i class="pi pi-chevron-right"></i></span></div>
+
+            <h:panelGroup rendered="#{historialController.sinDonaciones}">
+                <p class="texto-sec">Aún no tienes donaciones registradas.</p>
+            </h:panelGroup>
+
+            <h:panelGroup rendered="#{!historialController.sinDonaciones}">
+                <div class="tabla-contenedor">
+                    <table class="tabla">
+                        <thead>
+                            <tr>
+                                <th>Fecha</th>
+                                <th>Solicitud vinculada</th>
+                                <th>Estatus</th>
+                                <th>Constancia</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <ui:repeat value="#{historialController.donaciones}" var="r">
+                                <tr>
+                                    <td>
+                                        <h:outputText value="#{r.fechaDonacion}">
+                                            <f:convertDateTime pattern="dd/MM/yyyy" timeZone="America/Mexico_City"/>
+                                        </h:outputText>
+                                    </td>
+                                    <td>
+                                        <h:panelGroup rendered="#{r.solicitudReposicionid != null}">
+                                            <strong>#{r.solicitudReposicionid.hospitalid.nombre}</strong>
+                                            <span class="sub mono">#{r.solicitudReposicionid.folioCETS}</span>
+                                        </h:panelGroup>
+                                        <h:panelGroup rendered="#{r.solicitudReposicionid == null}">
+                                            <strong>Donación voluntaria general</strong>
+                                            <span class="sub">Sin solicitud vinculada</span>
+                                        </h:panelGroup>
+                                    </td>
+                                    <td><span class="estatus activa">Registrada</span></td>
+                                    <td><p:button value="Descargar" icon="pi pi-download" styleClass="boton-suave" disabled="true"/></td>
+                                </tr>
+                            </ui:repeat>
+                        </tbody>
+                    </table>
                 </div>
-            </div>
+            </h:panelGroup>
         </div>
 
         <!-- Intervalos -->
