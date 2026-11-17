@@ -82,7 +82,7 @@
                             </span>
                             <div style="flex:1"><strong>Grupo y factor Rh</strong><br/>
                                 <span class="texto-chico texto-sec">#{empty donacionController.donador.perfilClinico ? 'Sin perfil clínico' : 'Perfil clínico'}</span></div>
-                            <h:panelGroup rendered="#{donacionController.donador.exclusionPermanente}" styleClass="estatus cancelada">Exclusión permanente</h:panelGroup>
+                            <h:panelGroup rendered="#{donacionController.exclusionPermanente}" styleClass="estatus cancelada">Exclusión permanente</h:panelGroup>
                         </div>
 
                         <!-- HU-1.4 Contacto enmascarado -->
@@ -97,12 +97,27 @@
                     <div class="tarjeta">
                         <h3><i class="pi pi-calendar" style="color:var(--azul)"></i> Próxima fecha para donar</h3>
                         <div class="tarjeta-plana">
-                            <!-- TODO HU-5.4 (4): lnDonacion.obtenerElegibilidad / verificarExclusion de [Diego] (HU-5.3) -->
-                            <h:panelGroup rendered="#{donacionController.donador.exclusionPermanente}">
+                            <!-- HU-5.4 (4): HU-5.3 (obtenerElegibilidad, verificarExclusion, esElegible) -->
+                            <h:panelGroup rendered="#{donacionController.exclusionPermanente}">
                                 <span class="numero-grande" style="font-size:22px">Exclusión permanente</span>
+                                <p class="texto-chico texto-sec mt-1 mb-0">No puede donar por una condición médica registrada.</p>
                             </h:panelGroup>
-                            <h:panelGroup rendered="#{not donacionController.donador.exclusionPermanente}">
-                                <span class="texto-sec">Se calcula con HU-5.3 (pendiente de integrar).</span>
+                            <h:panelGroup rendered="#{not donacionController.exclusionPermanente and donacionController.sinDonaciones}">
+                                <span class="numero-grande" style="font-size:22px">Sin donaciones registradas</span>
+                                <p class="texto-chico texto-sec mt-1 mb-0">No hay una fecha de espera: puede donar cuando el médico lo valore.</p>
+                            </h:panelGroup>
+                            <h:panelGroup rendered="#{not donacionController.exclusionPermanente and not donacionController.sinDonaciones}">
+                                <span class="numero-grande" style="font-size:22px">
+                                    <h:outputText value="#{donacionController.proximaFecha}">
+                                        <f:convertDateTime pattern="dd-MMM-yyyy" locale="es_MX" timeZone="UTC"/>
+                                    </h:outputText>
+                                </span>
+                                <span class="etiqueta #{donacionController.puedeDonar ? 'verde' : 'ambar'}" style="margin-left:.5rem">
+                                    #{donacionController.puedeDonar ? 'Ya puede donar' : 'En periodo de espera'}</span>
+                                <p class="texto-chico texto-sec mt-1 mb-0">Última donación:
+                                    <h:outputText value="#{donacionController.ultimaDonacion.fechaDonacion}">
+                                        <f:convertDateTime pattern="dd-MMM-yyyy" locale="es_MX" timeZone="UTC"/>
+                                    </h:outputText></p>
                             </h:panelGroup>
                             <p class="texto-chico texto-sec mt-1 mb-0"><i class="pi pi-info-circle"></i> Fecha orientativa, sujeta a valoración médica del CETS.</p>
                         </div>
@@ -124,15 +139,15 @@
                                 <f:param name="donador" value="#{donacionController.donador.id}"/>
                             </p:button>
                         </div>
-                        <!-- TODO HU-5.4 (3): cambiar por lnDonacion.obtenerHistorial(donador) de [Diego] (HU-5.2) -->
-                        <h:panelGroup rendered="#{empty donacionController.donador.registroDonacionList}" layout="block" styleClass="texto-centro texto-sec" style="padding:1.5rem">
+                        <!-- HU-5.4 (3): lnDonacion.obtenerHistorial(donador) (HU-5.2) -->
+                        <h:panelGroup rendered="#{empty donacionController.historial}" layout="block" styleClass="texto-centro texto-sec" style="padding:1.5rem">
                             Este donador aún no tiene donaciones registradas en el CETS.
                         </h:panelGroup>
-                        <h:panelGroup rendered="#{not empty donacionController.donador.registroDonacionList}" layout="block" styleClass="tabla-contenedor">
+                        <h:panelGroup rendered="#{not empty donacionController.historial}" layout="block" styleClass="tabla-contenedor">
                             <table class="tabla">
                                 <thead><tr><th>Fecha de la donación</th><th>Solicitud asociada</th><th>Próxima fecha</th></tr></thead>
                                 <tbody>
-                                    <ui:repeat value="#{donacionController.donador.registroDonacionList}" var="r">
+                                    <ui:repeat value="#{donacionController.historial}" var="r">
                                         <tr>
                                             <td><div class="fila" style="flex-wrap:nowrap"><i class="pi pi-check-circle" style="color:var(--verde)"></i>
                                                 <strong class="mono"><h:outputText value="#{r.fechaDonacion}">
@@ -152,7 +167,7 @@
                                     </ui:repeat>
                                 </tbody>
                             </table>
-                            <div class="pie-tabla"><span>#{donacionController.donador.registroDonacionList.size()} donaciones registradas</span></div>
+                            <div class="pie-tabla"><span>#{donacionController.historial.size()} donaciones registradas</span></div>
                         </h:panelGroup>
                     </div>
 

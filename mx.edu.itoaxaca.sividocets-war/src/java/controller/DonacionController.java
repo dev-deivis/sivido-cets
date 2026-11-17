@@ -51,6 +51,13 @@ public class DonacionController implements Serializable {
     private List<HistorialExterno> historialExterno;
     private List<SolicitudReposicion> solicitudesActivas;
 
+    // HU-5.4 (3 y 4): historial y elegibilidad del donador seleccionado (métodos de LnDonacion, HU-5.2 / 5.3)
+    private List<RegistroDonacion> historial;
+    private RegistroDonacion ultimaDonacion;
+    private Date proximaFecha;
+    private boolean exclusionPermanente;
+    private boolean puedeDonar;
+
     public DonacionController() {
         registro = new RegistroDonacion();
         registro.setUsuarioid(new Usuario());
@@ -82,8 +89,11 @@ public class DonacionController implements Serializable {
             return;
         }
         historialExterno = lnDonacion.obtenerHistorialExterno(donador);
-        // TODO HU-5.4 (3 y 4): historial y elegibilidad con los métodos de [Diego]
-        // (lnDonacion.obtenerHistorial / obtenerElegibilidad / verificarExclusion) cuando los suba.
+        historial = lnDonacion.obtenerHistorial(donador);                    // HU-5.4 (3) → HU-5.2
+        ultimaDonacion = lnDonacion.obtenerElegibilidad(donador);            // HU-5.4 (4) → HU-5.3
+        proximaFecha = lnDonacion.obtenerProximaFecha(ultimaDonacion);
+        exclusionPermanente = lnDonacion.verificarExclusion(donador);
+        puedeDonar = lnDonacion.esElegible(donador);
     }
 
     // HU-5.1 f:viewAction de capturarDonacion?donador=: muestra el nombre del donador elegido
@@ -199,6 +209,30 @@ public class DonacionController implements Serializable {
 
     public List<Usuario> getResultados() {
         return resultados;
+    }
+
+    public List<RegistroDonacion> getHistorial() {
+        return historial;
+    }
+
+    public RegistroDonacion getUltimaDonacion() {
+        return ultimaDonacion;
+    }
+
+    public Date getProximaFecha() {
+        return proximaFecha;
+    }
+
+    public boolean isExclusionPermanente() {
+        return exclusionPermanente;
+    }
+
+    public boolean isPuedeDonar() {
+        return puedeDonar;
+    }
+
+    public boolean isSinDonaciones() {
+        return historial == null || historial.isEmpty();
     }
 
     public List<HistorialExterno> getHistorialExterno() {
