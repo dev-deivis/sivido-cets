@@ -13,6 +13,7 @@ import java.time.ZoneId;
 import java.util.Date;
 import java.util.List;
 import modelo.HistorialExterno;
+import modelo.PersonalCETS;
 import modelo.RegistroDonacion;
 import modelo.SolicitudReposicion;
 import modelo.Usuario;
@@ -50,20 +51,31 @@ public class LnDonacion {
     // ===================== [Galilea] =====================
 
     // HU-5.1 (1.1) registrarDonacion. r trae usuarioid (id del donador), personalCETSUsuarioid (personal en
-    // sesión), fechaDonacion y, opcional, solicitudReposicionid (id o vacío = donación general).
+    // sesión), fechaDonacion y, opcional, solicitudReposicionid (id o vacío = donación general; si viene, debe estar Activa).
     public boolean registrarDonacion(RegistroDonacion r) {
-        Usuario donador = usuarioF.find(r.getUsuarioid().getId());
-        if (donador == null || r.getFechaDonacion() == null
-                || aLocalDate(r.getFechaDonacion()).isAfter(LocalDate.now(ZONA))) {
+        // Sin donador, sin personal o sin fecha no se puede registrar (regresa false, sin excepción)
+        if (r.getUsuarioid() == null || r.getUsuarioid().getId() == null
+                || r.getPersonalCETSUsuarioid() == null || r.getPersonalCETSUsuarioid().getUsuarioid() == null
+                || r.getFechaDonacion() == null || aLocalDate(r.getFechaDonacion()).isAfter(LocalDate.now(ZONA))) {
             return false;
         }
-        r.setUsuarioid(donador);
-        r.setPersonalCETSUsuarioid(personalF.find(r.getPersonalCETSUsuarioid().getUsuarioid()));
-        if (r.getPersonalCETSUsuarioid() == null) {
-            return false;                                  // solo el personal del CETS registra donaciones
+        Usuario donador = usuarioF.find(r.getUsuarioid().getId());
+        PersonalCETS personal = personalF.find(r.getPersonalCETSUsuarioid().getUsuarioid());
+        if (donador == null || personal == null || !personal.getActivo()) {
+            return false;                                  // solo el personal CETS activo registra donaciones
         }
+        // La solicitud es opcional (donación general); si viene, debe existir y estar Activa
         SolicitudReposicion s = r.getSolicitudReposicionid();
-        r.setSolicitudReposicionid(s == null || s.getId() == null ? null : solicitudF.find(s.getId()));
+        SolicitudReposicion solicitud = null;
+        if (s != null && s.getId() != null) {
+            solicitud = solicitudF.find(s.getId());
+            if (solicitud == null || !"Activa".equals(solicitud.getEstatus())) {
+                return false;
+            }
+        }
+        r.setUsuarioid(donador);
+        r.setPersonalCETSUsuarioid(personal);
+        r.setSolicitudReposicionid(solicitud);
         r.setProximaFechaElegible(calcularProximaFecha(r.getFechaDonacion()));   // 1.1.1.2
         registroF.create(r);                                                     // 1.1.2
         donador.getRegistroDonacionList().add(r);        // relación bidireccional al día (caché de JPA)
