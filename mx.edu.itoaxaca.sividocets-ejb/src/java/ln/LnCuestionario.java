@@ -76,7 +76,7 @@ public class LnCuestionario {
         SolicitudReposicion solicitud = null;
         if (c.getSolicitudReposicionid() != null && c.getSolicitudReposicionid().getId() != null) {
             solicitud = solicitudF.find(c.getSolicitudReposicionid().getId());
-            if (solicitud == null) {
+            if (solicitud == null || !"Activa".equals(solicitud.getEstatus())) {
                 return 0;
             }
         }
@@ -95,18 +95,31 @@ public class LnCuestionario {
         c.setRespuestaCriterioList(respuestas);
         c.setResultado(evaluarRespuestas(respuestas));
         c.setTiempoEsperaDias(NO_APTO.equals(c.getResultado()) ? calcularTiempoEspera(respuestas) : null);
-        return cuestionarioF.crearYObtenerId(c);
+        int id = cuestionarioF.crearYObtenerId(c);
+        // Referencias inversas (#35)
+        agregar(usuario.getCuestionarioRespuestaList(), c);
+        if (solicitud != null) {
+            agregar(solicitud.getCuestionarioRespuestaList(), c);
+        }
+        return id;
     }
 
-    // HU-4.2 Resultado ya evaluado. c.id lleno; si c.usuarioid viene lleno, el cuestionario debe ser de ese
+    // Agrega al lado inverso de una relación bidireccional (null-safe)
+    private <T> void agregar(List<T> lista, T elemento) {
+        if (lista != null) {
+            lista.add(elemento);
+        }
+    }
+
+    // HU-4.2 Resultado ya evaluado. c.id y c.usuarioid obligatorios; el cuestionario debe ser de ese
     // usuario (nadie lee resultados ajenos). null si no existe.
     public CuestionarioRespuesta obtenerResultado(CuestionarioRespuesta c) {
-        if (c == null || c.getId() == null) {
+        boolean traeUsuario = c != null && c.getUsuarioid() != null && c.getUsuarioid().getId() != null;
+        if (!traeUsuario || c.getId() == null) {
             return null;
         }
         CuestionarioRespuesta encontrado = cuestionarioF.find(c.getId());
-        boolean traeUsuario = c.getUsuarioid() != null && c.getUsuarioid().getId() != null;
-        boolean ajeno = encontrado != null && traeUsuario
+        boolean ajeno = encontrado != null
                 && !encontrado.getUsuarioid().getId().equals(c.getUsuarioid().getId());
         return ajeno ? null : encontrado;
     }

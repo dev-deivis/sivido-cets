@@ -42,6 +42,10 @@ public class LnSolicitud {
     @EJB
     private UsuarioFacade usuarioF;
 
+    // [David] HU-3.1: avisa a los donadores compatibles y cercanos al registrar la solicitud
+    @EJB
+    private LnNotificacion lnNotificacion;
+
     // HU-2.4 (1.1) validarFolio: formato válido y sin otra solicitud Activa con el mismo folio
     public boolean validarFolio(SolicitudReposicion s) {
         if (!validarFormatoFolio(s)) {
@@ -80,8 +84,8 @@ public class LnSolicitud {
         s.setUsuarioid(usuario);
         s.setUuidPublico(UUID.randomUUID().toString());                  // 2.1.2.1.1 generarUuidPublico
         s.setFechaHoraRegistro(new Date());
-        solicitudF.create(s);                                            // 2.1.3 guardarSolicitud
-        // TODO HU-3.1: lnNotificacion.buscarDonadoresCercanos(s) cuando [Alex] lo suba
+        solicitudF.crearYObtenerId(s);                                   // 2.1.3 guardarSolicitud
+        lnNotificacion.buscarDonadoresCercanos(s);                       // [David] HU-3.1 (no lanza excepción)
         return true;
     }
 

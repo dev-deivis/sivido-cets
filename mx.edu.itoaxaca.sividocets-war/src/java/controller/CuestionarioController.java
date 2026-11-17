@@ -88,7 +88,7 @@ public class CuestionarioController implements Serializable {
         cuestionario.setRespuestaCriterioList(respuestas);
         int id = lnCuestionario.registrarRespuestas(cuestionario);
         if (id == 0) {
-            error("No se pudo guardar el cuestionario: contesta todas las preguntas");
+            error("No se pudo guardar el cuestionario: contesta todas las preguntas y verifica que la solicitud siga activa");
             return null;
         }
         return "/vista/notificaciones/resultado?faces-redirect=true&id=" + id;

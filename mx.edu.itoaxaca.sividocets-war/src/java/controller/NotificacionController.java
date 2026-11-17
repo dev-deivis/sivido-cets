@@ -53,6 +53,7 @@ public class NotificacionController implements Serializable {
     private SolicitudReposicion solicitud;
     private Notificacion aviso;
     private boolean compatible;
+    private String motivoRechazo;   // null = puede confirmar; si no, por qué no (lo decide LnNotificacion)
 
     // Campo propio de la vista (no existe en la entidad): casilla de aceptación de la vista confirmarInteres
     private boolean aceptaContacto;
@@ -87,6 +88,7 @@ public class NotificacionController implements Serializable {
         n.setUsuarioid(sesion.getUsuario());
         n.setSolicitudReposicionid(solicitud);
         aviso = lnNotificacion.obtenerNotificacion(n);
+        motivoRechazo = lnNotificacion.motivoRechazoInteres(sesion.getUsuario(), solicitud);
     }
 
     // HU-3.3 Confirmar interés: solo si el donador aceptó compartir su contacto y es elegible (lo decide el Ln)
@@ -101,8 +103,8 @@ public class NotificacionController implements Serializable {
         interes.setUsuario(sesion.getUsuario());
         SolicitudReposicion registrada = lnNotificacion.registrarInteres(interes);
         if (registrada == null) {
-            error("No se pudo registrar tu interés: la solicitud ya no está activa o todavía no cumples "
-                    + "con los requisitos para donar");
+            String motivo = lnNotificacion.motivoRechazoInteres(sesion.getUsuario(), interes.getSolicitudReposicion());
+            error("No se pudo registrar tu interés. " + (motivo == null ? "" : motivo));
             return null;
         }
         FacesContext.getCurrentInstance().getExternalContext().getFlash().setKeepMessages(true);
@@ -167,6 +169,14 @@ public class NotificacionController implements Serializable {
 
     public Notificacion getAviso() {
         return aviso;
+    }
+
+    public String getMotivoRechazo() {
+        return motivoRechazo;
+    }
+
+    public boolean isPuedeConfirmar() {
+        return solicitud != null && motivoRechazo == null;
     }
 
     public boolean isCompatible() {

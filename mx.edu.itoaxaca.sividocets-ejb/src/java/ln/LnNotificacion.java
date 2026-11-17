@@ -16,6 +16,8 @@ import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.Date;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import modelo.Hospital;
 import modelo.Interes;
 import modelo.InteresPK;
@@ -54,7 +56,7 @@ public class LnNotificacion {
     @EJB
     private LnCuentas lnCuentas;
 
-    // HU-3.3: esElegible(Usuario) lo escribe [Diego] en LnDonacion (HU-5.3)
+    // HU-3.3: LnDonacion.esElegible(Usuario) (HU-5.3, [Diego])
     @EJB
     private LnDonacion lnDonacion;
 
@@ -67,6 +69,17 @@ public class LnNotificacion {
     // No avisa si la solicitud no existe o ya no está Activa, al propio solicitante, ni dos veces al mismo
     // donador (la BD tiene UNIQUE Usuarioid + SolicitudReposicionid).
     public void buscarDonadoresCercanos(SolicitudReposicion s) {
+        try {
+            avisarDonadores(s);
+        } catch (RuntimeException e) {
+            // Un fallo al avisar no debe tumbar el registro de la solicitud que lo disparó (LnSolicitud);
+            // se captura aquí dentro para que el contenedor no marque la transacción para rollback.
+            Logger.getLogger(LnNotificacion.class.getName()).log(Level.WARNING,
+                    "No se pudieron crear los avisos de la solicitud", e);
+        }
+    }
+
+    private void avisarDonadores(SolicitudReposicion s) {
         if (s == null || s.getId() == null) {
             return;
         }
@@ -91,27 +104,32 @@ public class LnNotificacion {
                 n.setFechaEnvio(new Date());
                 n.setEstatus("Enviada");
                 notificacionF.create(n);
+                // Referencias inversas (#35): sin esto el caché compartido deja las listas desactualizadas
+                agregar(donador.getNotificacionList(), n);
+                agregar(solicitud.getNotificacionList(), n);
             }
             // Fuera del radio: no se crea (en el diagrama, «destroy» Notificacion)
         }
     }
 
     // HU-3.1 Obtener un aviso. Se busca por n.id o, si no viene, por el par n.usuarioid + n.solicitudReposicionid.
-    // Si n.usuarioid viene lleno, el aviso debe ser de ese usuario (nadie lee avisos ajenos). null si no existe.
+    // n.usuarioid es obligatorio y el aviso debe ser de ese usuario (nadie lee avisos ajenos). null si no existe.
     public Notificacion obtenerNotificacion(Notificacion n) {
+        boolean traeUsuario = n != null && n.getUsuarioid() != null && n.getUsuarioid().getId() != null;
+        if (!traeUsuario) {
+            return null;
+        }
         Notificacion encontrada = null;
-        boolean traeUsuario = n.getUsuarioid() != null && n.getUsuarioid().getId() != null;
         if (n.getId() != null) {
             encontrada = notificacionF.find(n.getId());
-        } else if (traeUsuario && n.getSolicitudReposicionid() != null && n.getSolicitudReposicionid().getId() != null) {
+        } else if (n.getSolicitudReposicionid() != null && n.getSolicitudReposicionid().getId() != null) {
             Usuario usuario = usuarioF.find(n.getUsuarioid().getId());
             SolicitudReposicion solicitud = solicitudF.find(n.getSolicitudReposicionid().getId());
             if (usuario != null && solicitud != null) {
                 encontrada = notificacionF.buscarPorUsuarioYSolicitud(usuario, solicitud);
             }
         }
-        boolean ajena = encontrada != null && traeUsuario
-                && !encontrada.getUsuarioid().getId().equals(n.getUsuarioid().getId());
+        boolean ajena = encontrada != null && !encontrada.getUsuarioid().getId().equals(n.getUsuarioid().getId());
         return ajena ? null : encontrada;
     }
 
@@ -132,25 +150,49 @@ public class LnNotificacion {
         return solicitudF.find(s.getId());
     }
 
+    // HU-3.3 ¿Puede este donador confirmar interés en esta solicitud? null si sí; si no, el motivo en
+    // texto para la vista. Lo usa registrarInteres y el controller (para avisar y deshabilitar el botón).
+    // u y s traen su id (se vuelven a leer de la BD).
+    public String motivoRechazoInteres(Usuario u, SolicitudReposicion s) {
+        Usuario usuario = u == null || u.getId() == null ? null : usuarioF.find(u.getId());
+        SolicitudReposicion solicitud = s == null || s.getId() == null ? null : solicitudF.find(s.getId());
+        if (usuario == null || solicitud == null) {
+            return "La solicitud no existe.";
+        }
+        if (!"Activa".equals(solicitud.getEstatus())) {
+            return "La solicitud ya no está activa (estatus: " + solicitud.getEstatus() + ").";
+        }
+        if (solicitud.getUsuarioid().getId().equals(usuario.getId())) {
+            return "Esta solicitud la registraste tú; no puedes confirmar interés en ella.";
+        }
+        PerfilClinico perfil = perfilF.find(usuario.getId());
+        if (perfil == null || perfil.getTipoSanguineo() == null || perfil.getFactorRh() == null) {
+            return "Completa tu perfil clínico (grupo sanguíneo y Rh) para confirmar interés.";
+        }
+        if (!validarCompatibilidad(perfil, solicitud)) {
+            return "Tu grupo sanguíneo (" + perfil.getTipoSanguineo() + perfil.getFactorRh()
+                    + ") no es compatible con esta solicitud (" + solicitud.getTipoSanguineo()
+                    + solicitud.getFactorRh() + ").";
+        }
+        if (!lnDonacion.esElegible(usuario)) {
+            return "Todavía no cumples con los requisitos para donar (periodo de recuperación o exclusión).";
+        }
+        return null;
+    }
+
     // HU-3.3 Confirmar interés. i.usuario es el usuario en sesión (lo pone el controller) e
     // i.solicitudReposicion trae el id de la solicitud. Regresa la solicitud si el interés quedó registrado
-    // y null si no se pudo: solicitud inexistente o ya no Activa, o donador no elegible (LnDonacion.esElegible).
+    // y null si no se pudo (ver motivoRechazoInteres: solicitud inexistente o no Activa, solicitante,
+    // grupo/Rh incompatible o donador no elegible).
     // Confirmar dos veces es inofensivo: no se duplica el renglón (PK compartida Usuarioid + SolicitudReposicionid).
     public SolicitudReposicion registrarInteres(Interes i) {
         boolean completo = i.getUsuario() != null && i.getUsuario().getId() != null
                 && i.getSolicitudReposicion() != null && i.getSolicitudReposicion().getId() != null;
-        if (!completo) {
+        if (!completo || motivoRechazoInteres(i.getUsuario(), i.getSolicitudReposicion()) != null) {
             return null;
         }
         Usuario usuario = usuarioF.find(i.getUsuario().getId());
         SolicitudReposicion solicitud = solicitudF.find(i.getSolicitudReposicion().getId());
-        if (usuario == null || solicitud == null || !"Activa".equals(solicitud.getEstatus())) {
-            return null;
-        }
-        boolean elegible = lnDonacion.esElegible(usuario);
-        if (!elegible) {
-            return null;
-        }
         InteresPK pk = new InteresPK(usuario.getId(), solicitud.getId());
         if (interesF.find(pk) == null) {
             i.setInteresPK(pk);
@@ -158,8 +200,18 @@ public class LnNotificacion {
             i.setSolicitudReposicion(solicitud);
             i.setFechaInteres(new Date());
             interesF.create(i);
+            // Referencias inversas (#35)
+            agregar(usuario.getInteresList(), i);
+            agregar(solicitud.getInteresList(), i);
         }
         return solicitud;
+    }
+
+    // Agrega al lado inverso de una relación bidireccional (null-safe)
+    private <T> void agregar(List<T> lista, T elemento) {
+        if (lista != null) {
+            lista.add(elemento);
+        }
     }
 
     // HU-3.1 PerfilClinico.validarCompatibilidad (el diagrama la pone en la entidad; aquí va en el Ln):
