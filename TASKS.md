@@ -2135,6 +2135,7 @@ quedó el trabajo en este documento.
 | D15 | Combo "Región" | Se **elimina**: no existe columna y la ubicación (D1) lo reemplaza. | [DAVID] HU-1.3 (hecho) |
 | D16 | Controller de miPerfil | `PerfilController` (`@ViewScoped`) y no `CuentasController` (`@RequestScoped`): el perfil debe conservarse entre los clics de la vista. Los dos usan `LnCuentas`. | [DAVID] HU-1.3 / HU-3.4 (hecho) |
 | D17 | Cuestionario Apto y confirmar interés | El resultado **Apto** del cuestionario es **orientativo, no obligatorio**: `registrarInteres` no lo exige. Sí exige solicitud Activa, que el donador no sea el solicitante, compatibilidad tipo/Rh y `esElegible` (56 días y exclusión permanente). | [Alex] HU-3.3 / HU-4.2 |
+| D18 | Cuándo no se registra una donación | **No se puede registrar una donación si el donador tiene exclusión permanente, está dentro de 56 días, es incompatible con la solicitud o ya donó ese día.** Lo valida `LnDonacion.registrarDonacion` (vía `motivoRechazoDonacion`); la vista muestra el motivo y deshabilita el botón. La donación general (sin solicitud) no revisa compatibilidad. | [DAVID] HU-5.1 |
 
 ---
 
@@ -2323,6 +2324,10 @@ Siguen **abiertas**: necesitan una decisión del equipo o del profe. Lo ya resue
       `diasDesdeUltimaDonacion` y `porcentajeRecuperacion` (datos de la tarjeta de recuperación). `HistorialController` es
       `@RequestScoped` **a propósito**: solo consulta en el `f:viewAction`. Si se agrega AJAX (botones o paginador), cambiarlo a
       `@ViewScoped` con `Serializable`.
+    - **D18 ([David]):** `LnDonacion.motivoRechazoDonacion(Usuario, SolicitudReposicion)` y su sobrecarga
+      `motivoRechazoDonacion(RegistroDonacion)` (esta última también revisa "ya donó ese día"). `registrarDonacion` conserva su
+      firma y regresa `false` al rechazar, igual que antes; el controller usa el motivo para mostrarlo y deshabilitar el botón.
+      `LnDonacion` inyecta ahora `PerfilClinicoFacade` y `LnCuentas` (sin dependencia circular: `LnCuentas` solo usa facades).
     - `LnSolicitud.validarFormatoFolio` es público (en el diagrama es de la entidad) y `verificarFolioUnico` quedó dentro de
       `validarFolio`.
     - **HU-3.1 a 4.3 ([Alex]):** métodos extra que no están en los diagramas: `LnNotificacion.listarMisNotificaciones`,
@@ -2351,9 +2356,10 @@ Siguen **abiertas**: necesitan una decisión del equipo o del profe. Lo ya resue
     (aceptado en HU-1.4 por la regla de no modificar la entidad).
 41. **`buscarDonadores` no escapa `%` ni `_`:** la consulta está parametrizada (sin inyección SQL), pero buscar `%` lista a
     todos los donadores con perfil. Solo lo usa el CETS. Pendiente.
-42. **Donaciones duplicadas el mismo día (pendiente, NO implementado):** `registrarDonacion` permite registrar dos veces al
-    mismo donador en la misma fecha; el diagrama no define la regla y la BD no tiene unicidad. Decidir la regla (y si
-    también debe respetar el periodo de 56 días desde la última donación) antes de agregarla.
+42. **Donaciones duplicadas el mismo día (cerrada):** `LnDonacion.registrarDonacion` ya rechaza una segunda donación del mismo
+    donador en la misma fecha (y, por D18, también la que cae dentro de los 56 días, con exclusión permanente o incompatible
+    con la solicitud). Pendiente menor: `esElegible` compara con **hoy**, no con `fechaDonacion`; una donación con fecha
+    pasada se valida contra el último registro y la fecha de hoy.
 43. **Validación en el Ln de `registrarSolicitud` y `registrarDonacion`:** se agregaron (grupo ∈ {A,B,AB,O}, Rh ∈ {+,−},
     hospital y usuario existentes; donación con donador y personal CETS **activo** existentes, y solicitud asociada Activa).
     No están en los diagramas; los diagramas tampoco dicen qué mensaje mostrar cuando el Ln regresa `false`, así que los

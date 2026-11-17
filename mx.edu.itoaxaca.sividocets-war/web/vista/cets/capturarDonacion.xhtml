@@ -107,17 +107,26 @@
                             <f:selectItems value="#{donacionController.solicitudesActivas}" var="s"
                                            itemLabel="#{s.folioCETS} - #{s.hospitalid.nombre} (#{s.tipoSanguineo}#{s.factorRh})"
                                            itemValue="#{s.id}"/>
+                            <!-- D18: al cambiar la solicitud se recalcula si el donador puede donar para ella -->
+                            <p:ajax event="change" listener="#{donacionController.actualizarMotivo}" update="zonaAcciones"/>
                         </p:selectOneMenu>
                         <span class="ayuda">Vincula la donación a una solicitud activa o regístrala como donación general.</span>
                     </div>
 
-                    <div class="acciones-formulario">
-                        <p:button outcome="/vista/cets/donadores" value="Descartar" icon="pi pi-times" styleClass="ui-button-secondary"/>
-                        <p:commandButton value="Registrar donación" icon="pi pi-check-circle"
-                                         action="#{donacionController.registrarDonacion}"
-                                         process="@this fecha solicitud" update="@form"
-                                         disabled="#{empty donacionController.registro.usuarioid.id}"/>
-                    </div>
+                    <h:panelGroup id="zonaAcciones" layout="block">
+                        <!-- D18: motivo por el que no se puede registrar (exclusión, 56 días, mismo día, incompatible) -->
+                        <h:panelGroup rendered="#{not empty donacionController.motivoRechazo}" layout="block" styleClass="aviso ambar mb-2">
+                            <i class="pi pi-exclamation-triangle"></i>
+                            <p class="texto-chico">#{donacionController.motivoRechazo}</p>
+                        </h:panelGroup>
+                        <div class="acciones-formulario">
+                            <p:button outcome="/vista/cets/donadores" value="Descartar" icon="pi pi-times" styleClass="ui-button-secondary"/>
+                            <p:commandButton value="Registrar donación" icon="pi pi-check-circle"
+                                             action="#{donacionController.registrarDonacion}"
+                                             process="@this fecha solicitud" update="@form"
+                                             disabled="#{empty donacionController.registro.usuarioid.id or not empty donacionController.motivoRechazo}"/>
+                        </div>
+                    </h:panelGroup>
                 </h:form>
             </div>
         </div>

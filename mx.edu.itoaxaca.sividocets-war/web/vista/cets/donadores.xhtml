@@ -135,10 +135,16 @@
                                     <span class="texto-chico texto-sec">Donaciones registradas por el personal del CETS Oaxaca.</span>
                                 </div>
                             </div>
-                            <p:button outcome="/vista/cets/capturarDonacion" value="Registrar donación" icon="pi pi-plus" styleClass="boton-suave">
+                            <p:button outcome="/vista/cets/capturarDonacion" value="Registrar donación" icon="pi pi-plus" styleClass="boton-suave"
+                                      disabled="#{not empty donacionController.motivoRechazo}">
                                 <f:param name="donador" value="#{donacionController.donador.id}"/>
                             </p:button>
                         </div>
+                        <!-- D18: por qué no se puede registrar una donación de este donador -->
+                        <h:panelGroup rendered="#{not empty donacionController.motivoRechazo}" layout="block" styleClass="aviso ambar mb-2">
+                            <i class="pi pi-exclamation-triangle"></i>
+                            <p class="texto-chico">#{donacionController.motivoRechazo}</p>
+                        </h:panelGroup>
                         <!-- HU-5.4 (3): lnDonacion.obtenerHistorial(donador) (HU-5.2) -->
                         <h:panelGroup rendered="#{empty donacionController.historial}" layout="block" styleClass="texto-centro texto-sec" style="padding:1.5rem">
                             Este donador aún no tiene donaciones registradas en el CETS.
