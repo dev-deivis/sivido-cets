@@ -7,6 +7,7 @@ import jakarta.faces.context.FacesContext;
 import jakarta.faces.view.ViewScoped;
 import jakarta.inject.Inject;
 import jakarta.inject.Named;
+import java.io.IOException;
 import java.io.Serializable;
 import java.util.List;
 import ln.LnSolicitud;
@@ -78,17 +79,24 @@ public class SolicitudController implements Serializable {
             return "/vista/solicitudes/misSolicitudes?faces-redirect=true";
         }
         validarFolio();
-        error("duplicado".equals(estadoFolio)
-                ? "Ya existe una solicitud activa con ese folio"
-                : "El folio debe tener el formato CETS-OAX-AAAA-NNNN");
+        if ("duplicado".equals(estadoFolio)) {
+            error("Ya existe una solicitud activa con ese folio");
+        } else if ("valido".equals(estadoFolio)) {
+            error("Elige el grupo sanguíneo, el factor Rh y un hospital de la lista");
+        } else {
+            error("El folio debe tener el formato CETS-OAX-AAAA-NNNN");
+        }
         return null;
     }
 
     // HU-2.3 (2) listarMisSolicitudes (f:viewAction al abrir misSolicitudes)
-    public void listarMisSolicitudes() {
-        if (sesion.getUsuario() != null) {
-            misSolicitudes = lnSolicitud.listarMisSolicitudes(sesion.getUsuario());
+    public void listarMisSolicitudes() throws IOException {
+        // verificar() redirige si no hay sesión o si el rol no es "usuario" (por ejemplo, personal CETS)
+        sesion.verificar();
+        if (FacesContext.getCurrentInstance().getResponseComplete()) {
+            return;
         }
+        misSolicitudes = lnSolicitud.listarMisSolicitudes(sesion.getUsuario());
     }
 
     // HU-2.2 / HU-1.4 obtenerPublicacion (f:viewAction al abrir publicacion?uuid=)
@@ -99,7 +107,8 @@ public class SolicitudController implements Serializable {
             return;
         }
         solicitud = encontrada;
-        urlPublicacion = servidor() + lnSolicitud.generarPublicacion(solicitud);   // HU-2.2 generarPublicacion
+        String ruta = lnSolicitud.generarPublicacion(solicitud);                   // HU-2.2 generarPublicacion
+        urlPublicacion = ruta == null ? null : servidor() + ruta;
     }
 
     public List<SolicitudReposicion> getMisSolicitudesFiltradas() {
