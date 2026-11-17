@@ -820,7 +820,7 @@ Se hace al final, cuando el código de todos esté en `main`, para que el diagra
       `verificarFolioUnico` (HU-2.1/2.4).
 - [ ] **D7:** en las secuencias, `UIAjustes` pasa a `miPerfil` (HU-3.4) y a `criteriosExclusion` (HU-4.3).
       `UIBuscarDonador`/`UIFichaDonador` pasan a `donadores` (HU-5.4, HU-7.3).
-- [ ] **D10:** en HU-5.3 y HU-5.4, `verificarExclusion` lee `Usuario.exclusionPermanente`; ya no se recorren los
+- [x] **D10:** en HU-5.3 y HU-5.4, `verificarExclusion` lee `Usuario.exclusionPermanente`; ya no se recorren los
       padecimientos.
 - [ ] Revisar con el profe y subir el `.vpp` actualizado.
 
@@ -1239,7 +1239,7 @@ public List<Usuario> buscarDonadores(String texto)
 
 - [x] `buscarDonadores` en `UsuarioFacade`
 - [x] `buscarDonador(Usuario)` en `LnDonacion`
-- [ ] Ficha usando los métodos de [Diego]
+- [x] Ficha usando los métodos de [Diego]
 - [ ] Pruebas + SQL
 
 ---
@@ -1727,9 +1727,9 @@ public List<RegistroDonacion> buscarPorDonador(Usuario u)
 
 **Checklist**
 
-- [ ] `buscarPorDonador` en `RegistroDonacionFacade`
-- [ ] `obtenerHistorial(Usuario)` en `LnDonacion`
-- [ ] Controller + vista con `ui:repeat` y estado vacío
+- [x] `buscarPorDonador` en `RegistroDonacionFacade`
+- [x] `obtenerHistorial(Usuario)` en `LnDonacion`
+- [x] Controller + vista con `ui:repeat` y estado vacío
 - [ ] Pruebas + SQL
 
 ---
@@ -1789,11 +1789,11 @@ La exclusión no necesita facade nueva (D10): `usuarioF.find(id)` ya existe.
 
 **Checklist**
 
-- [ ] Facade: `buscarUltimaPorDonador`
-- [ ] `verificarExclusion` y `esElegible` leen `Usuario.exclusionPermanente` (D10)
-- [ ] `obtenerElegibilidad`, `verificarExclusion` y `esElegible` (+ `calcularProximaFecha` privado)
-- [ ] Vista con los estados elegible, restrictivo por fecha y restrictivo permanente
-- [ ] Avisar a [Alex] y [Galilea] cuando esté en `main`
+- [x] Facade: `buscarUltimaPorDonador`
+- [x] `verificarExclusion` y `esElegible` leen `Usuario.exclusionPermanente` (D10)
+- [x] `obtenerElegibilidad`, `verificarExclusion` y `esElegible` (+ `calcularProximaFecha` privado)
+- [x] Vista con los estados elegible, restrictivo por fecha y restrictivo permanente
+- [x] Avisar a [Alex] y [Galilea] cuando esté en `main`
 - [ ] Pruebas + SQL
 
 ---
@@ -2319,6 +2319,10 @@ Siguen **abiertas**: necesitan una decisión del equipo o del profe. Lo ya resue
 36. **HU-2.x, 5.x, 7.3 y 1.4: métodos y firmas que difieren de los diagramas (todos aceptados):**
     - `LnSolicitud.listarHospitales()` y `LnDonacion.obtenerDonador(Usuario)` no están en el diagrama (la ficha del donador
       es `UIFichaDonador.mostrar`).
+    - **HU-5.2 / 5.3 ([Diego]):** métodos extra que no están en los diagramas: `LnDonacion.obtenerProximaFecha`,
+      `diasDesdeUltimaDonacion` y `porcentajeRecuperacion` (datos de la tarjeta de recuperación). `HistorialController` es
+      `@RequestScoped` **a propósito**: solo consulta en el `f:viewAction`. Si se agrega AJAX (botones o paginador), cambiarlo a
+      `@ViewScoped` con `Serializable`.
     - `LnSolicitud.validarFormatoFolio` es público (en el diagrama es de la entidad) y `verificarFolioUnico` quedó dentro de
       `validarFolio`.
     - **HU-3.1 a 4.3 ([Alex]):** métodos extra que no están en los diagramas: `LnNotificacion.listarMisNotificaciones`,
@@ -2333,9 +2337,11 @@ Siguen **abiertas**: necesitan una decisión del equipo o del profe. Lo ya resue
     `enmascararTelefono` ocultan el correo y el teléfono del **donador** en `donadores` y `capturarDonacion`. La HU-1.4 trata el
     contacto del **familiar** en la publicación (eso sí se cumple: la vista no lo pinta). Decidir si el CETS no debe ver el
     contacto de los donadores (¿cómo los contactará?) y, de mantenerlo, mover el enmascarado al Ln o a un convertidor.
-38. **TODOs pendientes de otros módulos:** ~~`registrarSolicitud` no llama todavía a `lnNotificacion.buscarDonadoresCercanos`~~
-    (**resuelto por [David]**: HU-3.1 quedó conectada en `LnSolicitud.registrarSolicitud`; el aviso va después de guardar y un
-    fallo al avisar no tumba la solicitud, aunque un error de BD al confirmar la transacción sí la revertiría); la ficha del donador no muestra historial ni elegibilidad (HU-5.4 pasos 3 y 4, [Diego], HU-5.2/5.3).
+38. **TODOs pendientes de otros módulos (cerrada):** HU-3.1 quedó conectada en `LnSolicitud.registrarSolicitud` ([David]; el
+    aviso va después de guardar y un fallo al avisar no tumba la solicitud, aunque un error de BD al confirmar la
+    transacción sí la revertiría). La ficha del donador (HU-5.4 pasos 3 y 4) ya muestra historial y elegibilidad con
+    `LnDonacion.obtenerHistorial`, `obtenerElegibilidad`, `obtenerProximaFecha`, `verificarExclusion` y `esElegible`
+    ([David], rama `feature/ficha-donador`); la ficha ya no lee `Usuario.registroDonacionList` (caché, #35).
 39. **URL del QR:** el controller la arma con el esquema, el servidor y el puerto de la petición (`ec.getRequestServerName()`,
     cabecera Host) y la vista la escribe dentro de un `<script>` sin escapar para JavaScript. Riesgo bajo (solo se refleja en
     la petición de quien la manipula), pero detrás de un proxy o HTTPS el esquema puede salir mal. Pendiente: configurar la URL
@@ -2352,3 +2358,11 @@ Siguen **abiertas**: necesitan una decisión del equipo o del profe. Lo ya resue
     hospital y usuario existentes; donación con donador y personal CETS **activo** existentes, y solicitud asociada Activa).
     No están en los diagramas; los diagramas tampoco dicen qué mensaje mostrar cuando el Ln regresa `false`, así que los
     controllers muestran un mensaje general.
+44. **Badge "3" del menú lateral del donador:** `plantillaUsuario.xhtml` (línea ~29) pinta `<span class="menu-contador">3</span>`
+    con un valor fijo; no refleja los avisos reales. Pendiente: calcularlo con `LnNotificacion.listarMisNotificaciones`
+    (avisos de solicitudes Activas) o quitarlo. Toca una plantilla compartida: coordinarlo con el equipo.
+45. **Fechas con 6 horas de diferencia (UTC):** las vistas con fechas usan `f:convertDateTime` con zonas distintas
+    (`donadores.xhtml` usa `timeZone="UTC"`; `miHistorial.xhtml` usa `America/Mexico_City`) y los valores con hora se ven 6 horas
+    corridos respecto a `America/Mexico_City`. Revisar la zona horaria de la JVM de Payara (`user.timezone`) y unificar el
+    `timeZone` en todas las vistas: las columnas `DATE` (`fechaDonacion`) y las `DATETIME` (`fechaEnvio`, `fechaHoraRegistro`) no
+    se deben convertir igual. Sin verificar en ejecución.
