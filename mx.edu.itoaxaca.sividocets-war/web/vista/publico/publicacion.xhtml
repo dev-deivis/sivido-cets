@@ -1,36 +1,51 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- Publicación de solicitud con código QR — ficha pública estática (diseño Stitch v3) -->
+<!-- Publicación de solicitud con código QR — HU-2.2 (ficha pública, sin datos personales del creador) -->
 <!DOCTYPE html>
 <ui:composition xmlns="http://www.w3.org/1999/xhtml"
                 xmlns:h="jakarta.faces.html"
+                xmlns:f="jakarta.faces.core"
                 xmlns:ui="jakarta.faces.facelets"
                 xmlns:p="primefaces"
                 template="/plantillas/plantillaPublica.xhtml">
 
     <ui:param name="menuActivo" value="publicacion"/>
-    <ui:define name="titulo">Solicitud CETS-OAX-2024-1102 · SIVIDO</ui:define>
+    <ui:define name="titulo">Solicitud #{publicacionController.solicitud.folioCETS} · SIVIDO</ui:define>
 
     <ui:define name="content">
         <section class="seccion">
             <div class="contenedor">
+
+                <!-- Enlace inválido o inexistente -->
+                <h:panelGroup rendered="#{empty publicacionController.solicitud}" layout="block"
+                              styleClass="tarjeta texto-centro" style="padding:2.5rem 1.5rem">
+                    <span class="icono-caja" style="width:56px;height:56px"><i class="pi pi-link" style="font-size:24px"></i></span>
+                    <h2 class="mt-2">Publicación no encontrada</h2>
+                    <p class="texto-sec">El enlace no es válido o la solicitud ya no está disponible.</p>
+                    <p:button outcome="/vista/publico/index" value="Ir al inicio" icon="pi pi-home"/>
+                </h:panelGroup>
+
+                <ui:fragment rendered="#{not empty publicacionController.solicitud}">
                 <div class="fila mb-2">
-                    <span class="etiqueta verde"><i class="pi pi-circle-fill" style="font-size:8px"></i> Solicitud activa</span>
+                    <span class="estatus #{publicacionController.solicitud.estatus.toLowerCase()}">Solicitud #{publicacionController.solicitud.estatus.toLowerCase()}</span>
                     <span class="etiqueta">SIVIDO · Red estatal Oaxaca</span>
                 </div>
 
                 <div class="grid grid-principal">
-                    <!-- Ficha principal -->
+                    <!-- Ficha principal: solo tipo de sangre, hospital, folio y descripción -->
                     <div class="tarjeta tarjeta-borde-rojo">
                         <span class="etiqueta solida"><i class="pi pi-exclamation-triangle"></i> Solicitud de reposición</span>
                         <h1 class="mt-2">Convocatoria solidaria de donación</h1>
                         <p class="texto-sec">Centro Estatal de la Transfusión Sanguínea de Oaxaca (CETS) · Servicios de Salud de Oaxaca</p>
 
                         <div class="fila mt-2" style="gap:1.25rem">
-                            <span class="grupo-sangre grande">O+<small>POSITIVO</small></span>
+                            <span class="grupo-sangre grande">#{publicacionController.solicitud.tipoSanguineo}#{publicacionController.solicitud.factorRh}<small>#{publicacionController.solicitud.factorRh eq '-' ? 'NEGATIVO' : 'POSITIVO'}</small></span>
                             <dl class="datos">
-                                <dt>Folio CETS</dt><dd class="mono texto-rojo">CETS-OAX-2024-1102</dd>
-                                <dt>Publicada</dt><dd>Hoy a las 06:30 hrs</dd>
-                                <dt>Grupo requerido</dt><dd>O positivo (O+)</dd>
+                                <dt>Folio CETS</dt><dd class="mono texto-rojo">#{publicacionController.solicitud.folioCETS}</dd>
+                                <dt>Publicada</dt>
+                                <dd><h:outputText value="#{publicacionController.solicitud.fechaHoraRegistro}">
+                                    <f:convertDateTime pattern="dd MMM yyyy, HH:mm 'hrs'" locale="es_MX" timeZone="America/Mexico_City"/>
+                                </h:outputText></dd>
+                                <dt>Grupo requerido</dt><dd>#{publicacionController.solicitud.tipoSanguineo} #{publicacionController.solicitud.factorRh eq '-' ? 'negativo' : 'positivo'} (#{publicacionController.solicitud.tipoSanguineo}#{publicacionController.solicitud.factorRh})</dd>
                             </dl>
                         </div>
 
@@ -39,20 +54,18 @@
                             <span class="icono-caja"><i class="pi pi-building"></i></span>
                             <div>
                                 <span class="sobretitulo">Hospital</span>
-                                <h3 class="mb-0">Hospital General Dr. Aurelio Valdivieso</h3>
-                                <span class="texto-sec">Hospital Civil de Oaxaca</span>
+                                <h3 class="mb-0">#{publicacionController.solicitud.hospitalid.nombre}</h3>
                             </div>
                         </div>
 
-                        <div class="tarjeta-plana mt-2">
+                        <h:panelGroup rendered="#{not empty publicacionController.solicitud.descripcion}" layout="block" styleClass="tarjeta-plana mt-2">
                             <strong><i class="pi pi-info-circle texto-rojo"></i> Descripción</strong>
-                            <p class="mt-1 mb-0">Convocatoria solidaria de reposición para el soporte transfusional de la unidad
-                                hospitalaria. Se invita a donadores voluntarios a presentarse en el CETS con ayuno de 4 horas.</p>
-                        </div>
+                            <p class="mt-1 mb-0">#{publicacionController.solicitud.descripcion}</p>
+                        </h:panelGroup>
 
                         <div class="aviso mt-2">
                             <i class="pi pi-lock"></i>
-                            <p><strong>Protección de datos.</strong> Por normativa NOM-253-SSA1-2012, la identidad del paciente permanece reservada.</p>
+                            <p><strong>Protección de datos.</strong> Por normativa NOM-253-SSA1-2012, la identidad del paciente y de quien publica permanece reservada.</p>
                         </div>
 
                         <div class="fila mt-3">
@@ -71,17 +84,28 @@
                         </div>
                     </div>
 
-                    <!-- QR -->
+                    <!-- QR que apunta a la URL única de esta publicación -->
                     <div class="columna">
                         <div class="tarjeta texto-centro">
                             <span class="sobretitulo">Código QR oficial</span>
-                            <h3>Validación SIVIDO</h3>
-                            <div class="qr mt-1"><i class="pi pi-qrcode"></i></div>
+                            <h3>Comparte esta solicitud</h3>
+                            <img src="#{publicacionController.qrDataUri}" alt="Código QR de la solicitud #{publicacionController.solicitud.folioCETS}"
+                                 width="220" height="220" style="image-rendering:pixelated;max-width:100%"/>
                             <p class="texto-sec texto-chico mt-2">Escanea este código con tu teléfono para abrir esta solicitud en SIVIDO.</p>
+                            <input id="urlPublicacion" type="text" readonly="readonly" class="mono texto-chico"
+                                   value="#{publicacionController.url}" style="width:100%;margin-bottom:.5rem"/>
                             <div class="columna">
-                                <p:button value="Copiar enlace" icon="pi pi-copy" styleClass="boton-suave boton-bloque" outcome="/vista/publico/publicacion"/>
-                                <p:button value="Descargar imagen" icon="pi pi-download" styleClass="ui-button-secondary boton-bloque" outcome="/vista/publico/publicacion"/>
-                                <p:button value="Imprimir ficha" icon="pi pi-print" styleClass="ui-button-secondary boton-bloque" outcome="/vista/publico/publicacion"/>
+                                <button type="button" class="boton suave bloque"
+                                        onclick="navigator.clipboard.writeText(document.getElementById('urlPublicacion').value);this.innerText='Enlace copiado';">
+                                    <i class="pi pi-copy"></i> Copiar enlace
+                                </button>
+                                <a class="boton secundario bloque" href="#{publicacionController.qrDataUri}"
+                                   download="#{publicacionController.nombreArchivoQr}">
+                                    <i class="pi pi-download"></i> Descargar QR (PNG)
+                                </a>
+                                <button type="button" class="boton secundario bloque" onclick="window.print()">
+                                    <i class="pi pi-print"></i> Imprimir ficha
+                                </button>
                             </div>
                         </div>
                         <div class="tarjeta">
@@ -91,6 +115,7 @@
                         </div>
                     </div>
                 </div>
+                </ui:fragment>
             </div>
         </section>
     </ui:define>

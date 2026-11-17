@@ -44,4 +44,23 @@ public class UsuarioFacade extends AbstractFacade<Usuario> {
                 .getResultList();
         return r.isEmpty() ? null : r.get(0);
     }
+
+    // HU-5.4 / HU-5.1: busca donadores (no personal del CETS) por nombre, correo o id
+    public List<Usuario> buscarDonadores(String criterio) {
+        String texto = "%" + criterio.trim().toLowerCase() + "%";
+        Integer id = null;
+        try {
+            id = Integer.valueOf(criterio.trim());
+        } catch (NumberFormatException e) {
+            // no es un id numérico
+        }
+        return getEntityManager()
+                .createQuery("SELECT u FROM Usuario u LEFT JOIN u.personalCETS p WHERE p IS NULL AND ("
+                        + "LOWER(u.nombreCompleto) LIKE :texto OR LOWER(u.correo) LIKE :texto OR u.id = :id) "
+                        + "ORDER BY u.nombreCompleto", Usuario.class)
+                .setParameter("texto", texto)
+                .setParameter("id", id == null ? -1 : id)
+                .setMaxResults(20)
+                .getResultList();
+    }
 }

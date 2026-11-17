@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- Capturar donación — panel institucional CETS estático (diseño Stitch v2) -->
+<!-- Capturar donación — HU-5.1 (solo personal del CETS; la plantilla institucional exige sesión CETS) -->
 <!DOCTYPE html>
 <ui:composition xmlns="http://www.w3.org/1999/xhtml"
                 xmlns:h="jakarta.faces.html"
@@ -14,57 +14,109 @@
     <ui:define name="content">
         <div style="max-width:760px">
             <div class="tarjeta tarjeta-borde-rojo">
-                <div class="fila-entre mb-2">
-                    <div class="fila" style="flex-wrap:nowrap;align-items:flex-start">
-                        <span class="icono-caja solido"><i class="pi pi-heart-fill"></i></span>
-                        <div>
-                            <h1 style="font-size:22px">Registro de donación efectuada en el CETS</h1>
-                            <p class="texto-sec mb-0">Captura de la donación concluida para acreditarla al donador y vincularla a una solicitud.</p>
-                        </div>
-                    </div>
-                    <div class="tarjeta-plana" style="padding:.5rem .8rem">
-                        <span class="texto-chico texto-tenue">Folio de sesión</span><br/>
-                        <strong class="mono">CETS-DON-2024/0984</strong>
+                <div class="fila mb-2" style="flex-wrap:nowrap;align-items:flex-start">
+                    <span class="icono-caja solido"><i class="pi pi-heart-fill"></i></span>
+                    <div>
+                        <h1 style="font-size:22px">Registro de donación efectuada en el CETS</h1>
+                        <p class="texto-sec mb-0">Captura de la donación concluida para acreditarla al donador y vincularla a una solicitud.</p>
                     </div>
                 </div>
 
                 <h:form id="formDonacion">
+                    <p:messages id="mensajes" closable="true"/>
+
+                    <!-- 1. Donador -->
                     <div class="campo">
                         <div class="fila-campo">
-                            <p:outputLabel for="donador">Buscar donador (nombre o correo) <span class="requerido">*</span></p:outputLabel>
+                            <p:outputLabel for="criterio">Buscar donador (nombre, correo o id) <span class="requerido">*</span></p:outputLabel>
                             <span class="ayuda">Padrón SIVIDO</span>
                         </div>
-                        <p:inputText id="donador" value="Ernesto Valdivieso Morales - ernesto.valdivieso@email.com"
-                                     placeholder="Nombre o correo del donador..."/>
-                        <div class="aviso verde" style="padding:.6rem .9rem">
-                            <i class="pi pi-verified"></i>
-                            <p class="texto-chico"><strong>Validado.</strong> Donador activo en el padrón del CETS Oaxaca.</p>
+                        <div class="fila" style="flex-wrap:nowrap">
+                            <p:inputText id="criterio" value="#{donacionController.criterio}" style="flex:1"
+                                         placeholder="Nombre o correo del donador...">
+                                <f:passThroughAttribute name="onkeydown"
+                                                        value="if(event.key==='Enter'){document.getElementById('formDonacion:btnBuscar').click();return false;}"/>
+                            </p:inputText>
+                            <p:commandButton id="btnBuscar" value="Buscar" icon="pi pi-search" styleClass="ui-button-secondary"
+                                             action="#{donacionController.buscar}" process="@this criterio"
+                                             update="resultados mensajes"/>
                         </div>
                     </div>
 
-                    <div class="campo">
+                    <h:panelGroup id="resultados" layout="block">
+                        <h:panelGroup rendered="#{not empty donacionController.resultados}" layout="block" styleClass="campo">
+                            <div class="tabla-contenedor">
+                                <table class="tabla">
+                                    <thead><tr><th>Donador</th><th>Grupo</th><th></th></tr></thead>
+                                    <tbody>
+                                        <ui:repeat value="#{donacionController.resultados}" var="u">
+                                            <tr>
+                                                <td><strong>#{u.nombreCompleto}</strong>
+                                                    <span class="sub mono">ID #{u.id} · #{donacionController.enmascararCorreo(u.correo)}</span></td>
+                                                <td><span class="grupo-sangre">#{empty donacionController.grupo(u) ? '—' : donacionController.grupo(u)}</span></td>
+                                                <td>
+                                                    <p:commandButton value="Seleccionar" icon="pi pi-check" styleClass="boton-suave"
+                                                                     action="#{donacionController.seleccionar(u.id)}"
+                                                                     process="@this" update="@form"/>
+                                                </td>
+                                            </tr>
+                                        </ui:repeat>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </h:panelGroup>
+                    </h:panelGroup>
+
+                    <!-- Donador seleccionado -->
+                    <h:panelGroup rendered="#{not empty donacionController.donador}" layout="block"
+                                  styleClass="aviso #{donacionController.elegible ? 'verde' : ''}" style="padding:.6rem .9rem">
+                        <i class="pi #{donacionController.elegible ? 'pi-verified' : 'pi-exclamation-triangle'}"></i>
+                        <p class="texto-chico">
+                            <strong>#{donacionController.donador.nombreCompleto}</strong> (ID #{donacionController.donador.id}).
+                            <h:outputText rendered="#{donacionController.elegible}" value="Puede donar según su historial."/>
+                            <h:outputText rendered="#{not donacionController.elegible and donacionController.donador.exclusionPermanente}"
+                                          value="Tiene exclusión permanente registrada."/>
+                            <h:panelGroup rendered="#{not donacionController.elegible and not donacionController.donador.exclusionPermanente}">
+                                Su próxima fecha para donar es el
+                                <h:outputText value="#{donacionController.proximaFecha}">
+                                    <f:convertDateTime pattern="dd 'de' MMMM 'de' yyyy" locale="es_MX" timeZone="America/Mexico_City"/>
+                                </h:outputText>. Verifica antes de registrar.
+                            </h:panelGroup>
+                        </p>
+                    </h:panelGroup>
+
+                    <!-- 2. Fecha -->
+                    <div class="campo mt-2">
                         <div class="fila-campo">
-                            <p:outputLabel for="fecha">Fecha y hora de la donación <span class="requerido">*</span></p:outputLabel>
-                            <span class="etiqueta azul">Actual</span>
+                            <p:outputLabel for="fecha">Fecha de la donación <span class="requerido">*</span></p:outputLabel>
                         </div>
-                        <p:inputText id="fecha" type="datetime-local" value="2024-10-24T10:45"/>
-                        <span class="ayuda">Momento en que se realizó la extracción.</span>
+                        <p:datePicker id="fecha" value="#{donacionController.fechaDonacion}" required="true"
+                                      requiredMessage="Indica la fecha de la donación"
+                                      maxdate="#{donacionController.hoy}" pattern="dd/MM/yyyy" locale="es"
+                                      timeZone="America/Mexico_City" showIcon="true"/>
+                        <span class="ayuda">Fecha en que se realizó la extracción. La próxima fecha para donar se calcula
+                            sumando #{donacionController.semanasExclusion} semanas.</span>
                     </div>
 
+                    <!-- 3. Solicitud asociada (opcional) -->
                     <div class="campo">
                         <p:outputLabel for="solicitud">Solicitud asociada <span class="texto-tenue">(opcional)</span></p:outputLabel>
-                        <p:selectOneMenu id="solicitud" value="1102">
-                            <f:selectItem itemLabel="CETS-OAX-2024-1102 - Hosp. Dr. Aurelio Valdivieso" itemValue="1102"/>
-                            <f:selectItem itemLabel="CETS-OAX-2024-1108 - Hospital de la Niñez Oaxaqueña" itemValue="1108"/>
-                            <f:selectItem itemLabel="CETS-OAX-2024-1115 - H. Regional Presidente Juárez (ISSSTE)" itemValue="1115"/>
-                            <f:selectItem itemLabel="Sin vincular / Donación voluntaria general" itemValue="ninguna"/>
+                        <p:selectOneMenu id="solicitud" value="#{donacionController.solicitudId}" filter="true" filterMatchMode="contains">
+                            <f:converter converterId="jakarta.faces.Integer"/>
+                            <f:selectItem itemLabel="Sin vincular / Donación voluntaria general" itemValue="#{null}" noSelectionOption="true"/>
+                            <f:selectItems value="#{donacionController.solicitudesActivas}" var="s"
+                                           itemLabel="#{s.folioCETS} - #{s.hospitalid.nombre} (#{s.tipoSanguineo}#{s.factorRh})"
+                                           itemValue="#{s.id}"/>
                         </p:selectOneMenu>
-                        <span class="ayuda">Vincula la donación a una solicitud o regístrala como donación general.</span>
+                        <span class="ayuda">Vincula la donación a una solicitud activa o regístrala como donación general.</span>
                     </div>
 
                     <div class="acciones-formulario">
-                        <p:button outcome="/vista/cets/capturarDonacion" value="Descartar" icon="pi pi-times" styleClass="ui-button-secondary"/>
-                        <p:button outcome="/vista/cets/donadores" value="Registrar donación" icon="pi pi-check-circle"/>
+                        <p:button outcome="/vista/cets/donadores" value="Descartar" icon="pi pi-times" styleClass="ui-button-secondary"/>
+                        <p:commandButton value="Registrar donación" icon="pi pi-check-circle"
+                                         action="#{donacionController.registrarDonacion}"
+                                         process="@this fecha solicitud" update="@form"
+                                         disabled="#{empty donacionController.donador}"/>
                     </div>
                 </h:form>
             </div>

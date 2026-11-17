@@ -5,6 +5,8 @@
 package acceso_datos;
 
 import jakarta.ejb.Stateless;
+import modelo.Usuario;
+import java.util.List;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import modelo.HistorialExterno;
@@ -27,5 +29,13 @@ public class HistorialExternoFacade extends AbstractFacade<HistorialExterno> {
     public HistorialExternoFacade() {
         super(HistorialExterno.class);
     }
-    
+
+    // HU-7.3: historial que instituciones externas compartieron del donador
+    public List<HistorialExterno> consultarHistorialExterno(Usuario donador) {
+        return getEntityManager()
+                .createQuery("SELECT h FROM HistorialExterno h WHERE h.usuarioid = :donador "
+                        + "ORDER BY h.fechaDonacion DESC", HistorialExterno.class)
+                .setParameter("donador", donador)
+                .getResultList();
+    }
 }
