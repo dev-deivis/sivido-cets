@@ -48,7 +48,6 @@ public class LnDonacion {
     @EJB
     private HistorialExternoFacade historialExternoF;
 
-    // ===================== [Galilea] =====================
 
     // HU-5.1 (1.1) registrarDonacion. r trae usuarioid (id del donador), personalCETSUsuarioid (personal en
     // sesión), fechaDonacion y, opcional, solicitudReposicionid (id o vacío = donación general; si viene, debe estar Activa).
@@ -113,16 +112,55 @@ public class LnDonacion {
         return fecha.toInstant().atZone(ZONA).toLocalDate();
     }
 
-    // ===================== [Diego] =====================
-    // HU-5.2 / HU-5.3: obtenerHistorial, obtenerElegibilidad, verificarExclusion, esElegible
-
-    // ===== STUB TEMPORAL de [Alex] (HU-3.3) =====
-    // Lo necesita LnNotificacion.registrarInteres para compilar.
-    // [Diego]: al implementar HU-5.3, BORRA este bloque completo y deja tu versión real
-    // (misma firma: public boolean esElegible(Usuario donador)).
-    // Versión real: !exclusionPermanente && (sin donación || proximaFechaElegible <= hoy)
-    public boolean esElegible(Usuario donador) {
-        return true;
+    // HU-5.2 (2) obtenerHistorial
+    public List<RegistroDonacion> obtenerHistorial(Usuario donador) {
+        return registroF.buscarPorDonador(donador);
     }
-    // ===== FIN DEL STUB =====
+
+    // HU-5.3 (1) obtenerElegibilidad: última donación, o null si nunca donó
+    public RegistroDonacion obtenerElegibilidad(Usuario donador) {
+        return registroF.buscarUltimaPorDonador(donador);
+    }
+
+    // HU-5.3 (1.2) próxima fecha: la guardada o, si falta, fechaDonacion + 56 días.
+    // No se asigna a la entidad (está administrada por JPA y se guardaría en la BD).
+    public Date obtenerProximaFecha(RegistroDonacion ultima) {
+        if (ultima == null) {
+            return null;
+        }
+        if (ultima.getProximaFechaElegible() != null) {
+            return ultima.getProximaFechaElegible();
+        }
+        return calcularProximaFecha(ultima.getFechaDonacion());
+    }
+
+    // HU-5.3 (2) verificarExclusion. D10: se lee el campo, no los padecimientos. Se hace find()
+    // porque el Usuario de la sesión puede estar desactualizado.
+    public boolean verificarExclusion(Usuario donador) {
+        Usuario u = usuarioF.find(donador.getId());
+        return u != null && Boolean.TRUE.equals(u.getExclusionPermanente());
+    }
+
+    // Para HU-3.3 ([Alex]): sin exclusión permanente y con la fecha ya cumplida
+    public boolean esElegible(Usuario donador) {
+        if (verificarExclusion(donador)) {
+            return false;
+        }
+        Date proxima = obtenerProximaFecha(obtenerElegibilidad(donador));
+        return proxima == null || !aLocalDate(proxima).isAfter(LocalDate.now(ZONA));
+    }
+
+    // Datos para la tarjeta de recuperación (HU-5.3)
+    public long diasDesdeUltimaDonacion(RegistroDonacion ultima) {
+        if (ultima == null) {
+            return 0;
+        }
+        return java.time.temporal.ChronoUnit.DAYS.between(
+                aLocalDate(ultima.getFechaDonacion()), LocalDate.now(ZONA));
+    }
+
+    public int porcentajeRecuperacion(RegistroDonacion ultima) {
+        return (int) Math.max(0, Math.min(100, diasDesdeUltimaDonacion(ultima) * 100 / DIAS_EXCLUSION));
+    }
+    
 }
