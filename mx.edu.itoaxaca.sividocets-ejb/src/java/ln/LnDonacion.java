@@ -115,4 +115,14 @@ public class LnDonacion {
 
     // ===================== [Diego] =====================
     // HU-5.2 / HU-5.3: obtenerHistorial, obtenerElegibilidad, verificarExclusion, esElegible
+
+    // ===== STUB TEMPORAL de [Alex] (HU-3.3) =====
+    // Lo necesita LnNotificacion.registrarInteres para compilar.
+    // [Diego]: al implementar HU-5.3, BORRA este bloque completo y deja tu versión real
+    // (misma firma: public boolean esElegible(Usuario donador)).
+    // Versión real: !exclusionPermanente && (sin donación || proximaFechaElegible <= hoy)
+    public boolean esElegible(Usuario donador) {
+        return true;
+    }
+    // ===== FIN DEL STUB =====
 }
