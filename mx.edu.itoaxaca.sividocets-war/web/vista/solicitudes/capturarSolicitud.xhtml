@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- Capturar solicitud — panel de usuario estático (diseño Stitch v3) -->
+<!-- Capturar solicitud — HU-2.1 (captura con folio) y HU-2.4 (validación de formato del folio) -->
 <!DOCTYPE html>
 <ui:composition xmlns="http://www.w3.org/1999/xhtml"
                 xmlns:h="jakarta.faces.html"
@@ -30,115 +30,152 @@
             </div>
         </div>
 
-        <div class="grid grid-principal">
-            <!-- Formulario -->
-            <div class="tarjeta">
-                <div class="tarjeta-cabecera">
-                    <h2><i class="pi pi-file-edit texto-rojo"></i> Datos de la solicitud</h2>
-                    <span class="etiqueta roja">* Obligatorios</span>
-                </div>
+        <h:form id="formSolicitud">
+            <p:messages id="mensajes" closable="true"/>
 
-                <h:form id="formSolicitud">
+            <div class="grid grid-principal">
+                <!-- Formulario -->
+                <div class="tarjeta">
+                    <div class="tarjeta-cabecera">
+                        <h2><i class="pi pi-file-edit texto-rojo"></i> Datos de la solicitud</h2>
+                        <span class="etiqueta roja">* Obligatorios</span>
+                    </div>
+
+                    <!-- HU-2.4 Folio con validación de formato al escribir -->
                     <div class="campo">
                         <div class="fila-campo">
                             <p:outputLabel for="folio">Folio CETS <span class="requerido">*</span></p:outputLabel>
-                            <span class="ayuda">Formato oficial</span>
+                            <span class="ayuda mono">#{solicitudController.formatoFolio}</span>
                         </div>
-                        <p:inputText id="folio" value="CETS-OAX-2024-0582" placeholder="Ej: CETS-OAX-2024-XXXX" styleClass="mono"/>
-                        <span class="ayuda" style="color:var(--verde)"><i class="pi pi-check-circle"></i> Formato de folio válido</span>
+                        <p:inputText id="folio" value="#{solicitudController.solicitud.folioCETS}" maxlength="30"
+                                     placeholder="Ej: CETS-OAX-2026-0582" styleClass="mono">
+                            <p:ajax event="keyup" delay="300" listener="#{solicitudController.validarFolio}"
+                                    update="estadoFolio btnPublicar vistaPrevia"/>
+                        </p:inputText>
+                        <h:panelGroup id="estadoFolio" layout="block">
+                            <h:panelGroup rendered="#{solicitudController.estadoFolio eq 'valido'}"
+                                          styleClass="ayuda" style="color:var(--verde)">
+                                <i class="pi pi-check-circle"></i> Formato de folio válido
+                            </h:panelGroup>
+                            <h:panelGroup rendered="#{solicitudController.estadoFolio eq 'formato'}"
+                                          styleClass="ayuda" style="color:var(--rojo)">
+                                <i class="pi pi-times-circle"></i> El folio debe tener el formato #{solicitudController.formatoFolio}
+                            </h:panelGroup>
+                            <h:panelGroup rendered="#{solicitudController.estadoFolio eq 'duplicado'}"
+                                          styleClass="ayuda" style="color:var(--rojo)">
+                                <i class="pi pi-exclamation-circle"></i> Ya existe una solicitud activa con este folio
+                            </h:panelGroup>
+                        </h:panelGroup>
                     </div>
 
                     <div class="grid grid-2" style="gap:0 1rem">
                         <div class="campo">
                             <span class="etiqueta-campo">Grupo sanguíneo <span class="requerido">*</span></span>
-                            <p:selectOneButton id="grupo" value="O">
+                            <p:selectOneButton id="grupo" value="#{solicitudController.solicitud.tipoSanguineo}">
                                 <f:selectItem itemLabel="O" itemValue="O"/>
                                 <f:selectItem itemLabel="A" itemValue="A"/>
                                 <f:selectItem itemLabel="B" itemValue="B"/>
                                 <f:selectItem itemLabel="AB" itemValue="AB"/>
+                                <p:ajax update="btnPublicar vistaPrevia"/>
                             </p:selectOneButton>
                             <span class="ayuda">Sistema ABO</span>
                         </div>
                         <div class="campo">
                             <span class="etiqueta-campo">Factor Rh <span class="requerido">*</span></span>
-                            <p:selectOneButton id="rh" value="+">
+                            <p:selectOneButton id="rh" value="#{solicitudController.solicitud.factorRh}">
                                 <f:selectItem itemLabel="+ Positivo" itemValue="+"/>
                                 <f:selectItem itemLabel="− Negativo" itemValue="-"/>
+                                <p:ajax update="btnPublicar vistaPrevia"/>
                             </p:selectOneButton>
                             <span class="ayuda">Antígeno D</span>
                         </div>
                     </div>
 
+                    <!-- Hospital autocompletable: el menú permite escribir para filtrar -->
                     <div class="campo">
                         <p:outputLabel for="hospital">Hospital / unidad médica de destino <span class="requerido">*</span></p:outputLabel>
-                        <p:selectOneMenu id="hospital" value="civil">
-                            <f:selectItem itemLabel="Hospital General 'Dr. Aurelio Valdivieso' (Hospital Civil)" itemValue="civil"/>
-                            <f:selectItem itemLabel="Hospital Regional de Alta Especialidad de Oaxaca (HRAEO)" itemValue="hraeo"/>
-                            <f:selectItem itemLabel="Hospital General de Zona No. 1 IMSS Oaxaca" itemValue="imss1"/>
-                            <f:selectItem itemLabel="Hospital Regional Presidente Juárez ISSSTE" itemValue="issste"/>
-                            <f:selectItem itemLabel="Hospital de la Niñez Oaxaqueña" itemValue="ninez"/>
+                        <p:selectOneMenu id="hospital" value="#{solicitudController.solicitud.hospitalid.id}"
+                                         filter="true" filterMatchMode="contains">
+                            <f:converter converterId="jakarta.faces.Integer"/>
+                            <f:selectItem itemLabel="Escribe o elige el hospital..." itemValue="#{null}" noSelectionOption="true"/>
+                            <f:selectItems value="#{solicitudController.hospitales}" var="h"
+                                           itemLabel="#{h.nombre}" itemValue="#{h.id}"/>
+                            <p:ajax update="btnPublicar vistaPrevia"/>
                         </p:selectOneMenu>
+                        <h:panelGroup rendered="#{empty solicitudController.hospitales}" styleClass="ayuda" style="color:var(--rojo)">
+                            <i class="pi pi-exclamation-triangle"></i> No hay hospitales registrados en el catálogo.
+                        </h:panelGroup>
                     </div>
 
                     <div class="campo">
                         <div class="fila-campo">
                             <p:outputLabel for="descripcion">Descripción del caso <span class="texto-tenue">(opcional)</span></p:outputLabel>
-                            <span class="ayuda mono">74 / 250</span>
+                            <h:outputText id="contador" styleClass="ayuda mono"/>
                         </div>
                         <p:inputTextarea id="descripcion" rows="4" maxlength="250" autoResize="false"
-                                         value="Requerimiento prioritario para soporte quirúrgico en sala de hematología."
-                                         placeholder="Observaciones para los donadores (ej. cirugía programada)..."/>
+                                         value="#{solicitudController.solicitud.descripcion}"
+                                         counter="contador" counterTemplate="Quedan {0} de 250"
+                                         placeholder="Observaciones para los donadores (ej. cirugía programada)...">
+                            <p:ajax event="blur" update="vistaPrevia"/>
+                        </p:inputTextarea>
                         <span class="ayuda"><i class="pi pi-exclamation-circle"></i> Evita incluir nombres de pacientes o datos de contacto.</span>
                     </div>
 
                     <div class="acciones-formulario">
                         <p:button outcome="/vista/solicitudes/misSolicitudes" value="Cancelar" icon="pi pi-times" styleClass="ui-button-secondary"/>
-                        <p:button outcome="/vista/solicitudes/misSolicitudes" value="Publicar solicitud" icon="pi pi-megaphone"/>
-                    </div>
-                </h:form>
-            </div>
-
-            <!-- Vista previa -->
-            <div class="columna">
-                <div class="fila-entre">
-                    <h3 class="mb-0"><i class="pi pi-eye texto-azul" style="color:var(--azul)"></i> Vista previa de publicación</h3>
-                    <span class="etiqueta verde">Público</span>
-                </div>
-                <div class="tarjeta" style="border:2px solid var(--rojo-claro);padding-top:0">
-                    <div class="tarjeta-cabecera roja" style="margin-top:0">
-                        <h3><i class="pi pi-heart-fill"></i> CETS Oaxaca · Ficha de donación</h3>
-                    </div>
-                    <div class="tarjeta-plana fila">
-                        <span class="grupo-sangre grande">O+<small>POSITIVO</small></span>
-                        <div>
-                            <span class="texto-chico texto-tenue">Folio CETS</span><br/>
-                            <strong class="mono texto-rojo">CETS-OAX-2024-0582</strong><br/>
-                            <span class="texto-chico" style="color:var(--verde)"><i class="pi pi-check-circle"></i> Folio en regla</span>
-                        </div>
-                    </div>
-                    <span class="sobretitulo mt-2" style="display:block"><i class="pi pi-building"></i> Hospital / unidad asignada</span>
-                    <h3 class="mb-0">Hospital General 'Dr. Aurelio Valdivieso'</h3>
-                    <span class="texto-sec texto-chico">Oaxaca de Juárez, Valles Centrales</span>
-
-                    <div class="tarjeta-plana mt-2">
-                        <strong class="texto-chico"><i class="pi pi-align-left"></i> Descripción:</strong>
-                        <p class="mono mb-0 mt-1" style="font-style:italic">"Requerimiento prioritario para soporte quirúrgico en sala de hematología."</p>
-                    </div>
-
-                    <div class="fila mt-2" style="flex-wrap:nowrap">
-                        <div class="qr chico"><i class="pi pi-qrcode"></i></div>
-                        <div>
-                            <strong>Escanea para acudir al CETS</strong>
-                            <p class="texto-chico texto-sec mb-0">Los donantes escanean este código para vincular su donación al folio.</p>
-                        </div>
-                    </div>
-
-                    <div class="aviso verde mt-2">
-                        <i class="pi pi-shield"></i>
-                        <p class="texto-chico"><strong>Ficha anónima y protegida.</strong> SIVIDO no publica nombres de pacientes ni datos personales.</p>
+                        <!-- HU-2.1 Publicar deshabilitado hasta completar los obligatorios -->
+                        <p:commandButton id="btnPublicar" value="Publicar solicitud" icon="pi pi-megaphone"
+                                         action="#{solicitudController.registrarSolicitud}" update="@form"
+                                         disabled="#{not solicitudController.completo}"/>
                     </div>
                 </div>
+
+                <!-- Vista previa de la publicación (solo datos no personales) -->
+                <h:panelGroup id="vistaPrevia" layout="block" styleClass="columna">
+                    <div class="fila-entre">
+                        <h3 class="mb-0"><i class="pi pi-eye texto-azul" style="color:var(--azul)"></i> Vista previa de publicación</h3>
+                        <span class="etiqueta verde">Público</span>
+                    </div>
+                    <div class="tarjeta" style="border:2px solid var(--rojo-claro);padding-top:0">
+                        <div class="tarjeta-cabecera roja" style="margin-top:0">
+                            <h3><i class="pi pi-heart-fill"></i> CETS Oaxaca · Ficha de donación</h3>
+                        </div>
+                        <div class="tarjeta-plana fila">
+                            <span class="grupo-sangre grande">
+                                #{empty solicitudController.solicitud.tipoSanguineo ? '?' : solicitudController.solicitud.tipoSanguineo}#{solicitudController.solicitud.factorRh}
+                                <small>#{solicitudController.solicitud.factorRh eq '-' ? 'NEGATIVO' : (solicitudController.solicitud.factorRh eq '+' ? 'POSITIVO' : '')}</small>
+                            </span>
+                            <div>
+                                <span class="texto-chico texto-tenue">Folio CETS</span><br/>
+                                <strong class="mono texto-rojo">#{empty solicitudController.solicitud.folioCETS ? '—' : solicitudController.solicitud.folioCETS.toUpperCase()}</strong><br/>
+                                <h:panelGroup rendered="#{solicitudController.estadoFolio eq 'valido'}" styleClass="texto-chico" style="color:var(--verde)">
+                                    <i class="pi pi-check-circle"></i> Folio en regla
+                                </h:panelGroup>
+                            </div>
+                        </div>
+                        <span class="sobretitulo mt-2" style="display:block"><i class="pi pi-building"></i> Hospital / unidad asignada</span>
+                        <h3 class="mb-0">#{empty solicitudController.nombreHospital ? 'Sin seleccionar' : solicitudController.nombreHospital}</h3>
+
+                        <h:panelGroup rendered="#{not empty solicitudController.solicitud.descripcion}" layout="block" styleClass="tarjeta-plana mt-2">
+                            <strong class="texto-chico"><i class="pi pi-align-left"></i> Descripción:</strong>
+                            <p class="mono mb-0 mt-1" style="font-style:italic">"#{solicitudController.solicitud.descripcion}"</p>
+                        </h:panelGroup>
+
+                        <div class="fila mt-2" style="flex-wrap:nowrap">
+                            <div class="qr chico"><i class="pi pi-qrcode"></i></div>
+                            <div>
+                                <strong>Código QR al publicar</strong>
+                                <p class="texto-chico texto-sec mb-0">Al publicar, la solicitud tendrá un enlace único con su código QR (en "Mis solicitudes").</p>
+                            </div>
+                        </div>
+
+                        <div class="aviso verde mt-2">
+                            <i class="pi pi-shield"></i>
+                            <p class="texto-chico"><strong>Ficha anónima y protegida.</strong> SIVIDO no publica nombres de pacientes ni datos personales.</p>
+                        </div>
+                    </div>
+                </h:panelGroup>
             </div>
-        </div>
+        </h:form>
     </ui:define>
 </ui:composition>
