@@ -5,10 +5,10 @@
 package acceso_datos;
 
 import jakarta.ejb.Stateless;
-import modelo.Usuario;
-import java.util.List;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
+import jakarta.persistence.TypedQuery;
+import java.util.List;
 import modelo.SolicitudReposicion;
 
 /**
@@ -30,40 +30,31 @@ public class SolicitudReposicionFacade extends AbstractFacade<SolicitudReposicio
         super(SolicitudReposicion.class);
     }
 
-    // HU-2.1 / HU-2.4: ¿ya existe una solicitud ACTIVA con ese folio?
-    public boolean existeFolioActivo(String folioCETS) {
-        return !getEntityManager()
-                .createQuery("SELECT s.id FROM SolicitudReposicion s "
-                        + "WHERE UPPER(s.folioCETS) = :folio AND s.estatus = 'Activa'")
-                .setParameter("folio", folioCETS.toUpperCase())
-                .setMaxResults(1)
-                .getResultList()
-                .isEmpty();
-    }
+    // HU-6.2: solicitudes que cumplen el filtro (estatus, tipoSanguineo, factorRh).
+    // Un campo null en el filtro significa "todos". Más recientes primero.
+    public List<SolicitudReposicion> buscarFiltradas(SolicitudReposicion filtro) {
+        StringBuilder jpql = new StringBuilder("SELECT s FROM SolicitudReposicion s WHERE 1 = 1");
+        if (filtro.getEstatus() != null) {
+            jpql.append(" AND s.estatus = :estatus");
+        }
+        if (filtro.getTipoSanguineo() != null) {
+            jpql.append(" AND s.tipoSanguineo = :tipo");
+        }
+        if (filtro.getFactorRh() != null) {
+            jpql.append(" AND s.factorRh = :rh");
+        }
+        jpql.append(" ORDER BY s.fechaHoraRegistro DESC");
 
-    // HU-2.2: publicación por su UUID público (null si no existe)
-    public SolicitudReposicion buscarPorUuid(String uuidPublico) {
-        List<SolicitudReposicion> r = getEntityManager()
-                .createNamedQuery("SolicitudReposicion.findByUuidPublico", SolicitudReposicion.class)
-                .setParameter("uuidPublico", uuidPublico)
-                .getResultList();
-        return r.isEmpty() ? null : r.get(0);
-    }
-
-    // HU-2.3: solicitudes del usuario, más recientes primero
-    public List<SolicitudReposicion> consultarSolicitudes(Usuario usuario) {
-        return getEntityManager()
-                .createQuery("SELECT s FROM SolicitudReposicion s WHERE s.usuarioid = :usuario "
-                        + "ORDER BY s.fechaHoraRegistro DESC", SolicitudReposicion.class)
-                .setParameter("usuario", usuario)
-                .getResultList();
-    }
-
-    // HU-5.1: solicitudes activas para vincular una donación
-    public List<SolicitudReposicion> listarActivas() {
-        return getEntityManager()
-                .createQuery("SELECT s FROM SolicitudReposicion s WHERE s.estatus = 'Activa' "
-                        + "ORDER BY s.fechaHoraRegistro DESC", SolicitudReposicion.class)
-                .getResultList();
+        TypedQuery<SolicitudReposicion> q = getEntityManager().createQuery(jpql.toString(), SolicitudReposicion.class);
+        if (filtro.getEstatus() != null) {
+            q.setParameter("estatus", filtro.getEstatus());
+        }
+        if (filtro.getTipoSanguineo() != null) {
+            q.setParameter("tipo", filtro.getTipoSanguineo());
+        }
+        if (filtro.getFactorRh() != null) {
+            q.setParameter("rh", filtro.getFactorRh());
+        }
+        return q.getResultList();
     }
 }

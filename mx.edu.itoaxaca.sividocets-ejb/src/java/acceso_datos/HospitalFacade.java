@@ -5,7 +5,6 @@
 package acceso_datos;
 
 import jakarta.ejb.Stateless;
-import java.util.List;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import modelo.Hospital;
@@ -28,11 +27,5 @@ public class HospitalFacade extends AbstractFacade<Hospital> {
     public HospitalFacade() {
         super(Hospital.class);
     }
-
-    // HU-2.1: catálogo de hospitales ordenado para el selector
-    public List<Hospital> listarPorNombre() {
-        return getEntityManager()
-                .createQuery("SELECT h FROM Hospital h ORDER BY h.nombre", Hospital.class)
-                .getResultList();
-    }
+    
 }

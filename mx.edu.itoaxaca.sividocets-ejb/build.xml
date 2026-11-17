@@ -65,11 +65,4 @@
     nbproject/build-impl.xml file. 
 
     -->
-    <!-- Empaqueta la libreria externa lib/qrcodegen.jar (generador de QR, licencia MIT)
-         dentro del modulo EJB, para que LnSolicitud la encuentre al desplegar. -->
-    <target name="-post-compile">
-        <unjar src="${file.reference.qrcodegen.jar}" dest="${build.classes.dir}">
-            <patternset excludes="META-INF/MANIFEST.MF"/>
-        </unjar>
-    </target>
 </project>
