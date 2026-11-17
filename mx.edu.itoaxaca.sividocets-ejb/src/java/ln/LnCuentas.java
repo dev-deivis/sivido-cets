@@ -134,6 +134,11 @@ public class LnCuentas {
         } else {
             perfilF.edit(perfil);
         }
+        // Referencia inversa (Usuario.perfilClinico es mappedBy): sin esto el caché compartido de EclipseLink
+        // se queda con el Usuario con perfilClinico = null y otras vistas (p. ej. la búsqueda de donadores del
+        // CETS) no ven el grupo sanguíneo hasta redesplegar. El consentimiento no necesita lo mismo: es un campo
+        // del propio Usuario administrado, que ya se actualiza en el caché al terminar la transacción.
+        usuario.setPerfilClinico(perfil);
         return true;
     }
 
