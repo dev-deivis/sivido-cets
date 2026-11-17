@@ -7,7 +7,10 @@ package acceso_datos;
 import jakarta.ejb.Stateless;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
+import java.util.List;
 import modelo.Notificacion;
+import modelo.SolicitudReposicion;
+import modelo.Usuario;
 
 /**
  *
@@ -26,6 +29,24 @@ public class NotificacionFacade extends AbstractFacade<Notificacion> {
 
     public NotificacionFacade() {
         super(Notificacion.class);
+    }
+
+    // HU-3.1: avisos del donador, el más reciente primero
+    public List<Notificacion> buscarPorUsuario(Usuario u) {
+        return getEntityManager()
+                .createQuery("SELECT n FROM Notificacion n WHERE n.usuarioid = :u ORDER BY n.fechaEnvio DESC", Notificacion.class)
+                .setParameter("u", u)
+                .getResultList();
+    }
+
+    // HU-3.1 / HU-3.3: el aviso de ese donador para esa solicitud (la BD solo permite uno por par), o null
+    public Notificacion buscarPorUsuarioYSolicitud(Usuario u, SolicitudReposicion s) {
+        List<Notificacion> r = getEntityManager()
+                .createQuery("SELECT n FROM Notificacion n WHERE n.usuarioid = :u AND n.solicitudReposicionid = :s", Notificacion.class)
+                .setParameter("u", u)
+                .setParameter("s", s)
+                .getResultList();
+        return r.isEmpty() ? null : r.get(0);
     }
     
 }

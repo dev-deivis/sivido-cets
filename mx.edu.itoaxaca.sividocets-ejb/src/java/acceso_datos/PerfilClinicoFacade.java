@@ -7,6 +7,7 @@ package acceso_datos;
 import jakarta.ejb.Stateless;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
+import java.util.List;
 import modelo.PerfilClinico;
 
 /**
@@ -26,6 +27,17 @@ public class PerfilClinicoFacade extends AbstractFacade<PerfilClinico> {
 
     public PerfilClinicoFacade() {
         super(PerfilClinico.class);
+    }
+
+    // HU-3.1: donadores a quienes se puede avisar. Necesitan grupo y Rh capturados, ubicación (D1: sin
+    // coordenadas no se notifica) y no tener exclusión permanente (D10).
+    public List<PerfilClinico> buscarDonadoresActivos() {
+        return getEntityManager()
+                .createQuery("SELECT p FROM PerfilClinico p "
+                        + "WHERE p.tipoSanguineo IS NOT NULL AND p.factorRh IS NOT NULL "
+                        + "AND p.latitud IS NOT NULL AND p.longitud IS NOT NULL "
+                        + "AND p.usuario.exclusionPermanente = false", PerfilClinico.class)
+                .getResultList();
     }
     
 }

@@ -1,5 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- Criterios de exclusión — panel institucional CETS estático (diseño Stitch v3) -->
+<!-- Criterios de exclusión — HU-4.3 (panel institucional CETS). La vista llena la entidad completa
+     #{cuestionarioController.criterio}. Los valores coinciden con la BD (D11): tipoRespuesta SiNo /
+     SeleccionSimple y tipoExclusion Temporal / Permanente. No se borra: un criterio en uso se desactiva.
+     La sesión CETS la verifica plantillaInstitucional y, antes de consultar la BD, cuestionarioController.cargarCatalogo. -->
 <!DOCTYPE html>
 <ui:composition xmlns="http://www.w3.org/1999/xhtml"
                 xmlns:h="jakarta.faces.html"
@@ -11,6 +14,12 @@
     <ui:param name="menuActivo" value="criteriosExclusion"/>
     <ui:define name="titulo">Criterios de exclusión · SIVIDO CETS</ui:define>
 
+    <ui:define name="metadata">
+        <f:metadata>
+            <f:viewAction action="#{cuestionarioController.cargarCatalogo}"/>
+        </f:metadata>
+    </ui:define>
+
     <ui:define name="content">
         <div class="encabezado-pagina">
             <span class="sobretitulo"><i class="pi pi-book"></i> Normatividad sanitaria CETS Oaxaca</span>
@@ -18,23 +27,26 @@
             <p>Preguntas del cuestionario de elegibilidad que responde el donador antes de confirmar su interés.</p>
         </div>
 
+        <p:messages id="mensajes" closable="true"/>
+
         <div class="grid grid-principal">
             <!-- Catálogo -->
             <div class="columna">
                 <div class="fila-entre">
                     <div class="pildoras">
-                        <span class="pildora activa">Todos (24)</span>
-                        <span class="pildora">Temporal (16)</span>
-                        <span class="pildora">Permanente (8)</span>
-                        <span class="pildora">Activos (22)</span>
-                        <span class="pildora">Inactivos (2)</span>
+                        <span class="pildora activa">Todos (#{cuestionarioController.totalCatalogo})</span>
+                        <span class="pildora">Temporal (#{cuestionarioController.totalTemporales})</span>
+                        <span class="pildora">Permanente (#{cuestionarioController.totalPermanentes})</span>
+                        <span class="pildora">Activos (#{cuestionarioController.totalActivos})</span>
+                        <span class="pildora">Inactivos (#{cuestionarioController.totalInactivos})</span>
                     </div>
                 </div>
 
                 <h:form id="formCatalogo">
                     <div class="tabla-contenedor">
                         <div style="padding:.75rem 1rem;border-bottom:1px solid var(--borde)">
-                            <p:inputText placeholder="Filtrar por palabra clave..." style="width:100%"/>
+                            <!-- Sin respaldo en los diagramas (la HU-4.3 no filtra): se deja deshabilitado -->
+                            <p:inputText placeholder="Filtrar por palabra clave (próximamente)" style="width:100%" disabled="true"/>
                         </div>
                         <table class="tabla">
                             <thead>
@@ -48,105 +60,84 @@
                                 </tr>
                             </thead>
                             <tbody>
-                                <tr>
-                                    <td><strong>¿Te has realizado tatuajes, perforaciones o acupuntura?</strong><span class="sub">Riesgo de transmisión parenteral</span></td>
-                                    <td>Sí / No</td>
-                                    <td><p:tag value="Temporal" severity="warning"/></td>
-                                    <td class="mono">365 días</td>
-                                    <td><p:toggleSwitch value="true"/></td>
-                                    <td><p:button outcome="/vista/cets/criteriosExclusion" icon="pi pi-pencil" styleClass="ui-button-flat" title="Editar"/></td>
-                                </tr>
-                                <tr>
-                                    <td><strong>¿Padeces hepatitis B, hepatitis C o infección por VIH?</strong><span class="sub">Infección transmisible por sangre</span></td>
-                                    <td>Sí / No</td>
-                                    <td><p:tag value="Permanente"/></td>
-                                    <td class="mono texto-tenue">N/A (definitiva)</td>
-                                    <td><p:toggleSwitch value="true"/></td>
-                                    <td><p:button outcome="/vista/cets/criteriosExclusion" icon="pi pi-pencil" styleClass="ui-button-flat" title="Editar"/></td>
-                                </tr>
-                                <tr>
-                                    <td><strong>¿Has presentado fiebre, gripe o tos en los últimos 14 días?</strong><span class="sub">Cuadros infecciosos agudos</span></td>
-                                    <td>Sí / No</td>
-                                    <td><p:tag value="Temporal" severity="warning"/></td>
-                                    <td class="mono">14 días</td>
-                                    <td><p:toggleSwitch value="true"/></td>
-                                    <td><p:button outcome="/vista/cets/criteriosExclusion" icon="pi pi-pencil" styleClass="ui-button-flat" title="Editar"/></td>
-                                </tr>
-                                <tr>
-                                    <td><strong>¿Has tomado antibióticos o analgésicos en las últimas 72 horas?</strong><span class="sub">Medicamentos que afectan la donación</span></td>
-                                    <td>Selección simple</td>
-                                    <td><p:tag value="Temporal" severity="warning"/></td>
-                                    <td class="mono">3 días</td>
-                                    <td><p:toggleSwitch value="true"/></td>
-                                    <td><p:button outcome="/vista/cets/criteriosExclusion" icon="pi pi-pencil" styleClass="ui-button-flat" title="Editar"/></td>
-                                </tr>
-                                <tr>
-                                    <td><strong>¿Has tenido cirugías mayores en los últimos seis meses?</strong><span class="sub">Recuperación postquirúrgica</span></td>
-                                    <td>Sí / No</td>
-                                    <td><p:tag value="Temporal" severity="warning"/></td>
-                                    <td class="mono">180 días</td>
-                                    <td><p:toggleSwitch value="false"/></td>
-                                    <td><p:button outcome="/vista/cets/criteriosExclusion" icon="pi pi-pencil" styleClass="ui-button-flat" title="Editar"/></td>
-                                </tr>
-                                <tr>
-                                    <td><strong>¿Diagnóstico de enfermedad de Chagas o cardiopatía severa?</strong><span class="sub">Condición endémica en Oaxaca</span></td>
-                                    <td>Sí / No</td>
-                                    <td><p:tag value="Permanente"/></td>
-                                    <td class="mono texto-tenue">N/A (definitiva)</td>
-                                    <td><p:toggleSwitch value="true"/></td>
-                                    <td><p:button outcome="/vista/cets/criteriosExclusion" icon="pi pi-pencil" styleClass="ui-button-flat" title="Editar"/></td>
-                                </tr>
+                                <ui:repeat value="#{cuestionarioController.catalogo}" var="c">
+                                    <tr>
+                                        <td><strong>#{c.criterio}</strong></td>
+                                        <td>#{c.tipoRespuesta == 'SiNo' ? 'Sí / No' : 'Selección simple'}</td>
+                                        <td>
+                                            <p:tag value="Temporal" severity="warning" rendered="#{c.tipoExclusion == 'Temporal'}"/>
+                                            <p:tag value="Permanente" rendered="#{c.tipoExclusion == 'Permanente'}"/>
+                                        </td>
+                                        <td class="mono">
+                                            <h:outputText value="#{c.duracionDias} días" rendered="#{c.tipoExclusion == 'Temporal'}"/>
+                                            <h:outputText value="N/A (definitiva)" styleClass="texto-tenue" rendered="#{c.tipoExclusion == 'Permanente'}"/>
+                                        </td>
+                                        <td>
+                                            <p:tag value="Activo" severity="success" rendered="#{c.activo}"/>
+                                            <p:tag value="Inactivo" severity="secondary" rendered="#{not c.activo}"/>
+                                        </td>
+                                        <td>
+                                            <p:commandButton icon="pi pi-pencil" styleClass="ui-button-flat" title="Editar" ajax="false"
+                                                             action="#{cuestionarioController.editarCriterio(c)}"/>
+                                            <p:commandButton icon="#{c.activo ? 'pi pi-eye-slash' : 'pi pi-eye'}" styleClass="ui-button-flat"
+                                                             title="#{c.activo ? 'Desactivar' : 'Activar'}" ajax="false"
+                                                             action="#{cuestionarioController.cambiarActivo(c)}"/>
+                                        </td>
+                                    </tr>
+                                </ui:repeat>
                             </tbody>
                         </table>
                         <div class="pie-tabla">
-                            <span>Mostrando 6 de 24 criterios</span>
-                            <div class="paginador"><span><i class="pi pi-chevron-left"></i></span><span class="actual">1</span><span>2</span><span>3</span><span><i class="pi pi-chevron-right"></i></span></div>
+                            <span>#{cuestionarioController.totalCatalogo} criterios en el catálogo</span>
                         </div>
                     </div>
                 </h:form>
             </div>
 
-            <!-- Nuevo criterio -->
+            <!-- Nuevo criterio / edición -->
             <div class="columna">
-                <p:panel header="Nuevo criterio de exclusión">
+                <p:panel header="#{empty cuestionarioController.criterio.id ? 'Nuevo criterio de exclusión' : 'Editar criterio de exclusión'}">
                     <h:form id="formNuevoCriterio">
                         <div class="campo">
                             <p:outputLabel for="pregunta">Texto de la pregunta <span class="requerido">*</span></p:outputLabel>
                             <p:inputTextarea id="pregunta" rows="3" autoResize="false"
+                                             value="#{cuestionarioController.criterio.criterio}"
                                              placeholder="Ej: ¿Has tenido contacto sexual de riesgo en los últimos 12 meses?"/>
                             <span class="ayuda">Redáctala en lenguaje claro para el donador.</span>
                         </div>
                         <div class="campo">
                             <p:outputLabel for="referencia">Referencia NOM-253</p:outputLabel>
-                            <p:inputText id="referencia" placeholder="Ej: Sección 6.4.1"/>
+                            <p:inputText id="referencia" placeholder="Ej: Sección 6.4.1" disabled="true"/>
+                            <span class="ayuda"><i class="pi pi-clock"></i> Aún no disponible: no tiene dónde guardarse en la base de datos.</span>
                         </div>
                         <div class="campo">
                             <p:outputLabel for="tipoRespuesta">Tipo de respuesta <span class="requerido">*</span></p:outputLabel>
-                            <p:selectOneMenu id="tipoRespuesta" value="sino">
-                                <f:selectItem itemLabel="Sí / No" itemValue="sino"/>
-                                <f:selectItem itemLabel="Selección simple" itemValue="simple"/>
-                                <f:selectItem itemLabel="Selección múltiple" itemValue="multiple"/>
+                            <p:selectOneMenu id="tipoRespuesta" value="#{cuestionarioController.criterio.tipoRespuesta}">
+                                <f:selectItem itemLabel="Sí / No" itemValue="SiNo"/>
+                                <f:selectItem itemLabel="Selección simple" itemValue="SeleccionSimple"/>
                             </p:selectOneMenu>
                         </div>
                         <div class="campo">
                             <span class="etiqueta-campo">Tipo de exclusión <span class="requerido">*</span></span>
-                            <p:selectOneRadio id="tipoExclusion" value="temporal" layout="lineDirection">
-                                <f:selectItem itemLabel="Temporal" itemValue="temporal"/>
-                                <f:selectItem itemLabel="Permanente" itemValue="permanente"/>
+                            <p:selectOneRadio id="tipoExclusion" value="#{cuestionarioController.criterio.tipoExclusion}" layout="lineDirection">
+                                <f:selectItem itemLabel="Temporal" itemValue="Temporal"/>
+                                <f:selectItem itemLabel="Permanente" itemValue="Permanente"/>
                             </p:selectOneRadio>
                         </div>
                         <div class="campo">
-                            <p:outputLabel for="dias">Días de espera <span class="requerido">*</span></p:outputLabel>
-                            <p:inputText id="dias" value="365"/>
-                            <span class="ayuda">Para exclusiones permanentes indicar "N/A".</span>
+                            <p:outputLabel for="dias">Días de espera</p:outputLabel>
+                            <p:inputText id="dias" value="#{cuestionarioController.criterio.duracionDias}"/>
+                            <span class="ayuda">Obligatorio y mayor que 0 si la exclusión es temporal. En las permanentes se ignora.</span>
                         </div>
                         <div class="preferencia">
-                            <div><strong>Activo inmediatamente</strong><p>Se mostrará en el cuestionario del donador.</p></div>
-                            <p:toggleSwitch id="activo" value="true"/>
+                            <div><strong>Activo</strong><p>Si está activo, se mostrará en el cuestionario del donador.</p></div>
+                            <p:toggleSwitch id="activo" value="#{cuestionarioController.criterio.activo}"/>
                         </div>
                         <div class="fila" style="justify-content:flex-end">
-                            <p:button outcome="/vista/cets/criteriosExclusion" value="Cancelar" styleClass="ui-button-secondary"/>
-                            <p:button outcome="/vista/cets/criteriosExclusion" value="Guardar criterio" icon="pi pi-save"/>
+                            <p:commandButton value="Cancelar" styleClass="ui-button-secondary" ajax="false" immediate="true"
+                                             action="#{cuestionarioController.nuevoCriterio}"/>
+                            <p:commandButton value="Guardar criterio" icon="pi pi-save" ajax="false"
+                                             action="#{cuestionarioController.guardarCriterio}"/>
                         </div>
                     </h:form>
                 </p:panel>
