@@ -108,7 +108,9 @@ public class LnDonacion {
         return motivoRechazo(donador, solicitud, null);
     }
 
-    // [David] D18 / #42: igual, con la fecha de la donación (también rechaza si ya donó ese día)
+    // [David] D18 / #42: igual, pero validando contra la fechaDonacion del registro (no contra hoy): la fecha no puede ser
+    // futura, no puede repetir un día con donación y debe quedar a 56 días o más de CUALQUIER donación existente del
+    // donador (antes o después de esa fecha, para cubrir donaciones con fecha pasada).
     public String motivoRechazoDonacion(RegistroDonacion r) {
         return motivoRechazo(r.getUsuarioid(), r.getSolicitudReposicionid(), r.getFechaDonacion());
     }
@@ -118,13 +120,19 @@ public class LnDonacion {
         if (donador == null) {
             return "El donador no existe.";
         }
+        if (fecha != null && aLocalDate(fecha).isAfter(LocalDate.now(ZONA))) {
+            return "La fecha de la donación no puede ser futura.";
+        }
         if (verificarExclusion(donador)) {
             return "El donador tiene exclusión permanente y no puede donar.";
         }
-        if (fecha != null && yaDonoEseDia(donador, fecha)) {
-            return "El donador ya tiene una donación registrada ese día.";
-        }
-        if (!esElegible(donador)) {
+        if (fecha != null) {
+            String intervalo = motivoIntervalo(donador, fecha);
+            if (intervalo != null) {
+                return intervalo;
+            }
+        } else if (!esElegible(donador)) {
+            // Sin fecha (la vista aún no la tiene): se compara contra hoy
             Date proxima = obtenerProximaFecha(obtenerElegibilidad(donador));
             return "El donador está dentro del intervalo de " + DIAS_EXCLUSION + " días entre donaciones"
                     + (proxima == null ? "." : "; podrá donar a partir del " + formatear(aLocalDate(proxima)) + ".");
@@ -151,14 +159,29 @@ public class LnDonacion {
         return null;
     }
 
-    private boolean yaDonoEseDia(Usuario donador, Date fecha) {
-        LocalDate dia = aLocalDate(fecha);
-        for (RegistroDonacion previa : registroF.buscarPorDonador(donador)) {
-            if (aLocalDate(previa.getFechaDonacion()).equals(dia)) {
-                return true;
+    // [David] #42: motivo por el que la fecha no respeta el intervalo con las donaciones existentes (null si sí lo respeta).
+    // Primero el mismo día; después, 56 días de diferencia como mínimo en ambos sentidos.
+    private String motivoIntervalo(Usuario donador, Date fecha) {
+        LocalDate nueva = aLocalDate(fecha);
+        List<RegistroDonacion> previas = registroF.buscarPorDonador(donador);     // más reciente primero
+        for (RegistroDonacion previa : previas) {
+            if (aLocalDate(previa.getFechaDonacion()).equals(nueva)) {
+                return "El donador ya tiene una donación registrada ese día.";
             }
         }
-        return false;
+        for (RegistroDonacion previa : previas) {
+            LocalDate dia = aLocalDate(previa.getFechaDonacion());
+            if (Math.abs(java.time.temporal.ChronoUnit.DAYS.between(dia, nueva)) < DIAS_EXCLUSION) {
+                if (dia.isBefore(nueva)) {
+                    return "La fecha queda a menos de " + DIAS_EXCLUSION + " días de la donación del " + formatear(dia)
+                            + "; el donador podrá donar a partir del " + formatear(dia.plusDays(DIAS_EXCLUSION)) + ".";
+                }
+                return "La fecha queda a menos de " + DIAS_EXCLUSION + " días de una donación posterior (" + formatear(dia)
+                        + "); debe ser el " + formatear(dia.minusDays(DIAS_EXCLUSION)) + " o antes, o a partir del "
+                        + formatear(dia.plusDays(DIAS_EXCLUSION)) + ".";
+            }
+        }
+        return null;
     }
 
     private String formatear(LocalDate fecha) {

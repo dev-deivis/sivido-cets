@@ -16,6 +16,10 @@
 --   Donador lejano A+:          donador2@prueba.mx       / Donador2026!
 -- =====================================================================
 
+-- Hora de México (UTC-6 fijo desde 2022, sin horario de verano): los NOW() de este seed coinciden con la hora
+-- que muestran las vistas (TASKS.md #45).
+SET time_zone = '-06:00';
+
 USE sivido;
 
 START TRANSACTION;

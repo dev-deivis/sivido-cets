@@ -2134,8 +2134,8 @@ quedó el trabajo en este documento.
 | D14 | Toggles sin columna | "Compartir mi contacto solo cuando yo confirme interés" y "Recibir avisos de solicitudes compatibles" quedan **deshabilitados** en miPerfil, con una nota, sin conectarlos a nada. | [DAVID] HU-1.3 (hecho) |
 | D15 | Combo "Región" | Se **elimina**: no existe columna y la ubicación (D1) lo reemplaza. | [DAVID] HU-1.3 (hecho) |
 | D16 | Controller de miPerfil | `PerfilController` (`@ViewScoped`) y no `CuentasController` (`@RequestScoped`): el perfil debe conservarse entre los clics de la vista. Los dos usan `LnCuentas`. | [DAVID] HU-1.3 / HU-3.4 (hecho) |
-| D17 | Cuestionario Apto y confirmar interés | El resultado **Apto** del cuestionario es **orientativo, no obligatorio**: `registrarInteres` no lo exige. Sí exige solicitud Activa, que el donador no sea el solicitante, compatibilidad tipo/Rh y `esElegible` (56 días y exclusión permanente). | [Alex] HU-3.3 / HU-4.2 |
-| D18 | Cuándo no se registra una donación | **No se puede registrar una donación si el donador tiene exclusión permanente, está dentro de 56 días, es incompatible con la solicitud o ya donó ese día.** Lo valida `LnDonacion.registrarDonacion` (vía `motivoRechazoDonacion`); la vista muestra el motivo y deshabilita el botón. La donación general (sin solicitud) no revisa compatibilidad. | [DAVID] HU-5.1 |
+| D17 | Cuestionario Apto y confirmar interés | El resultado **Apto** del cuestionario es **orientativo, no obligatorio**: `registrarInteres` no lo exige. Sí exige solicitud Activa, que el donador no sea el solicitante, compatibilidad tipo/Rh y `esElegible` (56 días y exclusión permanente). | [Alex] HU-3.3 / HU-4.2 — **decidida** |
+| D18 | Cuándo no se registra una donación | **No se puede registrar una donación si el donador tiene exclusión permanente, la fecha es futura, ya donó ese día, la fecha queda a menos de 56 días de cualquier donación suya (antes o después) o, cuando hay solicitud, la solicitud no está Activa o su grupo/Rh es incompatible: la compatibilidad bloquea la donación cuando hay solicitud.** Lo valida `LnDonacion.registrarDonacion` (vía `motivoRechazoDonacion`); la vista muestra el motivo y deshabilita el botón. La donación general (sin solicitud) no revisa compatibilidad. | [DAVID] HU-5.1 — **decidida** |
 
 ---
 
@@ -2312,6 +2312,9 @@ Siguen **abiertas**: necesitan una decisión del equipo o del profe. Lo ya resue
     - **Arreglo:** `LnCuentas.guardarPerfilClinico` asigna `usuario.setPerfilClinico(perfil)` después de crear o actualizar
       el perfil. El consentimiento no necesita lo mismo: es un campo del propio `Usuario` administrado, que ya se actualiza
       en el caché al terminar la transacción.
+    - **Estado actual:** las referencias inversas de `Interes` (`usuario.interesList`, `solicitud.interesList`), `Notificacion` y
+      `CuestionarioRespuesta` ya se actualizan en el Ln (`LnNotificacion`, `LnCuestionario`), igual que `RegistroDonacion`
+      (`usuario`, `solicitud` y personal) en `LnDonacion`. Ninguna vista lee todavía esas listas: hoy no hay efecto visible.
     - **Regla para el equipo:** en relaciones bidireccionales, al crear o cambiar el lado dueño hay que actualizar también
       el lado inverso en el mismo método del Ln (como ya hace `LnDonacion.registrarDonacion` con `registroDonacionList`).
       Revisar las demás: `Usuario.notificacionList` / `interesList`, `SolicitudReposicion.interesList` e
@@ -2356,10 +2359,14 @@ Siguen **abiertas**: necesitan una decisión del equipo o del profe. Lo ya resue
     (aceptado en HU-1.4 por la regla de no modificar la entidad).
 41. **`buscarDonadores` no escapa `%` ni `_`:** la consulta está parametrizada (sin inyección SQL), pero buscar `%` lista a
     todos los donadores con perfil. Solo lo usa el CETS. Pendiente.
-42. **Donaciones duplicadas el mismo día (cerrada):** `LnDonacion.registrarDonacion` ya rechaza una segunda donación del mismo
-    donador en la misma fecha (y, por D18, también la que cae dentro de los 56 días, con exclusión permanente o incompatible
-    con la solicitud). Pendiente menor: `esElegible` compara con **hoy**, no con `fechaDonacion`; una donación con fecha
-    pasada se valida contra el último registro y la fecha de hoy.
+42. **Donaciones duplicadas y regla de 56 días (cerrada):** `LnDonacion.registrarDonacion` valida contra la **fecha de la donación** del
+    registro y no contra hoy (`motivoRechazoDonacion(RegistroDonacion)`): la fecha no puede ser futura; no puede repetir un día en
+    que el donador ya donó; y debe quedar a **56 días o más de cualquier donación existente, en ambos sentidos** (una donación
+    con fecha pasada tampoco puede caer a menos de 56 días de una posterior). El mensaje indica desde qué fecha podría donar.
+    `esElegible(Usuario)` no cambia: sigue comparando contra **hoy** (lo usan `registrarInteres` y la ficha). La sobrecarga
+    `motivoRechazoDonacion(Usuario, SolicitudReposicion)`, que usan las vistas antes de tener la fecha, también compara contra
+    hoy: un donador dentro de los 56 días de hoy ve el botón "Registrar donación" deshabilitado aunque exista una fecha pasada
+    válida para él. Aceptado; si hace falta registrar donaciones antiguas, habilitar el botón y dejar que decida el Ln.
 43. **Validación en el Ln de `registrarSolicitud` y `registrarDonacion`:** se agregaron (grupo ∈ {A,B,AB,O}, Rh ∈ {+,−},
     hospital y usuario existentes; donación con donador y personal CETS **activo** existentes, y solicitud asociada Activa).
     No están en los diagramas; los diagramas tampoco dicen qué mensaje mostrar cuando el Ln regresa `false`, así que los
@@ -2380,6 +2387,7 @@ Siguen **abiertas**: necesitan una decisión del equipo o del profe. Lo ya resue
       `timeZone` use la zona del sistema y no UTC. Se eligió esta combinación (y no solo el parámetro) porque un `DATE` leído por
       JDBC es medianoche en la zona de la JVM: con `America/Mexico_City` explícito se movería un día si el servidor corriera en
       UTC, y con el parámetro las fechas de solo día siguen a la JVM.
-    - Pendiente (sin verificar): los datos del seed se insertan con `NOW()` de MySQL; si la zona de la sesión de MySQL no es la
-      de la JVM, esas horas pueden verse desplazadas. Las fechas creadas desde la aplicación no tienen ese problema.
+    - **Seed:** `sql/datos_prueba.sql` ahora empieza con `SET time_zone = '-06:00';` (México, sin horario de verano desde 2022), así
+      que los `NOW()` del seed coinciden con la hora que muestran las vistas. `limpiar_datos_prueba.sql` no necesita el cambio
+      (no usa `NOW()` ni `CURDATE()`). Las fechas creadas desde la aplicación no dependen de la zona de MySQL.
     - Regla para vistas nuevas: fecha con hora → `timeZone="America/Mexico_City"`; fecha de solo día → sin `timeZone`.
