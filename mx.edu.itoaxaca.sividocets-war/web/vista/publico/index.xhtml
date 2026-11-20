@@ -12,7 +12,7 @@
 
     <ui:define name="content">
         <!-- Héroe -->
-        <section class="heroe">
+        <section class="heroe heroe-rojo">
             <div class="contenedor grid grid-principal">
                 <div class="columna">
                     <div class="fila">
@@ -46,7 +46,14 @@
                 </div>
 
                 <div class="banda-roja columna">
-                    <span class="icono-caja blanco" style="background:#fff;color:var(--rojo)"><i class="pi pi-heart-fill"></i></span>
+                    <svg class="ilustracion-bolsa" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 140 140" aria-hidden="true">
+                        <rect x="14" y="16" width="56" height="78" rx="14" fill="rgba(255,255,255,.16)" stroke="#fff" stroke-width="2.5"/>
+                        <path d="M20 52 C34 46 50 58 64 50 L64 82 Q64 88 58 88 L26 88 Q20 88 20 82 Z" fill="#fff" opacity=".9"/>
+                        <rect x="26" y="26" width="32" height="16" rx="3" fill="#fff"/>
+                        <rect x="36" y="6" width="12" height="12" rx="3" fill="none" stroke="#fff" stroke-width="2.5"/>
+                        <path d="M42 94 L42 112 C42 128 70 130 84 118 C92 111 96 104 100 100" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round"/>
+                        <path d="M112 86 C104 74 88 78 92 92 C95 102 112 112 112 112 C112 112 129 102 132 92 C136 78 120 74 112 86 Z" fill="#fff"/>
+                    </svg>
                     <h2 class="mb-0">1 donación = hasta 3 vidas</h2>
                     <p class="mb-0">De una sola extracción se obtienen componentes listos para tres pacientes distintos.</p>
                     <hr class="separador" style="border-color:rgba(255,255,255,.3)"/>

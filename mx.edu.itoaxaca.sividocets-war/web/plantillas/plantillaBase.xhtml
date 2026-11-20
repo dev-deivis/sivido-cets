@@ -23,9 +23,9 @@
              para poder sobrescribirlos. Se usa <link> directo porque h:outputStylesheet se reubica
              junto con los recursos de PrimeFaces y quedaría antes de components.css. -->
         <f:facet name="last">
-            <link rel="stylesheet" href="#{resource['css:estilos.css']}"/>
-            <link rel="stylesheet" href="#{resource['css:layout.css']}"/>
-            <link rel="stylesheet" href="#{resource['css:primefaces-cets.css']}"/>
+            <!-- sivido-tema.css reemplaza a estilos.css, layout.css y primefaces-cets.css (rediseño «Editorial»):
+                 tokens, layout y sobrescritura del tema saga de PrimeFaces con la identidad SIVIDO. -->
+            <link rel="stylesheet" href="#{resource['css:sivido-tema.css']}"/>
         </f:facet>
     </h:head>
     <h:body>
@@ -40,6 +40,11 @@
             <div class="encabezado-derecha">
                 <ui:insert name="encabezado"/>
             </div>
+            <!-- Línea de pulso decorativa en el borde inferior del encabezado -->
+            <svg class="ecg-encabezado" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1280 14" preserveAspectRatio="none" aria-hidden="true">
+                <polyline fill="none" stroke="#d0102a" stroke-width="1.6" stroke-linejoin="round"
+                          points="0,12 300,12 318,12 326,3 334,13 342,1 350,12 760,12 778,12 786,4 794,13 802,2 810,12 1280,12"/>
+            </svg>
         </header>
 
         <div class="cuerpo">
@@ -55,6 +60,9 @@
             </main>
         </div>
 
-        <footer id="pie">SIVIDO · CETS Oaxaca</footer>
+        <footer id="pie">
+            <span>SIVIDO · CETS Oaxaca</span>
+            <span class="pie-lema">Dona sangre<b>·</b>Dona esperanza<b>·</b>Dona vida</span>
+        </footer>
     </h:body>
 </html>
