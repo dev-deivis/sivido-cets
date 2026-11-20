@@ -395,8 +395,8 @@ Rama: `feature/panel-cets`
       plantillas anidadas (`plantillaUsuario`, `plantillaInstitucional` y `plantillaPublica` heredan de `plantillaBase`).
 - [x] **T0.2** Subir al repo `sql/SIVIDO_CETS_mysql.sql`, `sql/datos_prueba.sql` y `sql/limpiar_datos_prueba.sql`
       (sección 2).
-- [ ] **T0.3** Correr `sql/datos_prueba.sql` y comprobar el login CETS con `admin@cets.oaxaca.gob.mx` / `Cets2026!`.
-- [ ] **T0.4** Merge a `main` y avisar al equipo.
+- [x] **T0.3** Correr `sql/datos_prueba.sql` y comprobar el login CETS con `admin@cets.oaxaca.gob.mx` / `Cets2026!`.
+- [x] **T0.4** Merge a `main` y avisar al equipo.
 
 ---
 
@@ -476,8 +476,8 @@ public List<SolicitudReposicion> buscarFiltradas(SolicitudReposicion filtro)
 - [x] Controller: lista, filtro y método para el `f:viewAction`
 - [x] Vista: `p:dataTable`, combos separados, `f:param id`, sin datos fijos
 - [x] Pruebas HTTP automáticas (login, listado, 4 filtros, sin sesión y rol equivocado): todas pasan
-- [ ] Revisión visual en el navegador (tabla, paginador, tarjetas)
-- [ ] Regresión (sección 8)
+- [x] Revisión visual en el navegador (tabla, paginador, tarjetas)
+- [x] Regresión (sección 8)
 
 ---
 
@@ -622,7 +622,7 @@ public boolean actualizarEstatus(SolicitudReposicion s)
 - [x] Compila (`clean dist`, 0 errores y 0 warnings)
 - [x] Pruebas HTTP (23 comprobaciones, todas OK): transición válida (2), inválida (mismo estatus, reabrir y valor
       inventado), id inexistente, sin sesión y rol equivocado; la BD se restauró al terminar
-- [ ] Revisión visual en el navegador
+- [x] Revisión visual en el navegador
 
 ---
 
@@ -796,7 +796,7 @@ Cambiar el radio **no** modifica grupo, Rh ni ubicación.
 - [x] Pruebas HTTP (parte de las 41 de HU-1.3): radio 3, 5 y 10, radio sin perfil, radio inválido y que no altere el resto del perfil.
       El radio inválido (7) lo rechaza la validación de JSF (no está en la lista del selector); la rama `validarRadio` falsa del
       Ln no se puede forzar por HTTP
-- [ ] Avisar a [Alex] cuando esté en `main` (reemplaza su selector, D7)
+- [x] Avisar a [Alex] cuando esté en `main` (reemplaza su selector, D7)
 - [ ] Revisión visual en el navegador (el selector `p:selectOneButton` y los mensajes)
 
 ---
@@ -805,20 +805,20 @@ Cambiar el radio **no** modifica grupo, Rh ni ubicación.
 
 Se hace al final, cuando el código de todos esté en `main`, para que el diagrama refleje lo implementado.
 
-- [ ] **Firmas con entidad completa** en todos los Controls del diagrama de clases y en los mensajes de las secuencias.
+- [x] **Firmas con entidad completa** en todos los Controls del diagrama de clases y en los mensajes de las secuencias.
       Ejemplos: `ControlCuentas.registrarUsuario(Usuario u)`, `ControlSolicitud.registrarSolicitud(SolicitudReposicion s)`,
       `ControlPanelCETS.actualizarEstatus(HistorialEstatusSolicitud h)`. Usa las firmas de este documento.
-- [ ] **`iniciarSesion` devuelve `Usuario`**, no `boolean`. `iniciarSesionInstitucional` devuelve `PersonalCETS`.
+- [x] **`iniciarSesion` devuelve `Usuario`**, no `boolean`. `iniciarSesionInstitucional` devuelve `PersonalCETS`.
       Ajustar los `return` y las guardas `alt[autenticado …]` de HU-1.2 y HU-6.1.
-- [ ] **Agregar la clase `Interes`** (con `fechaInteres` y la PK `Usuario`+`SolicitudReposicion`) al diagrama de
+- [x] **Agregar la clase `Interes`** (con `fechaInteres` y la PK `Usuario`+`SolicitudReposicion`) al diagrama de
       clases, con sus asociaciones a `Usuario` y `SolicitudReposicion`.
-- [ ] **Agregar `SesionController`** (sesión: `usuario`, `rol`, `iniciar`, `cerrarSesion`, `verificar`, `verificarCETS`).
-- [ ] **Mover a los Controls** los métodos de negocio que hoy están en entidades: `Usuario.autenticarse`,
+- [x] **Agregar `SesionController`** (sesión: `usuario`, `rol`, `iniciar`, `cerrarSesion`, `verificar`, `verificarCETS`).
+- [x] **Mover a los Controls** los métodos de negocio que hoy están en entidades: `Usuario.autenticarse`,
       `SolicitudReposicion.validarFormatoFolio`, `PerfilClinico.validarCompatibilidad`,
       `RegistroDonacion.calcularProximaFecha`, etc. En las secuencias, el mensaje sale del Control hacia sí mismo.
-- [ ] **Quitar los mensajes que ya no son métodos** (Ln delgado): `validarDatos` y `guardarUsuario` (HU-1.1),
+- [x] **Quitar los mensajes que ya no son métodos** (Ln delgado): `validarDatos` y `guardarUsuario` (HU-1.1),
       `verificarFolioUnico` (HU-2.1/2.4).
-- [ ] **D7:** en las secuencias, `UIAjustes` pasa a `miPerfil` (HU-3.4) y a `criteriosExclusion` (HU-4.3).
+- [x] **D7:** en las secuencias, `UIAjustes` pasa a `miPerfil` (HU-3.4) y a `criteriosExclusion` (HU-4.3).
       `UIBuscarDonador`/`UIFichaDonador` pasan a `donadores` (HU-5.4, HU-7.3).
 - [x] **D10:** en HU-5.3 y HU-5.4, `verificarExclusion` lee `Usuario.exclusionPermanente`; ya no se recorren los
       padecimientos.
@@ -879,7 +879,7 @@ regex en una sola constante del Ln para cambiarla fácil si el CETS pide otro fo
 - [x] `existeFolioActivo` en `SolicitudReposicionFacade`
 - [x] `validarFolio(SolicitudReposicion)` con la regex en una constante del Ln
 - [x] Mensajes distintos para formato y duplicado
-- [ ] Pruebas + SQL
+- [x] Pruebas + SQL
 
 ---
 
@@ -944,8 +944,8 @@ public List<Hospital> listarHospitales()     // NO está en el diagrama; lo nece
 
 - [x] `LnSolicitud.registrarSolicitud` + `listarHospitales` (valida en el Ln folio, grupo, Rh, y que el hospital y el usuario existan; si algo falla regresa `false`, sin excepción)
 - [x] `SolicitudController` + vista
-- [ ] (Integración) llamar `lnNotificacion.buscarDonadoresCercanos(s)` cuando [Alex] lo suba
-- [ ] Pruebas + SQL
+- [x] (Integración) llamar `lnNotificacion.buscarDonadoresCercanos(s)` cuando [Alex] lo suba
+- [x] Pruebas + SQL
 - [x] **Merge a `main` lo antes posible** (los demás dependen de solicitudes reales) (PR #4)
 
 ---
@@ -1013,7 +1013,7 @@ public SolicitudReposicion buscarPorUuid(String uuid)
 - [x] `generarPublicacion` y `obtenerPublicacion` en `LnSolicitud` (`generarPublicacion` regresa `null` si la solicitud no existe)
 - [x] Librería QR local en `-war/web/resources/js/` + QR con la URL de `uuidPublico` (D5)
 - [x] Vista sin datos fijos ni contacto del familiar
-- [ ] Pruebas + SQL
+- [x] Pruebas + SQL
 
 ---
 
@@ -1068,7 +1068,7 @@ public SolicitudReposicion obtenerPublicacion(SolicitudReposicion s)   // s.uuid
 
 - [x] `obtenerPublicacion` sin modificar la entidad
 - [x] `publicacion.xhtml` sin datos de contacto del familiar (`neg`)
-- [ ] Pruebas + SQL
+- [x] Pruebas + SQL
 
 ---
 
@@ -1119,7 +1119,7 @@ public List<SolicitudReposicion> buscarPorUsuario(Usuario u)
 
 - [x] `buscarPorUsuario` + `listarMisSolicitudes`
 - [x] Vista con `ui:repeat`, estado vacío y `f:param uuid` (`misSolicitudes` rechaza sin sesión y también al rol CETS)
-- [ ] Pruebas + SQL
+- [x] Pruebas + SQL
 
 ---
 
@@ -1180,7 +1180,7 @@ public boolean registrarDonacion(RegistroDonacion r)
 
 - [x] `registrarDonacion(RegistroDonacion)` + `calcularProximaFecha` privado (sin excepción con nulos; exige personal CETS activo y, si hay solicitud, que exista y esté Activa)
 - [x] `DonacionController` + vista (las acciones y los `f:viewAction` verifican la sesión CETS antes de consultar)
-- [ ] Pruebas + SQL
+- [x] Pruebas + SQL
 
 ---
 
@@ -1240,7 +1240,7 @@ public List<Usuario> buscarDonadores(String texto)
 - [x] `buscarDonadores` en `UsuarioFacade`
 - [x] `buscarDonador(Usuario)` en `LnDonacion`
 - [x] Ficha usando los métodos de [Diego]
-- [ ] Pruebas + SQL
+- [x] Pruebas + SQL
 
 ---
 
@@ -1286,7 +1286,7 @@ public List<HistorialExterno> buscarPorUsuario(Usuario u)
 - [x] `buscarPorUsuario` en `HistorialExternoFacade`
 - [x] `obtenerHistorialExterno(Usuario)`
 - [x] Vista con los dos casos (`alt`)
-- [ ] Pruebas + SQL
+- [x] Pruebas + SQL
 
 ---
 
@@ -1385,7 +1385,7 @@ La BD tiene `UNIQUE(Usuarioid, SolicitudReposicionid)` en `Notificacion`: no cre
 - [x] `buscarDonadoresCercanos`, `obtenerNotificacion`, `listarMisNotificaciones` + compatibilidad privada
 - [x] Avisar a [Galilea] para que lo llame desde `registrarSolicitud` — conectado en `LnSolicitud.registrarSolicitud` por [David]
 - [x] `NotificacionController` + vista
-- [ ] Pruebas + SQL
+- [x] Pruebas + SQL
 
 ---
 
@@ -1424,7 +1424,7 @@ private boolean calcularRadioCercania(Notificacion n, PerfilClinico donador, Sol
 
 - [x] `calcularRadioCercania` con haversine y redondeo
 - [x] Revisar que ninguna vista pinte `perfilClinico.latitud/longitud`
-- [ ] Pruebas + SQL
+- [x] Pruebas + SQL
 
 ---
 
@@ -1478,7 +1478,7 @@ public SolicitudReposicion registrarInteres(Interes i)   // i.usuario (sesión),
 - [x] `registrarInteres(Interes)` con PK compartida
 - [x] Stub temporal de `esElegible` hasta que [Diego] suba el real (no subir el stub) (ya no hace falta: se usa el `esElegible` real de [Diego])
 - [x] Vista + los dos casos (elegible → notificaciones; no elegible → mensaje)
-- [ ] Pruebas + SQL
+- [x] Pruebas + SQL
 
 ---
 
@@ -1547,7 +1547,7 @@ Para que `create(c)` también guarde las respuestas, cada `RespuestaCriterio` de
 - [x] `buscarActivos` en la facade
 - [x] `obtenerCriterios` y `registrarRespuestas`
 - [x] `CuestionarioController` `@ViewScoped` + vista dinámica
-- [ ] Pruebas + SQL
+- [x] Pruebas + SQL
 
 ---
 
@@ -1603,7 +1603,7 @@ BD. La vista puede mostrar el texto "No apto".
 - [x] `evaluarRespuestas`, `evaluarCriterio` y `calcularTiempoEspera` privados
 - [x] `obtenerResultado`
 - [x] Vista con los dos casos
-- [ ] Pruebas + SQL
+- [x] Pruebas + SQL
 
 ---
 
@@ -1662,7 +1662,7 @@ public boolean modificarCriterio(CriterioExclusion c)    // también sirve para 
 
 - [x] `obtenerCatalogo`, `registrarCriterio`, `modificarCriterio` y `validarCriterio` privado
 - [x] Vista dinámica con values iguales a los de la BD
-- [ ] Pruebas + SQL
+- [x] Pruebas + SQL
 
 ---
 
@@ -1730,7 +1730,7 @@ public List<RegistroDonacion> buscarPorDonador(Usuario u)
 - [x] `buscarPorDonador` en `RegistroDonacionFacade`
 - [x] `obtenerHistorial(Usuario)` en `LnDonacion`
 - [x] Controller + vista con `ui:repeat` y estado vacío
-- [ ] Pruebas + SQL
+- [x] Pruebas + SQL
 
 ---
 
@@ -1794,7 +1794,7 @@ La exclusión no necesita facade nueva (D10): `usuarioF.find(id)` ya existe.
 - [x] `obtenerElegibilidad`, `verificarExclusion` y `esElegible` (+ `calcularProximaFecha` privado)
 - [x] Vista con los estados elegible, restrictivo por fecha y restrictivo permanente
 - [x] Avisar a [Alex] y [Galilea] cuando esté en `main`
-- [ ] Pruebas + SQL
+- [x] Pruebas + SQL
 
 ---
 
@@ -2087,27 +2087,42 @@ Reglas:
 
 Todos corren esto antes de mezclar su rama a `main` y otra vez **después** del merge.
 
-- [ ] **Compila:** Clean and Build del EAR con JDK 21 → `BUILD SUCCESSFUL`, **0 errores**. No debe haber warnings
+- [x] **Compila:** Clean and Build del EAR con JDK 21 → `BUILD SUCCESSFUL`, **0 errores**. No debe haber warnings
       nuevos respecto a `main`.
-- [ ] **Despliega:** Run sin excepciones en el log de Payara (`~/Payara_Server/glassfish/domains/domain1/logs/server.log`).
-- [ ] **HU-1.1 Alta inicial:**
+- [x] **Despliega:** Run sin excepciones en el log de Payara (`~/Payara_Server/glassfish/domains/domain1/logs/server.log`).
+- [x] **HU-1.1 Alta inicial:**
   - En `cuentas/crearCuenta`, crear una cuenta con un correo nuevo → te lleva a `cuentas/iniciarSesion`.
   - Repetir el mismo correo → "Ese correo ya está registrado".
   - SQL: `SELECT correo, LENGTH(passwordHash), fechaRegistro FROM Usuario ORDER BY id DESC LIMIT 1;` → hash de 64 caracteres.
-- [ ] **HU-1.2 Autenticación:**
+- [x] **HU-1.2 Autenticación:**
   - Entrar con esa cuenta → `notificaciones/notificaciones`, con nombre e iniciales en el encabezado.
   - Una contraseña mala → "Correo o contraseña incorrectos".
   - "Cerrar sesión" → `publico/index`.
-- [ ] **HU-6.1 Login institucional:**
+- [x] **HU-6.1 Login institucional:**
   - `admin@cets.oaxaca.gob.mx` / `Cets2026!` → `cets/solicitudesActivas`.
   - Una contraseña mala → "Credenciales institucionales incorrectas".
   - Sin sesión CETS, `/faces/vista/cets/donadores.xhtml` → redirige a `cets/loginInstitucional`.
   - Con sesión de usuario normal, una vista CETS también redirige al login institucional.
-- [ ] **Sesión expirada (#26):** abre un formulario (por ejemplo `cuentas/miPerfil` o `cets/detalleSolicitud`), en otra
+- [x] **Sesión expirada (#26):** abre un formulario (por ejemplo `cuentas/miPerfil` o `cets/detalleSolicitud`), en otra
       pestaña pulsa "Cerrar sesión" y luego envía el formulario de la primera: debe aparecer "Tu sesión expiró" con los dos
       botones (destacado el institucional si estabas en una vista CETS), sin pantalla de error.
-- [ ] La raíz `http://localhost:8080/mx.edu.itoaxaca.sividocets-war/` carga `publico/index`.
-- [ ] Las HU de tu módulo siguen pasando sus "Terminado cuando".
+- [x] La raíz `http://localhost:8080/mx.edu.itoaxaca.sividocets-war/` carga `publico/index`.
+- [x] Las HU de tu módulo siguen pasando sus "Terminado cuando".
+
+### Limitaciones conocidas al 2026-11-19
+
+Pasada completa sobre `main` el 2026-11-19: Clean and Build con 0 errores, despliegue limpio, regresión de esta sección y
+recorrido de punta a punta (familiar crea solicitud → donador recibe aviso, contesta el cuestionario y confirma interés →
+CETS ve 1 interesado, registra la donación vinculada y pasa la solicitud a Atendida → el donador ve su historial). Todo pasó.
+Lo que sigue **no** es un fallo de esa pasada: son límites aceptados.
+
+- **#13:** nadie registra `HistorialClinico`; la exclusión permanente (`Usuario.exclusionPermanente`) solo se marca por SQL.
+- **#12:** registrar una donación ligada a una solicitud **no** cambia el estatus de la solicitud (el CETS lo cambia a mano en HU-6.4).
+- **#25:** cambiar el estatus a Cerrada o Cancelada solo afecta el panel CETS (no la publicación pública ni los avisos).
+- **#17:** HU-6.3 (`detalleSolicitud`) muestra solo la **cantidad** de interesados, no la lista.
+- **Ficha del donador:** el botón "Registrar donación" se deshabilita si el donador donó hace menos de 56 días, aunque exista una fecha pasada válida para él (#42).
+- **`capturarDonacion`:** la etiqueta "Fecha de la donación" muestra el asterisco de obligatorio dos veces (detalle visual).
+- **Diagramas (`SIVIDO_CETS_U4.vpp`), pendientes:** dudas 6a–6d de las secuencias (mensajes que no coinciden con el código, solo anotados); HU-2.1 sin `buscarDonadoresCercanos`; falta la dependencia `ControlPanelCETS` → `ControlCuentas` en el diagrama de clases; HU-6.1 sin la comprobación de `activo`; 36 métodos de entidades sin tocar; `generarQR` y `contarRegistros` (#15); `Interes` sin ligar al ORM.
 
 ---
 
@@ -2134,8 +2149,8 @@ quedó el trabajo en este documento.
 | D14 | Toggles sin columna | "Compartir mi contacto solo cuando yo confirme interés" y "Recibir avisos de solicitudes compatibles" quedan **deshabilitados** en miPerfil, con una nota, sin conectarlos a nada. | [DAVID] HU-1.3 (hecho) |
 | D15 | Combo "Región" | Se **elimina**: no existe columna y la ubicación (D1) lo reemplaza. | [DAVID] HU-1.3 (hecho) |
 | D16 | Controller de miPerfil | `PerfilController` (`@ViewScoped`) y no `CuentasController` (`@RequestScoped`): el perfil debe conservarse entre los clics de la vista. Los dos usan `LnCuentas`. | [DAVID] HU-1.3 / HU-3.4 (hecho) |
-| D17 | Cuestionario Apto y confirmar interés | El resultado **Apto** del cuestionario es **orientativo, no obligatorio**: `registrarInteres` no lo exige. Sí exige solicitud Activa, que el donador no sea el solicitante, compatibilidad tipo/Rh y `esElegible` (56 días y exclusión permanente). | [Alex] HU-3.3 / HU-4.2 |
-| D18 | Cuándo no se registra una donación | **No se puede registrar una donación si el donador tiene exclusión permanente, está dentro de 56 días, es incompatible con la solicitud o ya donó ese día.** Lo valida `LnDonacion.registrarDonacion` (vía `motivoRechazoDonacion`); la vista muestra el motivo y deshabilita el botón. La donación general (sin solicitud) no revisa compatibilidad. | [DAVID] HU-5.1 |
+| D17 | Cuestionario Apto y confirmar interés | El resultado **Apto** del cuestionario es **orientativo, no obligatorio**: `registrarInteres` no lo exige. Sí exige solicitud Activa, que el donador no sea el solicitante, compatibilidad tipo/Rh y `esElegible` (56 días y exclusión permanente). | [Alex] HU-3.3 / HU-4.2 — **decidida** |
+| D18 | Cuándo no se registra una donación | **No se puede registrar una donación si el donador tiene exclusión permanente, la fecha es futura, ya donó ese día, la fecha queda a menos de 56 días de cualquier donación suya (antes o después) o, cuando hay solicitud, la solicitud no está Activa o su grupo/Rh es incompatible: la compatibilidad bloquea la donación cuando hay solicitud.** Lo valida `LnDonacion.registrarDonacion` (vía `motivoRechazoDonacion`); la vista muestra el motivo y deshabilita el botón. La donación general (sin solicitud) no revisa compatibilidad. | [DAVID] HU-5.1 — **decidida** |
 
 ---
 
@@ -2312,6 +2327,9 @@ Siguen **abiertas**: necesitan una decisión del equipo o del profe. Lo ya resue
     - **Arreglo:** `LnCuentas.guardarPerfilClinico` asigna `usuario.setPerfilClinico(perfil)` después de crear o actualizar
       el perfil. El consentimiento no necesita lo mismo: es un campo del propio `Usuario` administrado, que ya se actualiza
       en el caché al terminar la transacción.
+    - **Estado actual:** las referencias inversas de `Interes` (`usuario.interesList`, `solicitud.interesList`), `Notificacion` y
+      `CuestionarioRespuesta` ya se actualizan en el Ln (`LnNotificacion`, `LnCuestionario`), igual que `RegistroDonacion`
+      (`usuario`, `solicitud` y personal) en `LnDonacion`. Ninguna vista lee todavía esas listas: hoy no hay efecto visible.
     - **Regla para el equipo:** en relaciones bidireccionales, al crear o cambiar el lado dueño hay que actualizar también
       el lado inverso en el mismo método del Ln (como ya hace `LnDonacion.registrarDonacion` con `registroDonacionList`).
       Revisar las demás: `Usuario.notificacionList` / `interesList`, `SolicitudReposicion.interesList` e
@@ -2356,10 +2374,14 @@ Siguen **abiertas**: necesitan una decisión del equipo o del profe. Lo ya resue
     (aceptado en HU-1.4 por la regla de no modificar la entidad).
 41. **`buscarDonadores` no escapa `%` ni `_`:** la consulta está parametrizada (sin inyección SQL), pero buscar `%` lista a
     todos los donadores con perfil. Solo lo usa el CETS. Pendiente.
-42. **Donaciones duplicadas el mismo día (cerrada):** `LnDonacion.registrarDonacion` ya rechaza una segunda donación del mismo
-    donador en la misma fecha (y, por D18, también la que cae dentro de los 56 días, con exclusión permanente o incompatible
-    con la solicitud). Pendiente menor: `esElegible` compara con **hoy**, no con `fechaDonacion`; una donación con fecha
-    pasada se valida contra el último registro y la fecha de hoy.
+42. **Donaciones duplicadas y regla de 56 días (cerrada):** `LnDonacion.registrarDonacion` valida contra la **fecha de la donación** del
+    registro y no contra hoy (`motivoRechazoDonacion(RegistroDonacion)`): la fecha no puede ser futura; no puede repetir un día en
+    que el donador ya donó; y debe quedar a **56 días o más de cualquier donación existente, en ambos sentidos** (una donación
+    con fecha pasada tampoco puede caer a menos de 56 días de una posterior). El mensaje indica desde qué fecha podría donar.
+    `esElegible(Usuario)` no cambia: sigue comparando contra **hoy** (lo usan `registrarInteres` y la ficha). La sobrecarga
+    `motivoRechazoDonacion(Usuario, SolicitudReposicion)`, que usan las vistas antes de tener la fecha, también compara contra
+    hoy: un donador dentro de los 56 días de hoy ve el botón "Registrar donación" deshabilitado aunque exista una fecha pasada
+    válida para él. Aceptado; si hace falta registrar donaciones antiguas, habilitar el botón y dejar que decida el Ln.
 43. **Validación en el Ln de `registrarSolicitud` y `registrarDonacion`:** se agregaron (grupo ∈ {A,B,AB,O}, Rh ∈ {+,−},
     hospital y usuario existentes; donación con donador y personal CETS **activo** existentes, y solicitud asociada Activa).
     No están en los diagramas; los diagramas tampoco dicen qué mensaje mostrar cuando el Ln regresa `false`, así que los
@@ -2380,6 +2402,7 @@ Siguen **abiertas**: necesitan una decisión del equipo o del profe. Lo ya resue
       `timeZone` use la zona del sistema y no UTC. Se eligió esta combinación (y no solo el parámetro) porque un `DATE` leído por
       JDBC es medianoche en la zona de la JVM: con `America/Mexico_City` explícito se movería un día si el servidor corriera en
       UTC, y con el parámetro las fechas de solo día siguen a la JVM.
-    - Pendiente (sin verificar): los datos del seed se insertan con `NOW()` de MySQL; si la zona de la sesión de MySQL no es la
-      de la JVM, esas horas pueden verse desplazadas. Las fechas creadas desde la aplicación no tienen ese problema.
+    - **Seed:** `sql/datos_prueba.sql` ahora empieza con `SET time_zone = '-06:00';` (México, sin horario de verano desde 2022), así
+      que los `NOW()` del seed coinciden con la hora que muestran las vistas. `limpiar_datos_prueba.sql` no necesita el cambio
+      (no usa `NOW()` ni `CURDATE()`). Las fechas creadas desde la aplicación no dependen de la zona de MySQL.
     - Regla para vistas nuevas: fecha con hora → `timeZone="America/Mexico_City"`; fecha de solo día → sin `timeZone`.
