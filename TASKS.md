@@ -805,20 +805,20 @@ Cambiar el radio **no** modifica grupo, Rh ni ubicación.
 
 Se hace al final, cuando el código de todos esté en `main`, para que el diagrama refleje lo implementado.
 
-- [ ] **Firmas con entidad completa** en todos los Controls del diagrama de clases y en los mensajes de las secuencias.
+- [x] **Firmas con entidad completa** en todos los Controls del diagrama de clases y en los mensajes de las secuencias.
       Ejemplos: `ControlCuentas.registrarUsuario(Usuario u)`, `ControlSolicitud.registrarSolicitud(SolicitudReposicion s)`,
       `ControlPanelCETS.actualizarEstatus(HistorialEstatusSolicitud h)`. Usa las firmas de este documento.
-- [ ] **`iniciarSesion` devuelve `Usuario`**, no `boolean`. `iniciarSesionInstitucional` devuelve `PersonalCETS`.
+- [x] **`iniciarSesion` devuelve `Usuario`**, no `boolean`. `iniciarSesionInstitucional` devuelve `PersonalCETS`.
       Ajustar los `return` y las guardas `alt[autenticado …]` de HU-1.2 y HU-6.1.
-- [ ] **Agregar la clase `Interes`** (con `fechaInteres` y la PK `Usuario`+`SolicitudReposicion`) al diagrama de
+- [x] **Agregar la clase `Interes`** (con `fechaInteres` y la PK `Usuario`+`SolicitudReposicion`) al diagrama de
       clases, con sus asociaciones a `Usuario` y `SolicitudReposicion`.
-- [ ] **Agregar `SesionController`** (sesión: `usuario`, `rol`, `iniciar`, `cerrarSesion`, `verificar`, `verificarCETS`).
-- [ ] **Mover a los Controls** los métodos de negocio que hoy están en entidades: `Usuario.autenticarse`,
+- [x] **Agregar `SesionController`** (sesión: `usuario`, `rol`, `iniciar`, `cerrarSesion`, `verificar`, `verificarCETS`).
+- [x] **Mover a los Controls** los métodos de negocio que hoy están en entidades: `Usuario.autenticarse`,
       `SolicitudReposicion.validarFormatoFolio`, `PerfilClinico.validarCompatibilidad`,
       `RegistroDonacion.calcularProximaFecha`, etc. En las secuencias, el mensaje sale del Control hacia sí mismo.
-- [ ] **Quitar los mensajes que ya no son métodos** (Ln delgado): `validarDatos` y `guardarUsuario` (HU-1.1),
+- [x] **Quitar los mensajes que ya no son métodos** (Ln delgado): `validarDatos` y `guardarUsuario` (HU-1.1),
       `verificarFolioUnico` (HU-2.1/2.4).
-- [ ] **D7:** en las secuencias, `UIAjustes` pasa a `miPerfil` (HU-3.4) y a `criteriosExclusion` (HU-4.3).
+- [x] **D7:** en las secuencias, `UIAjustes` pasa a `miPerfil` (HU-3.4) y a `criteriosExclusion` (HU-4.3).
       `UIBuscarDonador`/`UIFichaDonador` pasan a `donadores` (HU-5.4, HU-7.3).
 - [x] **D10:** en HU-5.3 y HU-5.4, `verificarExclusion` lee `Usuario.exclusionPermanente`; ya no se recorren los
       padecimientos.
@@ -2122,6 +2122,7 @@ Lo que sigue **no** es un fallo de esa pasada: son límites aceptados.
 - **#17:** HU-6.3 (`detalleSolicitud`) muestra solo la **cantidad** de interesados, no la lista.
 - **Ficha del donador:** el botón "Registrar donación" se deshabilita si el donador donó hace menos de 56 días, aunque exista una fecha pasada válida para él (#42).
 - **`capturarDonacion`:** la etiqueta "Fecha de la donación" muestra el asterisco de obligatorio dos veces (detalle visual).
+- **Diagramas (`SIVIDO_CETS_U4.vpp`), pendientes:** dudas 6a–6d de las secuencias (mensajes que no coinciden con el código, solo anotados); HU-2.1 sin `buscarDonadoresCercanos`; falta la dependencia `ControlPanelCETS` → `ControlCuentas` en el diagrama de clases; HU-6.1 sin la comprobación de `activo`; 36 métodos de entidades sin tocar; `generarQR` y `contarRegistros` (#15); `Interes` sin ligar al ORM.
 
 ---
 
