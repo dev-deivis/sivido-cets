@@ -99,20 +99,18 @@
                             <!-- HU-2.2 / D5: el navegador dibuja el QR con la URL pública (uuidPublico) -->
                             <div id="qrPublicacion" style="display:inline-block;padding:8px;background:#fff"></div>
                             <p class="texto-sec texto-chico mt-2">Escanea este código con tu teléfono para abrir esta solicitud en SIVIDO.</p>
-                            <input id="urlPublicacion" type="text" readonly="readonly" class="mono texto-chico"
+                            <input id="urlPublicacion" type="text" readonly="readonly" aria-label="Enlace de la publicación"
+                                   class="ui-inputfield ui-inputtext ui-widget ui-state-default mono texto-chico"
                                    value="#{solicitudController.urlPublicacion}" style="width:100%;margin-bottom:.5rem"/>
-                            <div class="columna">
-                                <button type="button" class="boton suave bloque"
-                                        onclick="navigator.clipboard.writeText(document.getElementById('urlPublicacion').value);this.innerText='Enlace copiado';">
-                                    <i class="pi pi-copy"></i> Copiar enlace
-                                </button>
-                                <button type="button" class="boton secundario bloque" onclick="descargarQr()">
-                                    <i class="pi pi-download"></i> Descargar QR (PNG)
-                                </button>
-                                <button type="button" class="boton secundario bloque" onclick="window.print()">
-                                    <i class="pi pi-print"></i> Imprimir ficha
-                                </button>
-                            </div>
+                            <!-- Botones de PrimeFaces solo del lado del cliente (type="button": no envían el formulario) -->
+                            <h:form id="formCompartir" styleClass="columna">
+                                <p:commandButton type="button" value="Copiar enlace" icon="pi pi-copy" styleClass="boton-suave boton-bloque"
+                                                 onclick="navigator.clipboard.writeText(document.getElementById('urlPublicacion').value);this.querySelector('.ui-button-text').textContent='Enlace copiado';"/>
+                                <p:commandButton type="button" value="Descargar QR (PNG)" icon="pi pi-download" styleClass="ui-button-secondary boton-bloque"
+                                                 onclick="descargarQr()"/>
+                                <p:commandButton type="button" value="Imprimir ficha" icon="pi pi-print" styleClass="ui-button-secondary boton-bloque"
+                                                 onclick="window.print()"/>
+                            </h:form>
                         </div>
                         <div class="tarjeta">
                             <h3><i class="pi pi-map-marker texto-rojo"></i> Dónde donar</h3>
