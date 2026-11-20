@@ -395,8 +395,8 @@ Rama: `feature/panel-cets`
       plantillas anidadas (`plantillaUsuario`, `plantillaInstitucional` y `plantillaPublica` heredan de `plantillaBase`).
 - [x] **T0.2** Subir al repo `sql/SIVIDO_CETS_mysql.sql`, `sql/datos_prueba.sql` y `sql/limpiar_datos_prueba.sql`
       (sección 2).
-- [ ] **T0.3** Correr `sql/datos_prueba.sql` y comprobar el login CETS con `admin@cets.oaxaca.gob.mx` / `Cets2026!`.
-- [ ] **T0.4** Merge a `main` y avisar al equipo.
+- [x] **T0.3** Correr `sql/datos_prueba.sql` y comprobar el login CETS con `admin@cets.oaxaca.gob.mx` / `Cets2026!`.
+- [x] **T0.4** Merge a `main` y avisar al equipo.
 
 ---
 
@@ -476,8 +476,8 @@ public List<SolicitudReposicion> buscarFiltradas(SolicitudReposicion filtro)
 - [x] Controller: lista, filtro y método para el `f:viewAction`
 - [x] Vista: `p:dataTable`, combos separados, `f:param id`, sin datos fijos
 - [x] Pruebas HTTP automáticas (login, listado, 4 filtros, sin sesión y rol equivocado): todas pasan
-- [ ] Revisión visual en el navegador (tabla, paginador, tarjetas)
-- [ ] Regresión (sección 8)
+- [x] Revisión visual en el navegador (tabla, paginador, tarjetas)
+- [x] Regresión (sección 8)
 
 ---
 
@@ -622,7 +622,7 @@ public boolean actualizarEstatus(SolicitudReposicion s)
 - [x] Compila (`clean dist`, 0 errores y 0 warnings)
 - [x] Pruebas HTTP (23 comprobaciones, todas OK): transición válida (2), inválida (mismo estatus, reabrir y valor
       inventado), id inexistente, sin sesión y rol equivocado; la BD se restauró al terminar
-- [ ] Revisión visual en el navegador
+- [x] Revisión visual en el navegador
 
 ---
 
@@ -796,7 +796,7 @@ Cambiar el radio **no** modifica grupo, Rh ni ubicación.
 - [x] Pruebas HTTP (parte de las 41 de HU-1.3): radio 3, 5 y 10, radio sin perfil, radio inválido y que no altere el resto del perfil.
       El radio inválido (7) lo rechaza la validación de JSF (no está en la lista del selector); la rama `validarRadio` falsa del
       Ln no se puede forzar por HTTP
-- [ ] Avisar a [Alex] cuando esté en `main` (reemplaza su selector, D7)
+- [x] Avisar a [Alex] cuando esté en `main` (reemplaza su selector, D7)
 - [ ] Revisión visual en el navegador (el selector `p:selectOneButton` y los mensajes)
 
 ---
@@ -879,7 +879,7 @@ regex en una sola constante del Ln para cambiarla fácil si el CETS pide otro fo
 - [x] `existeFolioActivo` en `SolicitudReposicionFacade`
 - [x] `validarFolio(SolicitudReposicion)` con la regex en una constante del Ln
 - [x] Mensajes distintos para formato y duplicado
-- [ ] Pruebas + SQL
+- [x] Pruebas + SQL
 
 ---
 
@@ -944,8 +944,8 @@ public List<Hospital> listarHospitales()     // NO está en el diagrama; lo nece
 
 - [x] `LnSolicitud.registrarSolicitud` + `listarHospitales` (valida en el Ln folio, grupo, Rh, y que el hospital y el usuario existan; si algo falla regresa `false`, sin excepción)
 - [x] `SolicitudController` + vista
-- [ ] (Integración) llamar `lnNotificacion.buscarDonadoresCercanos(s)` cuando [Alex] lo suba
-- [ ] Pruebas + SQL
+- [x] (Integración) llamar `lnNotificacion.buscarDonadoresCercanos(s)` cuando [Alex] lo suba
+- [x] Pruebas + SQL
 - [x] **Merge a `main` lo antes posible** (los demás dependen de solicitudes reales) (PR #4)
 
 ---
@@ -1013,7 +1013,7 @@ public SolicitudReposicion buscarPorUuid(String uuid)
 - [x] `generarPublicacion` y `obtenerPublicacion` en `LnSolicitud` (`generarPublicacion` regresa `null` si la solicitud no existe)
 - [x] Librería QR local en `-war/web/resources/js/` + QR con la URL de `uuidPublico` (D5)
 - [x] Vista sin datos fijos ni contacto del familiar
-- [ ] Pruebas + SQL
+- [x] Pruebas + SQL
 
 ---
 
@@ -1068,7 +1068,7 @@ public SolicitudReposicion obtenerPublicacion(SolicitudReposicion s)   // s.uuid
 
 - [x] `obtenerPublicacion` sin modificar la entidad
 - [x] `publicacion.xhtml` sin datos de contacto del familiar (`neg`)
-- [ ] Pruebas + SQL
+- [x] Pruebas + SQL
 
 ---
 
@@ -1119,7 +1119,7 @@ public List<SolicitudReposicion> buscarPorUsuario(Usuario u)
 
 - [x] `buscarPorUsuario` + `listarMisSolicitudes`
 - [x] Vista con `ui:repeat`, estado vacío y `f:param uuid` (`misSolicitudes` rechaza sin sesión y también al rol CETS)
-- [ ] Pruebas + SQL
+- [x] Pruebas + SQL
 
 ---
 
@@ -1180,7 +1180,7 @@ public boolean registrarDonacion(RegistroDonacion r)
 
 - [x] `registrarDonacion(RegistroDonacion)` + `calcularProximaFecha` privado (sin excepción con nulos; exige personal CETS activo y, si hay solicitud, que exista y esté Activa)
 - [x] `DonacionController` + vista (las acciones y los `f:viewAction` verifican la sesión CETS antes de consultar)
-- [ ] Pruebas + SQL
+- [x] Pruebas + SQL
 
 ---
 
@@ -1240,7 +1240,7 @@ public List<Usuario> buscarDonadores(String texto)
 - [x] `buscarDonadores` en `UsuarioFacade`
 - [x] `buscarDonador(Usuario)` en `LnDonacion`
 - [x] Ficha usando los métodos de [Diego]
-- [ ] Pruebas + SQL
+- [x] Pruebas + SQL
 
 ---
 
@@ -1286,7 +1286,7 @@ public List<HistorialExterno> buscarPorUsuario(Usuario u)
 - [x] `buscarPorUsuario` en `HistorialExternoFacade`
 - [x] `obtenerHistorialExterno(Usuario)`
 - [x] Vista con los dos casos (`alt`)
-- [ ] Pruebas + SQL
+- [x] Pruebas + SQL
 
 ---
 
@@ -1385,7 +1385,7 @@ La BD tiene `UNIQUE(Usuarioid, SolicitudReposicionid)` en `Notificacion`: no cre
 - [x] `buscarDonadoresCercanos`, `obtenerNotificacion`, `listarMisNotificaciones` + compatibilidad privada
 - [x] Avisar a [Galilea] para que lo llame desde `registrarSolicitud` — conectado en `LnSolicitud.registrarSolicitud` por [David]
 - [x] `NotificacionController` + vista
-- [ ] Pruebas + SQL
+- [x] Pruebas + SQL
 
 ---
 
@@ -1424,7 +1424,7 @@ private boolean calcularRadioCercania(Notificacion n, PerfilClinico donador, Sol
 
 - [x] `calcularRadioCercania` con haversine y redondeo
 - [x] Revisar que ninguna vista pinte `perfilClinico.latitud/longitud`
-- [ ] Pruebas + SQL
+- [x] Pruebas + SQL
 
 ---
 
@@ -1478,7 +1478,7 @@ public SolicitudReposicion registrarInteres(Interes i)   // i.usuario (sesión),
 - [x] `registrarInteres(Interes)` con PK compartida
 - [x] Stub temporal de `esElegible` hasta que [Diego] suba el real (no subir el stub) (ya no hace falta: se usa el `esElegible` real de [Diego])
 - [x] Vista + los dos casos (elegible → notificaciones; no elegible → mensaje)
-- [ ] Pruebas + SQL
+- [x] Pruebas + SQL
 
 ---
 
@@ -1547,7 +1547,7 @@ Para que `create(c)` también guarde las respuestas, cada `RespuestaCriterio` de
 - [x] `buscarActivos` en la facade
 - [x] `obtenerCriterios` y `registrarRespuestas`
 - [x] `CuestionarioController` `@ViewScoped` + vista dinámica
-- [ ] Pruebas + SQL
+- [x] Pruebas + SQL
 
 ---
 
@@ -1603,7 +1603,7 @@ BD. La vista puede mostrar el texto "No apto".
 - [x] `evaluarRespuestas`, `evaluarCriterio` y `calcularTiempoEspera` privados
 - [x] `obtenerResultado`
 - [x] Vista con los dos casos
-- [ ] Pruebas + SQL
+- [x] Pruebas + SQL
 
 ---
 
@@ -1662,7 +1662,7 @@ public boolean modificarCriterio(CriterioExclusion c)    // también sirve para 
 
 - [x] `obtenerCatalogo`, `registrarCriterio`, `modificarCriterio` y `validarCriterio` privado
 - [x] Vista dinámica con values iguales a los de la BD
-- [ ] Pruebas + SQL
+- [x] Pruebas + SQL
 
 ---
 
@@ -1730,7 +1730,7 @@ public List<RegistroDonacion> buscarPorDonador(Usuario u)
 - [x] `buscarPorDonador` en `RegistroDonacionFacade`
 - [x] `obtenerHistorial(Usuario)` en `LnDonacion`
 - [x] Controller + vista con `ui:repeat` y estado vacío
-- [ ] Pruebas + SQL
+- [x] Pruebas + SQL
 
 ---
 
@@ -1794,7 +1794,7 @@ La exclusión no necesita facade nueva (D10): `usuarioF.find(id)` ya existe.
 - [x] `obtenerElegibilidad`, `verificarExclusion` y `esElegible` (+ `calcularProximaFecha` privado)
 - [x] Vista con los estados elegible, restrictivo por fecha y restrictivo permanente
 - [x] Avisar a [Alex] y [Galilea] cuando esté en `main`
-- [ ] Pruebas + SQL
+- [x] Pruebas + SQL
 
 ---
 
@@ -2087,27 +2087,41 @@ Reglas:
 
 Todos corren esto antes de mezclar su rama a `main` y otra vez **después** del merge.
 
-- [ ] **Compila:** Clean and Build del EAR con JDK 21 → `BUILD SUCCESSFUL`, **0 errores**. No debe haber warnings
+- [x] **Compila:** Clean and Build del EAR con JDK 21 → `BUILD SUCCESSFUL`, **0 errores**. No debe haber warnings
       nuevos respecto a `main`.
-- [ ] **Despliega:** Run sin excepciones en el log de Payara (`~/Payara_Server/glassfish/domains/domain1/logs/server.log`).
-- [ ] **HU-1.1 Alta inicial:**
+- [x] **Despliega:** Run sin excepciones en el log de Payara (`~/Payara_Server/glassfish/domains/domain1/logs/server.log`).
+- [x] **HU-1.1 Alta inicial:**
   - En `cuentas/crearCuenta`, crear una cuenta con un correo nuevo → te lleva a `cuentas/iniciarSesion`.
   - Repetir el mismo correo → "Ese correo ya está registrado".
   - SQL: `SELECT correo, LENGTH(passwordHash), fechaRegistro FROM Usuario ORDER BY id DESC LIMIT 1;` → hash de 64 caracteres.
-- [ ] **HU-1.2 Autenticación:**
+- [x] **HU-1.2 Autenticación:**
   - Entrar con esa cuenta → `notificaciones/notificaciones`, con nombre e iniciales en el encabezado.
   - Una contraseña mala → "Correo o contraseña incorrectos".
   - "Cerrar sesión" → `publico/index`.
-- [ ] **HU-6.1 Login institucional:**
+- [x] **HU-6.1 Login institucional:**
   - `admin@cets.oaxaca.gob.mx` / `Cets2026!` → `cets/solicitudesActivas`.
   - Una contraseña mala → "Credenciales institucionales incorrectas".
   - Sin sesión CETS, `/faces/vista/cets/donadores.xhtml` → redirige a `cets/loginInstitucional`.
   - Con sesión de usuario normal, una vista CETS también redirige al login institucional.
-- [ ] **Sesión expirada (#26):** abre un formulario (por ejemplo `cuentas/miPerfil` o `cets/detalleSolicitud`), en otra
+- [x] **Sesión expirada (#26):** abre un formulario (por ejemplo `cuentas/miPerfil` o `cets/detalleSolicitud`), en otra
       pestaña pulsa "Cerrar sesión" y luego envía el formulario de la primera: debe aparecer "Tu sesión expiró" con los dos
       botones (destacado el institucional si estabas en una vista CETS), sin pantalla de error.
-- [ ] La raíz `http://localhost:8080/mx.edu.itoaxaca.sividocets-war/` carga `publico/index`.
-- [ ] Las HU de tu módulo siguen pasando sus "Terminado cuando".
+- [x] La raíz `http://localhost:8080/mx.edu.itoaxaca.sividocets-war/` carga `publico/index`.
+- [x] Las HU de tu módulo siguen pasando sus "Terminado cuando".
+
+### Limitaciones conocidas al 2026-11-19
+
+Pasada completa sobre `main` el 2026-11-19: Clean and Build con 0 errores, despliegue limpio, regresión de esta sección y
+recorrido de punta a punta (familiar crea solicitud → donador recibe aviso, contesta el cuestionario y confirma interés →
+CETS ve 1 interesado, registra la donación vinculada y pasa la solicitud a Atendida → el donador ve su historial). Todo pasó.
+Lo que sigue **no** es un fallo de esa pasada: son límites aceptados.
+
+- **#13:** nadie registra `HistorialClinico`; la exclusión permanente (`Usuario.exclusionPermanente`) solo se marca por SQL.
+- **#12:** registrar una donación ligada a una solicitud **no** cambia el estatus de la solicitud (el CETS lo cambia a mano en HU-6.4).
+- **#25:** cambiar el estatus a Cerrada o Cancelada solo afecta el panel CETS (no la publicación pública ni los avisos).
+- **#17:** HU-6.3 (`detalleSolicitud`) muestra solo la **cantidad** de interesados, no la lista.
+- **Ficha del donador:** el botón "Registrar donación" se deshabilita si el donador donó hace menos de 56 días, aunque exista una fecha pasada válida para él (#42).
+- **`capturarDonacion`:** la etiqueta "Fecha de la donación" muestra el asterisco de obligatorio dos veces (detalle visual).
 
 ---
 
