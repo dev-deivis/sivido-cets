@@ -4,18 +4,23 @@
  */
 package ln;
 
+import acceso_datos.HistorialClinicoFacade;
 import acceso_datos.HistorialEstatusSolicitudFacade;
 import acceso_datos.InteresFacade;
 import acceso_datos.PersonalCETSFacade;
 import acceso_datos.SolicitudReposicionFacade;
+import acceso_datos.UsuarioFacade;
 import jakarta.ejb.EJB;
 import jakarta.ejb.LocalBean;
 import jakarta.ejb.Stateless;
 import java.util.Date;
 import java.util.List;
+import modelo.HistorialClinico;
 import modelo.HistorialEstatusSolicitud;
+import modelo.Interes;
 import modelo.PersonalCETS;
 import modelo.SolicitudReposicion;
+import modelo.Usuario;
 
 
 /**
@@ -40,6 +45,16 @@ public class LnPanelCETS {
 
     @EJB
     private LnCuentas lnCuentas;
+
+    // [David] #13: marcar la exclusión permanente (HistorialClinico + Usuario.exclusionPermanente)
+    @EJB
+    private UsuarioFacade usuarioF;
+
+    @EJB
+    private HistorialClinicoFacade historialClinicoF;
+
+    // Longitud máxima del motivo: HistorialClinico.diagnostico es VARCHAR(200)
+    private static final int MAX_MOTIVO = 200;
 
     // HU-6.4: estatus que el personal del CETS puede asignar. Fuente: diagrama de clases, nota del atributo
     // SolicitudReposicion.estatus: "Activa al crearse; el personal del CETS la pasa a Atendida, Cerrada o Cancelada".
@@ -91,6 +106,50 @@ public class LnPanelCETS {
             return 0;
         }
         return interesF.contarPorSolicitud(s);
+    }
+
+    // #17 Donadores que confirmaron interés en la solicitud, el más reciente primero. La vista solo muestra
+    // nombre y grupo sanguíneo de cada uno: nunca ubicación ni datos de contacto.
+    public List<Interes> obtenerInteresados(SolicitudReposicion s) {
+        if (s == null || s.getId() == null) {
+            return List.of();
+        }
+        return interesF.buscarPorSolicitud(s);
+    }
+
+    // #13 Marcar exclusión permanente. h trae usuarioid.id (el donador), personalCETSUsuarioid.usuarioid (el
+    // personal en sesión, lo pone el controller) y diagnostico (el motivo, obligatorio, máximo 200 caracteres).
+    // Regresa false (sin excepción) si falta algo, el personal no está activo o el donador ya está excluido.
+    // En una sola transacción: crea el HistorialClinico y pone Usuario.exclusionPermanente = true. No toca las
+    // solicitudes ni los avisos del donador; solo se bloquean donaciones nuevas (D18). No hay reversa.
+    public boolean marcarExclusionPermanente(HistorialClinico h) {
+        String motivo = h == null || h.getDiagnostico() == null ? "" : h.getDiagnostico().trim();
+        boolean completo = h != null && h.getUsuarioid() != null && h.getUsuarioid().getId() != null
+                && h.getPersonalCETSUsuarioid() != null && h.getPersonalCETSUsuarioid().getUsuarioid() != null;
+        if (!completo || motivo.isEmpty() || motivo.length() > MAX_MOTIVO) {
+            return false;
+        }
+        Usuario donador = usuarioF.find(h.getUsuarioid().getId());
+        PersonalCETS personal = personalF.find(h.getPersonalCETSUsuarioid().getUsuarioid());
+        if (donador == null || personal == null || !personal.getActivo() || donador.getExclusionPermanente()) {
+            return false;
+        }
+        HistorialClinico registro = new HistorialClinico();
+        registro.setDiagnostico(motivo);
+        registro.setFechaDeteccion(new Date());
+        registro.setUsuarioid(donador);
+        registro.setPersonalCETSUsuarioid(personal);
+        historialClinicoF.create(registro);
+        donador.setExclusionPermanente(true);
+        usuarioF.edit(donador);
+        // Referencias inversas (#35): sin esto el caché compartido deja las listas desactualizadas
+        if (donador.getHistorialClinicoList() != null) {
+            donador.getHistorialClinicoList().add(registro);
+        }
+        if (personal.getHistorialClinicoList() != null) {
+            personal.getHistorialClinicoList().add(registro);
+        }
+        return true;
     }
 
     // HU-6.4 Actualizar estatus. s trae el id, el nuevo estatus y el personal CETS en sesión

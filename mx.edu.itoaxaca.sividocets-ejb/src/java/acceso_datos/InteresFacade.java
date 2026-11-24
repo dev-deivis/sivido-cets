@@ -7,6 +7,7 @@ package acceso_datos;
 import jakarta.ejb.Stateless;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
+import java.util.List;
 import modelo.Interes;
 import modelo.SolicitudReposicion;
 
@@ -27,6 +28,15 @@ public class InteresFacade extends AbstractFacade<Interes> {
 
     public InteresFacade() {
         super(Interes.class);
+    }
+
+    // #17: los donadores que confirmaron interés en la solicitud, el más reciente primero
+    public List<Interes> buscarPorSolicitud(SolicitudReposicion s) {
+        return getEntityManager()
+                .createQuery("SELECT i FROM Interes i WHERE i.solicitudReposicion = :s ORDER BY i.fechaInteres DESC",
+                        Interes.class)
+                .setParameter("s", s)
+                .getResultList();
     }
 
     // HU-6.3: cuántos donadores confirmaron interés en la solicitud

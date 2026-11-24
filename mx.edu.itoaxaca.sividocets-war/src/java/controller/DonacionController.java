@@ -12,6 +12,7 @@ import java.util.Date;
 import java.util.List;
 import ln.LnDonacion;
 import ln.LnPanelCETS;
+import modelo.HistorialClinico;
 import modelo.HistorialExterno;
 import modelo.PersonalCETS;
 import modelo.RegistroDonacion;
@@ -61,6 +62,10 @@ public class DonacionController implements Serializable {
     // D18: por qué no se puede registrar la donación (null = se puede). Lo decide LnDonacion.
     private String motivoRechazo;
 
+    // #13: la vista llena exclusion.diagnostico (el motivo); exclusionRegistrada es el registro ya guardado (motivo y fecha)
+    private HistorialClinico exclusion;
+    private HistorialClinico exclusionRegistrada;
+
     public DonacionController() {
         registro = new RegistroDonacion();
         registro.setUsuarioid(new Usuario());
@@ -68,6 +73,12 @@ public class DonacionController implements Serializable {
         registro.setFechaDonacion(new Date());
         criterio = new Usuario();
         donador = new Usuario();
+        nuevaExclusion();
+    }
+
+    private void nuevaExclusion() {
+        exclusion = new HistorialClinico();
+        exclusion.setUsuarioid(new Usuario());
     }
 
     // HU-5.4 (1 buscar → 1.1 buscarDonador)
@@ -98,6 +109,27 @@ public class DonacionController implements Serializable {
         exclusionPermanente = lnDonacion.verificarExclusion(donador);
         puedeDonar = lnDonacion.esElegible(donador);
         motivoRechazo = lnDonacion.motivoRechazoDonacion(donador, null);     // D18: botón "Registrar donación" de la ficha
+        exclusionRegistrada = lnDonacion.obtenerExclusion(donador);          // #13: motivo y fecha de la exclusión
+    }
+
+    // #13 Marcar exclusión permanente (botón del diálogo de la ficha). La vista llena exclusion.diagnostico (el motivo);
+    // aquí se agregan el donador de la ficha y el personal en sesión, y todo viaja como la entidad completa.
+    public void marcarExclusion() throws IOException {
+        if (!sesionCETSValida()) {
+            return;
+        }
+        PersonalCETS personal = sesion.getUsuario().getPersonalCETS();
+        exclusion.setUsuarioid(donador);
+        exclusion.setPersonalCETSUsuarioid(personal != null ? personal : new PersonalCETS(sesion.getUsuario().getId()));
+        boolean marcado = lnPanelCETS.marcarExclusionPermanente(exclusion);
+        if (marcado) {
+            FacesContext.getCurrentInstance().addMessage(null, new FacesMessage(FacesMessage.SEVERITY_INFO,
+                    "Exclusión permanente registrada. El donador ya no puede registrar donaciones.", null));
+        } else {
+            error("No se pudo marcar la exclusión: escribe un motivo de hasta 200 caracteres y verifica que el donador no esté ya excluido.");
+        }
+        nuevaExclusion();
+        seleccionarDonador();                                                // refresca la ficha con el estado real
     }
 
     // HU-5.1 f:viewAction de capturarDonacion?donador=: muestra el nombre del donador elegido
@@ -199,6 +231,18 @@ public class DonacionController implements Serializable {
     private void aviso(String texto) {
         FacesContext.getCurrentInstance().addMessage(null,
                 new FacesMessage(FacesMessage.SEVERITY_WARN, texto, null));
+    }
+
+    public HistorialClinico getExclusion() {
+        return exclusion;
+    }
+
+    public void setExclusion(HistorialClinico exclusion) {
+        this.exclusion = exclusion;
+    }
+
+    public HistorialClinico getExclusionRegistrada() {
+        return exclusionRegistrada;
     }
 
     public RegistroDonacion getRegistro() {

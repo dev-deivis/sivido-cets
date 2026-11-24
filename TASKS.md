@@ -534,6 +534,7 @@ public int contarPorSolicitud(SolicitudReposicion s) {
 - En el HTML (Ctrl+U) no aparece ninguna latitud ni longitud de donador.
 - Un `?id=` inexistente muestra un mensaje en lugar de una excepción.
 - SQL de verificación: `SELECT COUNT(*) FROM Interes WHERE SolicitudReposicionid = 901;`
+- (2026-11-24, #17) Con ese interés, la tabla "Donador / Tipo de sangre" muestra solo el nombre y `O−` del 903; sin intereses no hay tabla.
 
 **Checklist**
 
@@ -2122,6 +2123,13 @@ Todos corren esto antes de mezclar su rama a `main` y otra vez **después** del 
       donación de otro usuario, o inexistente, muestra "Constancia no disponible"; sin sesión redirige al login.
 - [ ] **Impresión:** "Imprimir / guardar como PDF" (constancia) e "Imprimir ficha" (`publicacion`) imprimen solo el contenido, sin
       encabezado, menú, pie ni botones.
+- [ ] **Exclusión permanente (#13):** en `cets/donadores?id=903` aparece "Marcar exclusión permanente" (en el 904, ya excluido, no). El diálogo
+      avisa que el motivo será visible y que no se puede deshacer; sin motivo, o con más de 200 caracteres, no guarda. Con motivo válido: mensaje de
+      éxito, la ficha muestra motivo y fecha de hoy y el botón desaparece. SQL: una fila nueva en `HistorialClinico` (Usuarioid 903, PersonalCETS 901)
+      y `exclusionPermanente = 1`; repetirlo no crea otra fila. `capturarDonacion?donador=903` muestra el motivo y la fecha en el aviso y deshabilita el
+      botón; el 903 ve el aviso en `miPerfil`; sus solicitudes y avisos siguen igual.
+- [ ] **Lista de interesados (#17):** el 903 confirma interés en la 901: `detalleSolicitud?id=901` lista su nombre y `O−`; sin intereses solo el
+      contador en 0; en el HTML (Ctrl+U) no hay latitud, longitud, teléfono ni correo; un donador solo notificado no aparece.
 
 ### Limitaciones conocidas al 2026-11-19
 
@@ -2130,8 +2138,6 @@ recorrido de punta a punta (familiar crea solicitud → donador recibe aviso, co
 CETS ve 1 interesado, registra la donación vinculada y pasa la solicitud a Atendida → el donador ve su historial). Todo pasó.
 Lo que sigue **no** es un fallo de esa pasada: son límites aceptados.
 
-- **#13:** nadie registra `HistorialClinico`; la exclusión permanente (`Usuario.exclusionPermanente`) solo se marca por SQL.
-- **#17:** HU-6.3 (`detalleSolicitud`) muestra solo la **cantidad** de interesados, no la lista.
 - **Ficha del donador:** el botón "Registrar donación" se deshabilita si el donador donó hace menos de 56 días, aunque exista una fecha pasada válida para él (#42).
 - **`capturarDonacion`:** la etiqueta "Fecha de la donación" muestra el asterisco de obligatorio dos veces (detalle visual).
 
@@ -2143,8 +2149,21 @@ Lo que sigue **no** es un fallo de esa pasada: son límites aceptados.
   `LnNotificacion.listarMisNotificaciones` ya no regresa avisos de solicitudes no Activas. `misSolicitudes` sigue mostrando todos los estatus.
 - **Bitácora:** `detalleSolicitud` muestra el "Historial de cambios" de la solicitud.
 
+**Resueltas el 2026-11-24 (`feature/exclusion-permanente`):**
+
+- **#13 (resuelta):** la ficha del donador (`cets/donadores`) tiene el botón **"Marcar exclusión permanente"** (solo personal CETS, oculto si el
+  donador ya está excluido). Un diálogo pide el motivo (obligatorio, máximo 200) y avisa que el donador lo verá y que no se puede deshacer
+  desde la app. `LnPanelCETS.marcarExclusionPermanente` crea un `HistorialClinico` (motivo en `diagnostico`, `fechaDeteccion` = hoy, personal que
+  lo marcó) y pone `Usuario.exclusionPermanente = true` en una sola transacción, actualizando las listas inversas. **No** hay botón para quitarla
+  y **no** se tocan sus solicitudes ni avisos: solo se bloquean donaciones nuevas (D18). La ficha muestra motivo y fecha; `miPerfil` del donador
+  muestra un aviso con el motivo; el mensaje D18 de `capturarDonacion` ahora incluye motivo y fecha.
+- **#17 (resuelta):** `detalleSolicitud` lista a los donadores que **confirmaron interés** (`Interes`), solo con **nombre y tipo de sangre**.
+  Criterio de diseño: los que solo fueron notificados no aparecen (no han aceptado compartir nada), y la lista coincide con el contador.
+  Nunca se muestran ubicación, teléfono ni correo (el `neg` de HU-6.3 sigue vigente).
+
 **Funcionalidades sin HU** (pendiente agregarlas al backlog y a los diagramas): **Constancia** de donación (`miHistorial` →
-`historial/constancia`), **Descargar QR** e **Imprimir ficha** (`publicacion`).
+`historial/constancia`), **Descargar QR** e **Imprimir ficha** (`publicacion`), **Marcar exclusión permanente** (`cets/donadores`) y la
+**lista de interesados** de HU-6.3 (`obtenerInteresados`, que el `.vpp` no tiene).
 - **Diagramas (`SIVIDO_CETS_U4.vpp`), pendientes:** dudas 6a–6d de las secuencias (mensajes que no coinciden con el código, solo anotados); HU-2.1 sin `buscarDonadoresCercanos`; falta la dependencia `ControlPanelCETS` → `ControlCuentas` en el diagrama de clases; HU-6.1 sin la comprobación de `activo`; 36 métodos de entidades sin tocar; `generarQR` y `contarRegistros` (#15); `Interes` sin ligar al ORM.
 
 ---
@@ -2232,7 +2251,8 @@ Siguen **abiertas**: necesitan una decisión del equipo o del profe. Lo ya resue
     - La vista usa `datetime-local` y la columna es `DATE`.
     - ~~Falta definir si al registrar una donación ligada se cambia el estatus de la solicitud.~~ **Resuelto (2026-11-24):** pasa a
       Atendida con renglón de bitácora (ver "Limitaciones conocidas").
-13. **HU-5.3 / D10:** **ninguna HU registra `HistorialClinico`**. `PersonalCETS.registrarPadecimiento` no tiene
+13. **HU-5.3 / D10 — RESUELTA (2026-11-24):** el CETS marca la exclusión desde la ficha del donador (ver "Limitaciones conocidas").
+    Falta que el `.vpp` refleje el método nuevo (`PersonalCETS.registrarPadecimiento` sigue sin secuencia). Texto original: **ninguna HU registra `HistorialClinico`**. `PersonalCETS.registrarPadecimiento` no tiene
     secuencia, así que nadie marca `Usuario.exclusionPermanente` desde la aplicación. Por ahora solo se marca con los
     `INSERT`/`UPDATE` de prueba. Decidir qué HU e integrante lo implementa.
 14. **HU-5.4:** la vista muestra un código "DON-OAX-2024-984" que no existe en la BD, y
@@ -2242,7 +2262,8 @@ Siguen **abiertas**: necesitan una decisión del equipo o del profe. Lo ya resue
 16. **HU-6.2:**
     - El nombre dice "solicitudes activas", pero la vista filtra por cualquier estatus, con contadores fijos.
     - La vista combina tipo y Rh en un solo combo (`O+`) y el diagrama los maneja por separado.
-17. **HU-6.3:** el título habla de "detalle de **donadores** vinculados", pero la secuencia solo obtiene la
+17. **HU-6.3 — RESUELTA (2026-11-24):** `detalleSolicitud` lista nombre y tipo de sangre de los donadores que confirmaron interés
+    (ver "Limitaciones conocidas"). El `.vpp` no tiene la operación `obtenerInteresados`. Texto original: el título habla de "detalle de **donadores** vinculados", pero la secuencia solo obtiene la
     **cantidad** de interesados. Definir si el CETS debe ver la lista (nombres, sin ubicación). Mientras tanto
     `detalleSolicitud` muestra solo la cantidad; se retiró la tabla de identificadores "DON-OAX-…" de la maqueta
     porque eran datos inventados.

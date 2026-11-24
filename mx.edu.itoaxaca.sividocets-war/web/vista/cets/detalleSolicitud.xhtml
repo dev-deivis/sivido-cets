@@ -66,15 +66,31 @@
                         <div class="fila-entre mb-2">
                             <div>
                                 <h2 class="mb-0"><i class="pi pi-users texto-rojo"></i> Donadores que confirmaron interés</h2>
-                                <span class="texto-chico texto-tenue">Solo se informa la cantidad: nunca la identidad ni la ubicación del donador.</span>
+                                <span class="texto-chico texto-tenue">Solo nombre y grupo sanguíneo: nunca la ubicación ni los datos de contacto del donador.</span>
                             </div>
-                            <span class="etiqueta azul"><i class="pi pi-lock"></i> Identidad protegida</span>
+                            <span class="etiqueta azul"><i class="pi pi-lock"></i> Sin ubicación ni contacto</span>
                         </div>
                         <!-- HU-6.3 (obtenerCantidadInteresados). El diagrama no define lista de donadores: se retiró la tabla de ejemplo (ver TASKS.md, inconsistencia 17) -->
                         <div class="tarjeta-plana fila mb-0">
                             <span class="numero-grande">#{panelCetsController.cantidadInteresados}</span>
                             <span class="texto-sec">#{panelCetsController.cantidadInteresados eq 1 ? 'donador confirmó' : 'donadores confirmaron'} interés en esta solicitud</span>
                         </div>
+                        <!-- #17: solo quienes confirmaron interés (Interes); nombre y grupo, nada más del donador -->
+                        <ui:fragment rendered="#{not empty panelCetsController.donadoresInteresados}">
+                            <div class="tabla-contenedor mt-2">
+                                <table class="tabla">
+                                    <thead><tr><th>Donador</th><th>Tipo de sangre</th></tr></thead>
+                                    <tbody>
+                                        <ui:repeat value="#{panelCetsController.donadoresInteresados}" var="i">
+                                            <tr>
+                                                <td>#{i.usuario.nombreCompleto}</td>
+                                                <td><span class="grupo-sangre">#{empty i.usuario.perfilClinico ? '—' : i.usuario.perfilClinico.tipoSanguineo.concat(i.usuario.perfilClinico.factorRh)}</span></td>
+                                            </tr>
+                                        </ui:repeat>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </ui:fragment>
                     </div>
 
                     <!-- Bitácora de HU-6.4: del cambio más reciente al más antiguo -->
