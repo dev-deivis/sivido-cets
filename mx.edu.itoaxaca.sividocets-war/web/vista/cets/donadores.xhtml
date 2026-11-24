@@ -85,6 +85,27 @@
                             <h:panelGroup rendered="#{donacionController.exclusionPermanente}" styleClass="estatus cancelada">Exclusión permanente</h:panelGroup>
                         </div>
 
+                        <!-- #13: motivo y fecha de la exclusión permanente, o el botón para marcarla (sin reversa desde la app) -->
+                        <h:panelGroup rendered="#{donacionController.exclusionPermanente}" layout="block" styleClass="aviso rojo mt-2">
+                            <i class="pi pi-ban"></i>
+                            <div>
+                                <strong>Exclusión permanente</strong>
+                                <p class="texto-chico mb-0">
+                                    <h:outputText value="#{empty donacionController.exclusionRegistrada ? 'Sin motivo registrado en la aplicación.' : donacionController.exclusionRegistrada.diagnostico}"/>
+                                    <h:panelGroup rendered="#{not empty donacionController.exclusionRegistrada.fechaDeteccion}">
+                                        · desde
+                                        <h:outputText value="#{donacionController.exclusionRegistrada.fechaDeteccion}">
+                                            <f:convertDateTime pattern="dd/MM/yyyy"/>
+                                        </h:outputText>
+                                    </h:panelGroup>
+                                </p>
+                            </div>
+                        </h:panelGroup>
+                        <h:panelGroup rendered="#{not donacionController.exclusionPermanente}" layout="block" styleClass="mt-2">
+                            <p:commandButton type="button" value="Marcar exclusión permanente" icon="pi pi-ban"
+                                             styleClass="ui-button-secondary boton-bloque" onclick="PF('dlgExclusion').show()"/>
+                        </h:panelGroup>
+
                         <!-- HU-1.4 Contacto enmascarado -->
                         <span class="sobretitulo mt-2" style="display:block">Datos de contacto</span>
                         <dl class="datos">
@@ -213,5 +234,35 @@
                 </div>
             </h:panelGroup>
         </h:form>
+
+        <!-- #13: el diálogo hace de confirmación; formulario propio (no puede ir dentro de formDonadores). Se reabre
+             si el motivo no pasa la validación. -->
+        <p:dialog header="Marcar exclusión permanente" widgetVar="dlgExclusion" modal="true" resizable="false"
+                  draggable="false" width="520" visible="#{facesContext.validationFailed}">
+            <h:form id="formExclusion">
+                <p:messages id="mensajesExclusion" closable="true"/>
+                <div class="aviso rojo mb-2">
+                    <i class="pi pi-exclamation-triangle"></i>
+                    <p class="texto-chico mb-0">Este motivo será visible para el donador. Esta acción no se puede deshacer desde la app.</p>
+                </div>
+                <p>El donador <strong>#{donacionController.donador.nombreCompleto}</strong> ya no podrá registrar donaciones.
+                    Sus solicitudes y avisos activos no cambian.</p>
+                <div class="campo">
+                    <p:outputLabel for="motivo">Motivo <span class="requerido">*</span></p:outputLabel>
+                    <p:inputTextarea id="motivo" value="#{donacionController.exclusion.diagnostico}" required="true"
+                                     requiredMessage="Escribe el motivo de la exclusión" rows="4" maxlength="200"
+                                     counter="contadorMotivo" counterTemplate="{0} caracteres restantes" style="width:100%">
+                        <f:validateLength maximum="200"/>
+                    </p:inputTextarea>
+                    <span class="ayuda"><h:outputText id="contadorMotivo"/></span>
+                </div>
+                <div class="acciones-formulario">
+                    <p:commandButton type="button" value="Cancelar" icon="pi pi-times" styleClass="ui-button-secondary"
+                                     onclick="PF('dlgExclusion').hide()"/>
+                    <p:commandButton value="Confirmar y marcar exclusión" icon="pi pi-ban" ajax="false"
+                                     action="#{donacionController.marcarExclusion}"/>
+                </div>
+            </h:form>
+        </p:dialog>
     </ui:define>
 </ui:composition>

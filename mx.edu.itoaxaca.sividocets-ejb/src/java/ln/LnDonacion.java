@@ -1,5 +1,6 @@
 package ln;
 
+import acceso_datos.HistorialClinicoFacade;
 import acceso_datos.HistorialExternoFacade;
 import acceso_datos.PerfilClinicoFacade;
 import acceso_datos.PersonalCETSFacade;
@@ -13,6 +14,7 @@ import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.Date;
 import java.util.List;
+import modelo.HistorialClinico;
 import modelo.HistorialExterno;
 import modelo.PerfilClinico;
 import modelo.PersonalCETS;
@@ -49,6 +51,10 @@ public class LnDonacion {
 
     @EJB
     private HistorialExternoFacade historialExternoF;
+
+    // [David] #13: motivo y fecha de la exclusión permanente (HistorialClinico)
+    @EJB
+    private HistorialClinicoFacade historialClinicoF;
 
     // [David] HU-5.1: perfil del donador y tabla de compatibilidad ABO/Rh (LnCuentas.receptoresCompatibles, la misma
     // que usa LnNotificacion; LnCuentas solo depende de facades, así que no hay dependencia circular)
@@ -142,7 +148,7 @@ public class LnDonacion {
             return "La fecha de la donación no puede ser futura.";
         }
         if (verificarExclusion(donador)) {
-            return "El donador tiene exclusión permanente y no puede donar.";
+            return "El donador tiene exclusión permanente" + detalleExclusion(donador) + " y no puede donar.";
         }
         if (fecha != null) {
             String intervalo = motivoIntervalo(donador, fecha);
@@ -175,6 +181,30 @@ public class LnDonacion {
                     + solicitud.getFactorRh() + ").";
         }
         return null;
+    }
+
+    // [David] #13: " (motivo: …, desde dd/MM/yyyy)" de la exclusión permanente, o "" si no hay registro clínico
+    private String detalleExclusion(Usuario donador) {
+        HistorialClinico exclusion = obtenerExclusion(donador);
+        if (exclusion == null || exclusion.getDiagnostico() == null) {
+            return "";
+        }
+        String desde = exclusion.getFechaDeteccion() == null ? ""
+                : ", desde " + formatear(aLocalDate(exclusion.getFechaDeteccion()));
+        return " (motivo: " + exclusion.getDiagnostico() + desde + ")";
+    }
+
+    // [David] #13: el registro clínico que explica la exclusión permanente (motivo, fecha y personal que la marcó).
+    // null si el usuario no está excluido o no tiene registro (por ejemplo, se marcó por SQL).
+    public HistorialClinico obtenerExclusion(Usuario u) {
+        if (u == null || u.getId() == null) {
+            return null;
+        }
+        Usuario donador = usuarioF.find(u.getId());
+        if (donador == null || !Boolean.TRUE.equals(donador.getExclusionPermanente())) {
+            return null;
+        }
+        return historialClinicoF.buscarUltimoPorUsuario(donador);
     }
 
     // [David] #42: motivo por el que la fecha no respeta el intervalo con las donaciones existentes (null si sí lo respeta).

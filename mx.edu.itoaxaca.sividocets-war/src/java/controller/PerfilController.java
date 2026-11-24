@@ -10,6 +10,8 @@ import java.io.IOException;
 import java.io.Serializable;
 import java.util.List;
 import ln.LnCuentas;
+import ln.LnDonacion;
+import modelo.HistorialClinico;
 import modelo.PerfilClinico;
 import modelo.Usuario;
 
@@ -31,6 +33,12 @@ public class PerfilController implements Serializable {
 
     @EJB
     private LnCuentas lnCuentas;
+
+    @EJB
+    private LnDonacion lnDonacion;
+
+    // #13: motivo y fecha de la exclusión permanente del usuario (null si no está excluido)
+    private HistorialClinico exclusion;
 
     @Inject
     private SesionController sesion;
@@ -93,6 +101,7 @@ public class PerfilController implements Serializable {
         Usuario usuario = sesion.getUsuario();
         perfil = lnCuentas.obtenerPerfilClinico(usuario);
         radioGuardado = lnCuentas.obtenerRadio(usuario);
+        exclusion = lnDonacion.obtenerExclusion(usuario);
         // Otras vistas leen el perfil desde la sesión (p. ej. el radio en notificaciones)
         usuario.setPerfilClinico(perfil.getUsuarioid() == null ? null : perfil);
     }
@@ -138,6 +147,10 @@ public class PerfilController implements Serializable {
 
     public void setPerfil(PerfilClinico perfil) {
         this.perfil = perfil;
+    }
+
+    public HistorialClinico getExclusion() {
+        return exclusion;
     }
 
     public int getRadioGuardado() {

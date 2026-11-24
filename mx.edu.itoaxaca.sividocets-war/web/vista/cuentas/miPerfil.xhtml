@@ -42,6 +42,22 @@
             </div>
         </div>
 
+        <!-- #13: exclusión permanente marcada por el CETS -->
+        <ui:fragment rendered="#{not empty perfilController.exclusion}">
+            <div class="aviso rojo mb-2">
+                <i class="pi pi-ban"></i>
+                <div>
+                    <strong>Tienes una exclusión permanente</strong>
+                    <p>El CETS la registró
+                        <h:outputText value="#{perfilController.exclusion.fechaDeteccion}">
+                            <f:convertDateTime pattern="'el' dd/MM/yyyy"/>
+                        </h:outputText>
+                        por este motivo: #{perfilController.exclusion.diagnostico}. Por ahora no puedes registrar donaciones en el CETS.
+                        Si tienes dudas, acude al CETS Oaxaca.</p>
+                </div>
+            </div>
+        </ui:fragment>
+
         <p:messages id="mensajes" closable="true"/>
 
         <h:form id="formPerfil">

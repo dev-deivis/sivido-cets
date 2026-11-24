@@ -14,6 +14,7 @@ import java.util.List;
 import java.util.Map;
 import ln.LnPanelCETS;
 import modelo.HistorialEstatusSolicitud;
+import modelo.Interes;
 import modelo.PersonalCETS;
 import modelo.SolicitudReposicion;
 import modelo.Usuario;
@@ -52,6 +53,8 @@ public class PanelCetsController implements Serializable {
     private SolicitudReposicion solicitud;
     private int cantidadInteresados;
     // Bitácora de cambios de estatus de la solicitud (más reciente primero)
+    // #17: donadores que confirmaron interés (la vista solo pinta nombre y grupo sanguíneo)
+    private List<Interes> donadoresInteresados = new java.util.ArrayList<>();
     private List<HistorialEstatusSolicitud> historialEstatus = new java.util.ArrayList<>();
 
     public PanelCetsController() {
@@ -122,12 +125,14 @@ public class PanelCetsController implements Serializable {
         if (encontrada == null) {
             solicitud = new SolicitudReposicion();
             historialEstatus = new java.util.ArrayList<>();
+            donadoresInteresados = new java.util.ArrayList<>();
             error("La solicitud no existe");
             return;
         }
         solicitud = encontrada;
         cantidadInteresados = lnPanelCETS.obtenerCantidadInteresados(solicitud);
         historialEstatus = lnPanelCETS.obtenerHistorialEstatus(solicitud);
+        donadoresInteresados = lnPanelCETS.obtenerInteresados(solicitud);
     }
 
     private void cargarSolicitudes(List<SolicitudReposicion> lista) {
@@ -224,6 +229,10 @@ public class PanelCetsController implements Serializable {
 
     public int getCantidadInteresados() {
         return cantidadInteresados;
+    }
+
+    public List<Interes> getDonadoresInteresados() {
+        return donadoresInteresados;
     }
 
     public List<HistorialEstatusSolicitud> getHistorialEstatus() {
