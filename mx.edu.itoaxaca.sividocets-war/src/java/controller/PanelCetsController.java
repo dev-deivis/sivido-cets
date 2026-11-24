@@ -13,6 +13,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import ln.LnPanelCETS;
+import modelo.HistorialEstatusSolicitud;
 import modelo.PersonalCETS;
 import modelo.SolicitudReposicion;
 import modelo.Usuario;
@@ -50,6 +51,8 @@ public class PanelCetsController implements Serializable {
     // HU-6.3: solicitud seleccionada (el id llega por f:viewParam) y su cantidad de interesados
     private SolicitudReposicion solicitud;
     private int cantidadInteresados;
+    // Bitácora de cambios de estatus de la solicitud (más reciente primero)
+    private List<HistorialEstatusSolicitud> historialEstatus = new java.util.ArrayList<>();
 
     public PanelCetsController() {
         personal = new PersonalCETS();
@@ -118,11 +121,13 @@ public class PanelCetsController implements Serializable {
         SolicitudReposicion encontrada = lnPanelCETS.obtenerDetalle(solicitud);
         if (encontrada == null) {
             solicitud = new SolicitudReposicion();
+            historialEstatus = new java.util.ArrayList<>();
             error("La solicitud no existe");
             return;
         }
         solicitud = encontrada;
         cantidadInteresados = lnPanelCETS.obtenerCantidadInteresados(solicitud);
+        historialEstatus = lnPanelCETS.obtenerHistorialEstatus(solicitud);
     }
 
     private void cargarSolicitudes(List<SolicitudReposicion> lista) {
@@ -219,5 +224,9 @@ public class PanelCetsController implements Serializable {
 
     public int getCantidadInteresados() {
         return cantidadInteresados;
+    }
+
+    public List<HistorialEstatusSolicitud> getHistorialEstatus() {
+        return historialEstatus;
     }
 }

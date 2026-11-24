@@ -600,6 +600,7 @@ public boolean actualizarEstatus(SolicitudReposicion s)
 - Activa → Atendida muestra "El estatus de la solicitud cambió a Atendida", saca la solicitud del listado de activas
   (HU-6.2) y crea un renglón de bitácora.
 - Atendida → Cerrada también funciona (queda otro renglón).
+- El detalle muestra el bloque "Historial de cambios" con cada renglón de la bitácora (estatus anterior → nuevo, quién y cuándo).
 - Elegir el mismo estatus, o volver a "Activa", muestra un error, no cambia nada y no inserta bitácora.
 - Una solicitud inexistente no muestra el formulario de estatus.
 - SQL de verificación:
@@ -2108,6 +2109,19 @@ Todos corren esto antes de mezclar su rama a `main` y otra vez **después** del 
       botones (destacado el institucional si estabas en una vista CETS), sin pantalla de error.
 - [x] La raíz `http://localhost:8080/mx.edu.itoaxaca.sividocets-war/` carga `publico/index`.
 - [x] Las HU de tu módulo siguen pasando sus "Terminado cuando".
+- [ ] **Donación ligada → Atendida (#12):** el CETS registra una donación del donador 903 (O−) para la solicitud 901 (O−): el mensaje dice
+      "La solicitud … pasó a Atendida", la solicitud sale de `solicitudesActivas` y el combo de `capturarDonacion` ya no la ofrece.
+      Una donación general no cambia ningún estatus.
+- [ ] **Bitácora:** en `detalleSolicitud` de esa solicitud, "Historial de cambios" muestra Activa → Atendida con el nombre del
+      personal y la hora de México; una solicitud sin cambios dice "Sin cambios de estatus". Tras "Guardar cambio de estatus" aparece
+      el renglón nuevo sin recargar a mano.
+- [ ] **Solicitud no Activa (#25):** `publicacion?uuid=` de la solicitud Atendida muestra "Esta solicitud ya no está activa" sin folio ni
+      hospital ni QR; la de una Activa se ve completa; un uuid inexistente conserva "Publicación no encontrada". `notificaciones` del
+      donador ya no lista avisos de solicitudes no Activas; `misSolicitudes` del familiar sigue listando todas.
+- [ ] **Constancia:** en `miHistorial`, "Descargar" abre `historial/constancia?id=` con los datos de esa donación; con el id de una
+      donación de otro usuario, o inexistente, muestra "Constancia no disponible"; sin sesión redirige al login.
+- [ ] **Impresión:** "Imprimir / guardar como PDF" (constancia) e "Imprimir ficha" (`publicacion`) imprimen solo el contenido, sin
+      encabezado, menú, pie ni botones.
 
 ### Limitaciones conocidas al 2026-11-19
 
@@ -2117,11 +2131,20 @@ CETS ve 1 interesado, registra la donación vinculada y pasa la solicitud a Aten
 Lo que sigue **no** es un fallo de esa pasada: son límites aceptados.
 
 - **#13:** nadie registra `HistorialClinico`; la exclusión permanente (`Usuario.exclusionPermanente`) solo se marca por SQL.
-- **#12:** registrar una donación ligada a una solicitud **no** cambia el estatus de la solicitud (el CETS lo cambia a mano en HU-6.4).
-- **#25:** cambiar el estatus a Cerrada o Cancelada solo afecta el panel CETS (no la publicación pública ni los avisos).
 - **#17:** HU-6.3 (`detalleSolicitud`) muestra solo la **cantidad** de interesados, no la lista.
 - **Ficha del donador:** el botón "Registrar donación" se deshabilita si el donador donó hace menos de 56 días, aunque exista una fecha pasada válida para él (#42).
 - **`capturarDonacion`:** la etiqueta "Fecha de la donación" muestra el asterisco de obligatorio dos veces (detalle visual).
+
+**Resueltas el 2026-11-24 (`feature/cierre-reglas`):**
+
+- **#12 (resuelta):** `LnDonacion.registrarDonacion` pasa la solicitud ligada a **Atendida** en la misma transacción, con renglón en
+  `HistorialEstatusSolicitud` (reutiliza `LnPanelCETS.cambiarEstatus`). El mensaje de `capturarDonacion` lo dice.
+- **#25 (resuelta):** `publicacion` muestra "Esta solicitud ya no está activa" (sin folio, hospital ni QR) si el estatus no es Activa, y
+  `LnNotificacion.listarMisNotificaciones` ya no regresa avisos de solicitudes no Activas. `misSolicitudes` sigue mostrando todos los estatus.
+- **Bitácora:** `detalleSolicitud` muestra el "Historial de cambios" de la solicitud.
+
+**Funcionalidades sin HU** (pendiente agregarlas al backlog y a los diagramas): **Constancia** de donación (`miHistorial` →
+`historial/constancia`), **Descargar QR** e **Imprimir ficha** (`publicacion`).
 - **Diagramas (`SIVIDO_CETS_U4.vpp`), pendientes:** dudas 6a–6d de las secuencias (mensajes que no coinciden con el código, solo anotados); HU-2.1 sin `buscarDonadoresCercanos`; falta la dependencia `ControlPanelCETS` → `ControlCuentas` en el diagrama de clases; HU-6.1 sin la comprobación de `activo`; 36 métodos de entidades sin tocar; `generarQR` y `contarRegistros` (#15); `Interes` sin ligar al ORM.
 
 ---
@@ -2207,7 +2230,8 @@ Siguen **abiertas**: necesitan una decisión del equipo o del profe. Lo ya resue
     - `calcularProximaFecha()` no define la regla. El comentario del script dice
       `máx(última donación + 56 días, fechaRespuesta + tiempoEsperaDias)`, pero el diagrama no lo refleja.
     - La vista usa `datetime-local` y la columna es `DATE`.
-    - Falta definir si al registrar una donación ligada se cambia el estatus de la solicitud.
+    - ~~Falta definir si al registrar una donación ligada se cambia el estatus de la solicitud.~~ **Resuelto (2026-11-24):** pasa a
+      Atendida con renglón de bitácora (ver "Limitaciones conocidas").
 13. **HU-5.3 / D10:** **ninguna HU registra `HistorialClinico`**. `PersonalCETS.registrarPadecimiento` no tiene
     secuencia, así que nadie marca `Usuario.exclusionPermanente` desde la aplicación. Por ahora solo se marca con los
     `INSERT`/`UPDATE` de prueba. Decidir qué HU e integrante lo implementa.
@@ -2260,7 +2284,8 @@ Siguen **abiertas**: necesitan una decisión del equipo o del profe. Lo ya resue
 24. **HU-6.4, mensaje de error genérico:** `actualizarEstatus` regresa `boolean`, así que el Ln no puede decir por qué
     falló (estatus no asignable, igual al actual, solicitud inexistente o personal inactivo). La vista muestra un solo
     mensaje con la regla. Si se quieren mensajes distintos, habría que cambiar el tipo de retorno en el diagrama.
-25. **HU-6.4, efecto sobre los donadores:** la ayuda de la maqueta dice que el estatus "define si la solicitud sigue
+25. **HU-6.4, efecto sobre los donadores — RESUELTA (2026-11-24).** Una solicitud no Activa ya se oculta en la publicación pública y
+    en los avisos del donador. Texto original: la ayuda de la maqueta dice que el estatus "define si la solicitud sigue
     visible para los donadores", pero ningún diagrama lo define. Hoy cambiar el estatus solo afecta el listado del
     panel CETS; falta decidir si la publicación pública y las notificaciones deben ocultar las solicitudes no activas.
 26. **Vista expirada o sin sesión en un POST — RESUELTA.** Enviar un formulario con un `ViewState` inválido (por ejemplo,

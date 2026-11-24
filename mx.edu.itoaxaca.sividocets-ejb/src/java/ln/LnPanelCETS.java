@@ -111,18 +111,40 @@ public class LnPanelCETS {
             return false;
         }
 
+        cambiarEstatus(solicitud, personal, s.getEstatus());
+        return true;
+    }
+
+    // Cambio de estatus + renglón de bitácora, en la transacción de quien lo llame. Lo usan actualizarEstatus
+    // (HU-6.4) y LnDonacion.registrarDonacion (#12: la donación ligada pasa la solicitud a Atendida).
+    // solicitud y personal ya son las entidades administradas; no valida (eso lo hace quien llama).
+    public void cambiarEstatus(SolicitudReposicion solicitud, PersonalCETS personal, String nuevoEstatus) {
         HistorialEstatusSolicitud historial = new HistorialEstatusSolicitud();
         historial.setSolicitudReposicionid(solicitud);
         historial.setPersonalCETSUsuarioid(personal);
         historial.setEstatusAnterior(solicitud.getEstatus());
-        historial.setEstatusNuevo(s.getEstatus());
+        historial.setEstatusNuevo(nuevoEstatus);
         historial.setFechaCambio(new Date());
 
-        solicitud.setEstatus(s.getEstatus());
+        solicitud.setEstatus(nuevoEstatus);
         solicitud.setPersonalCETSUsuarioid(personal);
         solicitudF.edit(solicitud);
         historialEstatusF.create(historial);
-        return true;
+        // Referencias inversas (#35): sin esto el caché compartido deja las listas desactualizadas
+        if (solicitud.getHistorialEstatusSolicitudList() != null) {
+            solicitud.getHistorialEstatusSolicitudList().add(historial);
+        }
+        if (personal.getHistorialEstatusSolicitudList() != null) {
+            personal.getHistorialEstatusSolicitudList().add(historial);
+        }
+    }
+
+    // Bitácora de la solicitud (HU-6.4), del cambio más reciente al más antiguo.
+    public List<HistorialEstatusSolicitud> obtenerHistorialEstatus(SolicitudReposicion s) {
+        if (s == null || s.getId() == null) {
+            return List.of();
+        }
+        return historialEstatusF.buscarPorSolicitud(s);
     }
 
     // El nuevo estatus debe ser uno de los asignables (nunca "Activa": solo es el estado al crearse)

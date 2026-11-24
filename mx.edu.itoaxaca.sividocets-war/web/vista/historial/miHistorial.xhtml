@@ -148,7 +148,12 @@
                                         </h:panelGroup>
                                     </td>
                                     <td><span class="estatus activa">Registrada</span></td>
-                                    <td><p:button value="Descargar" icon="pi pi-download" styleClass="boton-suave" disabled="true"/></td>
+                                    <td>
+                                        <p:button value="Descargar" icon="pi pi-download" styleClass="boton-suave"
+                                                  outcome="/vista/historial/constancia">
+                                            <f:param name="id" value="#{r.id}"/>
+                                        </p:button>
+                                    </td>
                                 </tr>
                             </ui:repeat>
                         </tbody>

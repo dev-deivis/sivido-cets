@@ -76,6 +76,38 @@
                             <span class="texto-sec">#{panelCetsController.cantidadInteresados eq 1 ? 'donador confirmó' : 'donadores confirmaron'} interés en esta solicitud</span>
                         </div>
                     </div>
+
+                    <!-- Bitácora de HU-6.4: del cambio más reciente al más antiguo -->
+                    <div class="tarjeta">
+                        <h2><i class="pi pi-history texto-rojo"></i> Historial de cambios</h2>
+                        <ui:fragment rendered="#{empty panelCetsController.historialEstatus}">
+                            <p class="texto-sec mb-0">Sin cambios de estatus</p>
+                        </ui:fragment>
+                        <ui:fragment rendered="#{not empty panelCetsController.historialEstatus}">
+                            <div class="tabla-contenedor">
+                                <table class="tabla">
+                                    <thead><tr><th>Cambio</th><th>Realizado por</th><th>Fecha</th></tr></thead>
+                                    <tbody>
+                                        <ui:repeat value="#{panelCetsController.historialEstatus}" var="h">
+                                            <tr>
+                                                <td>
+                                                    <span class="estatus #{h.estatusAnterior.toLowerCase()}">#{h.estatusAnterior}</span>
+                                                    <i class="pi pi-arrow-right"></i>
+                                                    <span class="estatus #{h.estatusNuevo.toLowerCase()}">#{h.estatusNuevo}</span>
+                                                </td>
+                                                <td>#{h.personalCETSUsuarioid.usuario.nombreCompleto}</td>
+                                                <td>
+                                                    <h:outputText value="#{h.fechaCambio}">
+                                                        <f:convertDateTime pattern="dd/MM/yyyy HH:mm 'hrs'" timeZone="America/Mexico_City"/>
+                                                    </h:outputText>
+                                                </td>
+                                            </tr>
+                                        </ui:repeat>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </ui:fragment>
+                    </div>
                 </div>
 
                 <div class="columna">
