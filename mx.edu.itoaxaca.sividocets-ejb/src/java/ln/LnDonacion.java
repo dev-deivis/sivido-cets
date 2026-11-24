@@ -58,6 +58,11 @@ public class LnDonacion {
     @EJB
     private LnCuentas lnCuentas;
 
+    // [David] #12: la donación ligada pasa la solicitud a Atendida con su renglón de bitácora (LnPanelCETS no
+    // depende de LnDonacion, así que no hay dependencia circular)
+    @EJB
+    private LnPanelCETS lnPanelCETS;
+
 
     // HU-5.1 (1.1) registrarDonacion. r trae usuarioid (id del donador), personalCETSUsuarioid (personal en
     // sesión), fechaDonacion y, opcional, solicitudReposicionid (id o vacío = donación general; si viene, debe estar Activa).
@@ -98,7 +103,20 @@ public class LnDonacion {
         if (personal.getRegistroDonacionList() != null) {
             personal.getRegistroDonacionList().add(r);   // [David] #35: el personal que la registró
         }
+        if (solicitud != null) {
+            lnPanelCETS.cambiarEstatus(solicitud, personal, "Atendida");   // [David] #12: misma transacción
+        }
         return true;
+    }
+
+    // [David] Constancia de donación: la donación solo si es del usuario en sesión; null si no existe o es ajena.
+    public RegistroDonacion obtenerConstancia(RegistroDonacion r, Usuario u) {
+        if (r == null || r.getId() == null || u == null || u.getId() == null) {
+            return null;
+        }
+        RegistroDonacion donacion = registroF.find(r.getId());
+        boolean propia = donacion != null && donacion.getUsuarioid().getId().equals(u.getId());
+        return propia ? donacion : null;
     }
 
     // [David] D18 / #42: ¿se puede registrar una donación de este donador para esta solicitud (null = donación

@@ -150,7 +150,11 @@ public class DonacionController implements Serializable {
         }
         FacesContext ctx = FacesContext.getCurrentInstance();
         ctx.getExternalContext().getFlash().setKeepMessages(true);
-        ctx.addMessage(null, new FacesMessage(FacesMessage.SEVERITY_INFO, "Donación registrada", null));
+        SolicitudReposicion ligada = registro.getSolicitudReposicionid();    // #12: el Ln la dejó Atendida
+        String texto = ligada != null && ligada.getId() != null
+                ? "Donación registrada. La solicitud " + ligada.getFolioCETS() + " pasó a Atendida."
+                : "Donación registrada";
+        ctx.addMessage(null, new FacesMessage(FacesMessage.SEVERITY_INFO, texto, null));
         return "/vista/cets/donadores?faces-redirect=true&id=" + donadorId;
     }
 

@@ -133,12 +133,15 @@ public class LnNotificacion {
         return ajena ? null : encontrada;
     }
 
-    // HU-3.1 Avisos del donador (no está en el diagrama; lo necesita la vista notificaciones)
+    // HU-3.1 Avisos del donador (no está en el diagrama; lo necesita la vista notificaciones).
+    // #25: solo los de solicitudes Activas; los de una solicitud atendida, cerrada o cancelada ya no se muestran.
     public List<Notificacion> listarMisNotificaciones(Usuario u) {
         if (u == null || u.getId() == null) {
             return List.of();
         }
-        return notificacionF.buscarPorUsuario(u);
+        return notificacionF.buscarPorUsuario(u).stream()
+                .filter(n -> "Activa".equals(n.getSolicitudReposicionid().getEstatus()))
+                .toList();
     }
 
     // HU-3.3 Datos de la solicitud a la que se quiere confirmar interés (no está en el diagrama; lo necesita

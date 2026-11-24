@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Constancia de donación (imprimible). Sin HU: pendiente de agregar al backlog y a los diagramas.
+     Entrada: miHistorial → constancia?id=N (f:viewParam → constanciaController.registro.id).
+     Solo se muestra si la donación es del usuario en sesión (LnDonacion.obtenerConstancia). -->
+<!DOCTYPE html>
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:h="jakarta.faces.html"
+                xmlns:f="jakarta.faces.core"
+                xmlns:ui="jakarta.faces.facelets"
+                xmlns:p="primefaces"
+                template="/plantillas/plantillaUsuario.xhtml">
+
+    <ui:param name="menuActivo" value="miHistorial"/>
+    <ui:define name="titulo">Constancia de donación · SIVIDO</ui:define>
+
+    <ui:define name="metadata">
+        <f:metadata>
+            <f:viewParam name="id" value="#{constanciaController.registro.id}"/>
+            <f:viewAction action="#{constanciaController.cargar}"/>
+        </f:metadata>
+    </ui:define>
+
+    <ui:define name="content">
+        <p:messages id="mensajes" closable="true" styleClass="no-imprimir"/>
+
+        <div class="fila-entre mb-2 no-imprimir">
+            <h:link outcome="/vista/historial/miHistorial" styleClass="enlace-flecha"><i class="pi pi-arrow-left"></i> Volver a mi historial</h:link>
+            <ui:fragment rendered="#{not empty constanciaController.donacion}">
+                <p:button value="Imprimir / guardar como PDF" icon="pi pi-print" onclick="window.print(); return false;"/>
+            </ui:fragment>
+        </div>
+
+        <ui:fragment rendered="#{not empty constanciaController.donacion}">
+            <div class="tarjeta tarjeta-borde-rojo" style="max-width:760px">
+                <span class="sobretitulo">SIVIDO · Centro Estatal de la Transfusión Sanguínea · Oaxaca</span>
+                <h1>Constancia de donación</h1>
+
+                <dl class="datos mt-2">
+                    <dt>Identificador</dt><dd class="mono texto-rojo">DON-#{constanciaController.donacion.id}</dd>
+                    <dt>Fecha de la donación</dt>
+                    <dd><h:outputText value="#{constanciaController.donacion.fechaDonacion}">
+                        <f:convertDateTime pattern="dd/MM/yyyy"/>
+                    </h:outputText></dd>
+                    <dt>Donador</dt><dd>#{constanciaController.donacion.usuarioid.nombreCompleto}</dd>
+                    <dt>Solicitud vinculada</dt>
+                    <dd>
+                        <h:panelGroup rendered="#{not empty constanciaController.donacion.solicitudReposicionid}">
+                            Folio <span class="mono">#{constanciaController.donacion.solicitudReposicionid.folioCETS}</span>
+                            · #{constanciaController.donacion.solicitudReposicionid.hospitalid.nombre}
+                        </h:panelGroup>
+                        <h:panelGroup rendered="#{empty constanciaController.donacion.solicitudReposicionid}">
+                            Donación voluntaria general
+                        </h:panelGroup>
+                    </dd>
+                    <dt>Próxima fecha elegible</dt>
+                    <dd><h:outputText value="#{constanciaController.donacion.proximaFechaElegible}">
+                        <f:convertDateTime pattern="dd/MM/yyyy"/>
+                    </h:outputText></dd>
+                </dl>
+
+                <hr class="separador"/>
+                <p class="texto-sec texto-chico mb-0">Este documento es un comprobante informativo de SIVIDO. La próxima
+                    fecha es orientativa y está sujeta a valoración médica en el CETS.</p>
+            </div>
+        </ui:fragment>
+    </ui:define>
+</ui:composition>

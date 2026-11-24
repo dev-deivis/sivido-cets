@@ -7,7 +7,9 @@ package acceso_datos;
 import jakarta.ejb.Stateless;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
+import java.util.List;
 import modelo.HistorialEstatusSolicitud;
+import modelo.SolicitudReposicion;
 
 /**
  *
@@ -26,6 +28,15 @@ public class HistorialEstatusSolicitudFacade extends AbstractFacade<HistorialEst
 
     public HistorialEstatusSolicitudFacade() {
         super(HistorialEstatusSolicitud.class);
+    }
+
+    // Bitácora de una solicitud: del cambio más reciente al más antiguo
+    public List<HistorialEstatusSolicitud> buscarPorSolicitud(SolicitudReposicion s) {
+        return getEntityManager()
+                .createQuery("SELECT h FROM HistorialEstatusSolicitud h WHERE h.solicitudReposicionid = :s "
+                        + "ORDER BY h.fechaCambio DESC, h.id DESC", HistorialEstatusSolicitud.class)
+                .setParameter("s", s)
+                .getResultList();
     }
     
 }

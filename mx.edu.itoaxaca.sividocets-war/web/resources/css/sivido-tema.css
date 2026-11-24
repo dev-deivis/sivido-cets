@@ -864,3 +864,15 @@ body .ui-toggleswitch {
 /* Interruptores deshabilitados (opciones "Aún no disponible"): se ven claramente inactivos */
 body .ui-toggleswitch.ui-state-disabled { opacity: .45; cursor: not-allowed; }
 body .ui-toggleswitch.ui-state-disabled .ui-toggleswitch-slider { cursor: not-allowed; }
+
+/* ===================== Impresión ===================== */
+/* "Imprimir ficha" (publicacion) y "Imprimir / guardar como PDF" (constancia): solo el contenido,
+   sin encabezado, menú, pie ni botones (clase .no-imprimir). */
+@media print {
+    #top, #left, #pie, .no-imprimir, .ui-messages { display: none !important; }
+    body { background: #fff !important; }
+    .cuerpo { display: block !important; padding: 0 !important; min-height: 0 !important; }
+    #content { padding: 0 !important; margin: 0 !important; max-width: none !important; }
+    .tarjeta { box-shadow: none !important; border: 1px solid #ccc !important; break-inside: avoid; }
+    .grid-principal { display: block !important; }
+}

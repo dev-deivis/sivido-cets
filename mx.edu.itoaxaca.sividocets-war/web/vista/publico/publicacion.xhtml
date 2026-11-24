@@ -16,7 +16,7 @@
             <f:viewAction action="#{solicitudController.obtenerPublicacion}"/>
         </f:metadata>
     </ui:define>
-    <ui:define name="titulo">Solicitud #{solicitudController.solicitud.folioCETS} · SIVIDO</ui:define>
+    <ui:define name="titulo">#{solicitudController.solicitud.estatus eq 'Activa' ? 'Solicitud '.concat(solicitudController.solicitud.folioCETS) : 'Solicitud'} · SIVIDO</ui:define>
 
     <ui:define name="content">
         <section class="seccion">
@@ -31,8 +31,17 @@
                     <p:button outcome="/vista/publico/index" value="Ir al inicio" icon="pi pi-home"/>
                 </h:panelGroup>
 
-                <ui:fragment rendered="#{not empty solicitudController.solicitud}">
-                <div class="fila mb-2">
+                <!-- #25: solicitud atendida, cerrada o cancelada: no se muestran folio, hospital, descripción ni QR -->
+                <h:panelGroup rendered="#{not empty solicitudController.solicitud and solicitudController.solicitud.estatus ne 'Activa'}" layout="block"
+                              styleClass="tarjeta texto-centro" style="padding:2.5rem 1.5rem">
+                    <span class="icono-caja" style="width:56px;height:56px"><i class="pi pi-lock" style="font-size:24px"></i></span>
+                    <h2 class="mt-2">Esta solicitud ya no está activa</h2>
+                    <p class="texto-sec">Gracias por tu interés en donar. La solicitud ya fue atendida o cerrada.</p>
+                    <p:button outcome="/vista/publico/index" value="Ir al inicio" icon="pi pi-home"/>
+                </h:panelGroup>
+
+                <ui:fragment rendered="#{not empty solicitudController.solicitud and solicitudController.solicitud.estatus eq 'Activa'}">
+                <div class="fila mb-2 no-imprimir">
                     <span class="estatus #{solicitudController.solicitud.estatus.toLowerCase()}">Solicitud #{solicitudController.solicitud.estatus.toLowerCase()}</span>
                     <span class="etiqueta">SIVIDO · Red estatal Oaxaca</span>
                 </div>
@@ -70,20 +79,20 @@
                             <p class="mt-1 mb-0">#{solicitudController.solicitud.descripcion}</p>
                         </h:panelGroup>
 
-                        <div class="aviso mt-2">
+                        <div class="aviso mt-2 no-imprimir">
                             <i class="pi pi-lock"></i>
                             <p><strong>Protección de datos.</strong> Por normativa NOM-253-SSA1-2012, la identidad del paciente y de quien publica permanece reservada.</p>
                         </div>
 
-                        <div class="fila mt-3">
+                        <div class="fila mt-3 no-imprimir">
                             <p:button outcome="/vista/cuentas/iniciarSesion" value="Quiero donar para esta solicitud" icon="pi pi-heart-fill"/>
                             <p:button outcome="/vista/publico/requisitos" value="Ver requisitos" icon="pi pi-list-check"
                                       styleClass="ui-button-secondary"/>
                         </div>
 
-                        <hr class="separador mt-3"/>
-                        <h3><i class="pi pi-list-check texto-rojo"></i> Criterios básicos para presentarse</h3>
-                        <div class="grid grid-4">
+                        <hr class="separador mt-3 no-imprimir"/>
+                        <h3 class="no-imprimir"><i class="pi pi-list-check texto-rojo"></i> Criterios básicos para presentarse</h3>
+                        <div class="grid grid-4 no-imprimir">
                             <div class="tarjeta-plana"><i class="pi pi-id-card texto-rojo"></i><br/><strong>18 a 65 años</strong><br/><span class="texto-chico texto-sec">INE o pasaporte</span></div>
                             <div class="tarjeta-plana"><i class="pi pi-gauge texto-rojo"></i><br/><strong>Peso mínimo</strong><br/><span class="texto-chico texto-sec">Más de 50 kg</span></div>
                             <div class="tarjeta-plana"><i class="pi pi-clock texto-rojo"></i><br/><strong>Ayuno 4 h</strong><br/><span class="texto-chico texto-sec">Sin grasas ni lácteos</span></div>
@@ -103,7 +112,7 @@
                                    class="ui-inputfield ui-inputtext ui-widget ui-state-default mono texto-chico"
                                    value="#{solicitudController.urlPublicacion}" style="width:100%;margin-bottom:.5rem"/>
                             <!-- Botones de PrimeFaces solo del lado del cliente (type="button": no envían el formulario) -->
-                            <h:form id="formCompartir" styleClass="columna">
+                            <h:form id="formCompartir" styleClass="columna no-imprimir">
                                 <p:commandButton type="button" value="Copiar enlace" icon="pi pi-copy" styleClass="boton-suave boton-bloque"
                                                  onclick="navigator.clipboard.writeText(document.getElementById('urlPublicacion').value);this.querySelector('.ui-button-text').textContent='Enlace copiado';"/>
                                 <p:commandButton type="button" value="Descargar QR (PNG)" icon="pi pi-download" styleClass="ui-button-secondary boton-bloque"
@@ -112,7 +121,7 @@
                                                  onclick="window.print()"/>
                             </h:form>
                         </div>
-                        <div class="tarjeta">
+                        <div class="tarjeta no-imprimir">
                             <h3><i class="pi pi-map-marker texto-rojo"></i> Dónde donar</h3>
                             <p class="mb-0"><strong>Sede central CETS Oaxaca</strong></p>
                             <p class="texto-sec texto-chico mb-0">Oaxaca de Juárez · Lunes a domingo, 07:00 a 13:00 hrs</p>
@@ -123,7 +132,7 @@
             </div>
         </section>
 
-        <ui:fragment rendered="#{not empty solicitudController.solicitud}">
+        <ui:fragment rendered="#{not empty solicitudController.solicitud and solicitudController.solicitud.estatus eq 'Activa'}">
             <h:outputScript name="js/qrcode.min.js"/>
             <script>
                 // HU-2.2 / D5: QR de 320x320 px con la URL pública de la solicitud
