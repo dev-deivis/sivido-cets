@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- Capturar donación — HU-5.1 (solo personal del CETS; la plantilla institucional exige sesión CETS) -->
+<!-- Capturar donación — HU-5.1 (solo personal CETS; la plantilla institucional exige sesión CETS) -->
 <!DOCTYPE html>
 <ui:composition xmlns="http://www.w3.org/1999/xhtml"
                 xmlns:h="jakarta.faces.html"
@@ -114,7 +114,7 @@
                     </div>
 
                     <h:panelGroup id="zonaAcciones" layout="block">
-                        <!-- D18: motivo por el que no se puede registrar (exclusión, 56 días, mismo día, incompatible) -->
+                        <!-- D18: motivo de rechazo (exclusión, 56 días, mismo día, incompatible) -->
                         <h:panelGroup rendered="#{not empty donacionController.motivoRechazo}" layout="block" styleClass="aviso ambar mb-2">
                             <i class="pi pi-exclamation-triangle"></i>
                             <p class="texto-chico">#{donacionController.motivoRechazo}</p>

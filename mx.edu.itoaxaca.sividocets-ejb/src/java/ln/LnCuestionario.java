@@ -23,8 +23,7 @@ import modelo.SolicitudReposicion;
 import modelo.Usuario;
 
 /**
- * ControlCuestionario del diagrama: HU-4.1 (responder cuestionario), HU-4.2 (resultado orientativo)
- * y HU-4.3 (catálogo de criterios de exclusión).
+ * ControlCuestionario: HU-4.1 (responder cuestionario), HU-4.2 (resultado) y HU-4.3 (catálogo).
  *
  * @author Alex Torres
  */
@@ -44,7 +43,7 @@ public class LnCuestionario {
     @EJB
     private SolicitudReposicionFacade solicitudF;
 
-    // Valores que acepta la BD (CHECK de CuestionarioRespuesta y CriterioExclusion). D3 y D11 de TASKS.md.
+    // Valores del CHECK de la BD (CuestionarioRespuesta y CriterioExclusion): D3 y D11 de TASKS.md
     public static final String APTO = "Apto";
     public static final String NO_APTO = "NoApto";
     private static final String SI = "Si";
@@ -58,11 +57,8 @@ public class LnCuestionario {
         return criterioF.buscarActivos();
     }
 
-    // HU-4.1 Registrar respuestas. c trae usuarioid (el de la sesión; lo pone el controller), la solicitud
-    // (opcional) y respuestaCriterioList con una respuesta por cada criterio activo: criterioExclusionid.id y
-    // respuesta ("Si" o "No"). El Ln completa preguntaTexto desde el catálogo, evalúa (HU-4.2) antes de guardar
-    // porque resultado es NOT NULL, y guarda el cuestionario con sus respuestas (cascade).
-    // Regresa el id del cuestionario, o 0 si algo no es válido (en ese caso no se guarda nada).
+    // HU-4.1 c trae usuarioid (sesión), solicitud (opcional) y una respuesta "Si"/"No" por criterio activo.
+    // Evalúa (HU-4.2) antes de guardar (resultado NOT NULL); regresa el id, o 0 si no es válido (nada se guarda).
     public int registrarRespuestas(CuestionarioRespuesta c) {
         boolean traeUsuario = c.getUsuarioid() != null && c.getUsuarioid().getId() != null;
         boolean traeRespuestas = c.getRespuestaCriterioList() != null && !c.getRespuestaCriterioList().isEmpty();
@@ -111,8 +107,8 @@ public class LnCuestionario {
         }
     }
 
-    // HU-4.2 Resultado ya evaluado. c.id y c.usuarioid obligatorios; el cuestionario debe ser de ese
-    // usuario (nadie lee resultados ajenos). null si no existe.
+    // HU-4.2 Resultado ya evaluado. c.id y c.usuarioid obligatorios; debe ser del usuario (nadie lee
+    // resultados ajenos). null si no existe.
     public CuestionarioRespuesta obtenerResultado(CuestionarioRespuesta c) {
         boolean traeUsuario = c != null && c.getUsuarioid() != null && c.getUsuarioid().getId() != null;
         if (!traeUsuario || c.getId() == null) {
@@ -131,8 +127,8 @@ public class LnCuestionario {
         return catalogo;
     }
 
-    // HU-4.3 Agregar un criterio. c trae criterio, tipoRespuesta, tipoExclusion, duracionDias y activo;
-    // regresa false si no es válido (ver validarCriterio).
+    // HU-4.3 Agrega un criterio (c trae criterio, tipoRespuesta, tipoExclusion, duracionDias y activo);
+    // false si no es válido (ver validarCriterio).
     public boolean registrarCriterio(CriterioExclusion c) {
         if (!validarCriterio(c)) {
             return false;
@@ -143,8 +139,7 @@ public class LnCuestionario {
         return true;
     }
 
-    // HU-4.3 Editar un criterio (también sirve para activar o desactivar: activo). c.id lleno. No se borra:
-    // un criterio en uso se desactiva.
+    // HU-4.3 Edita un criterio (también activa o desactiva); c.id lleno. No se borra: en uso se desactiva.
     public boolean modificarCriterio(CriterioExclusion c) {
         if (c.getId() == null || !validarCriterio(c)) {
             return false;
@@ -162,9 +157,8 @@ public class LnCuestionario {
         return true;
     }
 
-    // HU-4.3 CriterioExclusion.validarCriterio (el diagrama lo deja en el Control). Reglas:
-    // texto no vacío; tipoRespuesta SiNo o SeleccionSimple; Temporal ⇒ duracionDias > 0;
-    // Permanente ⇒ sin duración (si la vista la manda, se descarta).
+    // HU-4.3 validarCriterio (el diagrama lo deja en el Control): texto no vacío, tipoRespuesta SiNo o
+    // SeleccionSimple, Temporal ⇒ duracionDias > 0, Permanente ⇒ sin duración (si viene, se descarta).
     private boolean validarCriterio(CriterioExclusion c) {
         if (c == null || c.getCriterio() == null || c.getCriterio().isBlank()) {
             return false;
@@ -182,9 +176,8 @@ public class LnCuestionario {
         return false;
     }
 
-    // HU-4.1 Cada respuesta del donador se liga a su criterio del catálogo. Debe haber exactamente una
-    // respuesta por cada criterio activo, con "Si" o "No". La pregunta se copia del catálogo (no se confía en
-    // lo que mande la vista) y se calcula excluye. null si algo no cuadra.
+    // HU-4.1 Liga cada respuesta a su criterio: exactamente una por criterio activo, con "Si" o "No".
+    // La pregunta se copia del catálogo (no se confía en la vista) y se calcula excluye; null si no cuadra.
     private List<RespuestaCriterio> armarRespuestas(List<RespuestaCriterio> recibidas) {
         List<CriterioExclusion> activos = criterioF.buscarActivos();
         Set<Integer> faltantes = new HashSet<>();
@@ -218,7 +211,7 @@ public class LnCuestionario {
         return SI.equals(respuesta);
     }
 
-    // HU-4.2 CuestionarioRespuesta.evaluarRespuestas: "NoApto" si alguna respuesta excluye; si no, "Apto"
+    // HU-4.2 evaluarRespuestas: "NoApto" si alguna respuesta excluye; si no, "Apto"
     private String evaluarRespuestas(List<RespuestaCriterio> respuestas) {
         for (RespuestaCriterio r : respuestas) {
             if (r.getExcluye()) {
@@ -228,8 +221,8 @@ public class LnCuestionario {
         return APTO;
     }
 
-    // HU-4.2 CuestionarioRespuesta.calcularTiempoEspera: el mayor duracionDias de los criterios Temporales que
-    // excluyen. Si excluye un criterio Permanente no hay fecha de regreso: regresa null (Inconsistencias 10).
+    // HU-4.2 CuestionarioRespuesta.calcularTiempoEspera: mayor duracionDias de los criterios Temporales que
+    // excluyen; null si excluye uno Permanente (sin fecha de regreso, Inconsistencias 10).
     private Integer calcularTiempoEspera(List<RespuestaCriterio> respuestas) {
         Integer espera = 0;
         for (RespuestaCriterio r : respuestas) {

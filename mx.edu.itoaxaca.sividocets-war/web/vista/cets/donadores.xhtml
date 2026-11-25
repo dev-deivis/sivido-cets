@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- Padrón de donadores — HU-5.4 (historial y elegibilidad de un donador) y HU-7.3 (historial externo) -->
+<!-- Padrón de donadores — HU-5.4 (historial y elegibilidad) y HU-7.3 (historial externo) -->
 <!DOCTYPE html>
 <ui:composition xmlns="http://www.w3.org/1999/xhtml"
                 xmlns:h="jakarta.faces.html"
@@ -85,7 +85,7 @@
                             <h:panelGroup rendered="#{donacionController.exclusionPermanente}" styleClass="estatus cancelada">Exclusión permanente</h:panelGroup>
                         </div>
 
-                        <!-- #13: motivo y fecha de la exclusión permanente, o el botón para marcarla (sin reversa desde la app) -->
+                        <!-- #13: motivo y fecha de la exclusión, o el botón para marcarla (sin reversa) -->
                         <h:panelGroup rendered="#{donacionController.exclusionPermanente}" layout="block" styleClass="aviso rojo mt-2">
                             <i class="pi pi-ban"></i>
                             <div>
@@ -198,7 +198,7 @@
                         </h:panelGroup>
                     </div>
 
-                    <!-- HU-7.3 Historial compartido por instituciones externas (separado del registro CETS) -->
+                    <!-- HU-7.3 Historial de instituciones externas (separado del registro CETS) -->
                     <div class="tarjeta tarjeta-borde-izq azul" style="background:var(--sup-baja)">
                         <div class="fila mb-2" style="flex-wrap:nowrap">
                             <span class="icono-caja azul"><i class="pi pi-share-alt"></i></span>
@@ -235,8 +235,8 @@
             </h:panelGroup>
         </h:form>
 
-        <!-- #13: el diálogo hace de confirmación; formulario propio (no puede ir dentro de formDonadores). Se reabre
-             si el motivo no pasa la validación. -->
+        <!-- #13: el diálogo hace de confirmación; formulario propio (no puede ir dentro de formDonadores).
+             Se reabre si el motivo no pasa la validación. -->
         <p:dialog header="Marcar exclusión permanente" widgetVar="dlgExclusion" modal="true" resizable="false"
                   draggable="false" width="520" visible="#{facesContext.validationFailed}">
             <h:form id="formExclusion">

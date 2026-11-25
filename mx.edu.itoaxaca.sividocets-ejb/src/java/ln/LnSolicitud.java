@@ -71,7 +71,7 @@ public class LnSolicitud {
         if (!valido || !validarTipoSangre(s)) {
             return false;
         }
-        // El hospital y el usuario deben existir (un id nulo o inexistente no lanza excepción: regresa false)
+        // El hospital y el usuario deben existir (id nulo o inexistente: regresa false, sin excepción)
         Hospital hospital = s.getHospitalid() == null || s.getHospitalid().getId() == null
                 ? null : hospitalF.find(s.getHospitalid().getId());
         Usuario usuario = s.getUsuarioid() == null || s.getUsuarioid().getId() == null
@@ -94,9 +94,8 @@ public class LnSolicitud {
         return hospitalF.findAll();
     }
 
-    // HU-2.2 (1) generarPublicacion: ruta pública de la solicitud (1.1 obtenerUuidPublico);
-    // null si la solicitud no existe.
-    // El controller le antepone el servidor y el contexto; el navegador dibuja el QR (D5).
+    // HU-2.2 (1) generarPublicacion: ruta pública de la solicitud (1.1 obtenerUuidPublico); null si no existe.
+    // El controller le antepone servidor y contexto; el navegador dibuja el QR (D5).
     public String generarPublicacion(SolicitudReposicion s) {
         SolicitudReposicion solicitud = s.getId() == null ? null : solicitudF.find(s.getId());
         return solicitud == null ? null : RUTA_PUBLICACION + solicitud.getUuidPublico();

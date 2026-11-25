@@ -80,8 +80,8 @@ public class LnCuentas {
         return usuario.getPasswordHash().equals(hash(password));
     }
 
-    // Perfil clínico del usuario (con su Usuario actualizado desde la BD). Si todavía no tiene,
-    // regresa un PerfilClinico nuevo ligado al usuario (PK compartida: usuarioid se pone al guardar).
+    // Perfil clínico del usuario (con su Usuario actualizado desde la BD); si no tiene, uno nuevo ligado
+    // al usuario (PK compartida: usuarioid se pone al guardar).
     public PerfilClinico obtenerPerfilClinico(Usuario u) {
         Usuario usuario = usuarioF.find(u.getId());
         PerfilClinico perfil = perfilF.find(usuario.getId());
@@ -92,10 +92,8 @@ public class LnCuentas {
         return perfil;
     }
 
-    // HU-1.3 Perfil clínico del donador. p trae tipoSanguineo, factorRh, latitud/longitud (opcionales)
-    // y p.usuario con consentimientoContacto. Crea el perfil si no existe y si existe lo actualiza
-    // (el radio solo se cambia con configurarRadio). Regresa false si algo no es válido; en ese caso
-    // no se guarda nada.
+    // HU-1.3 p trae tipoSanguineo, factorRh, latitud/longitud (opcionales) y p.usuario.consentimientoContacto.
+    // Crea o actualiza (el radio solo con configurarRadio); false si algo no es válido, sin guardar nada.
     public boolean guardarPerfilClinico(PerfilClinico p) {
         boolean valido = validarTipoSangre(p) && validarUbicacion(p)
                 && p.getUsuario() != null && p.getUsuario().getId() != null;
@@ -134,15 +132,13 @@ public class LnCuentas {
         } else {
             perfilF.edit(perfil);
         }
-        // Referencia inversa (Usuario.perfilClinico es mappedBy): sin esto el caché compartido de EclipseLink
-        // se queda con el Usuario con perfilClinico = null y otras vistas (p. ej. la búsqueda de donadores del
-        // CETS) no ven el grupo sanguíneo hasta redesplegar. El consentimiento no necesita lo mismo: es un campo
-        // del propio Usuario administrado, que ya se actualiza en el caché al terminar la transacción.
+        // Referencia inversa (Usuario.perfilClinico es mappedBy): sin ella el caché de EclipseLink deja perfilClinico
+        // = null y el CETS no ve el grupo hasta redesplegar. El consentimiento no la necesita (campo del Usuario).
         usuario.setPerfilClinico(perfil);
         return true;
     }
 
-    // HU-3.4 Radio actual del donador; el que trae un PerfilClinico nuevo si todavía no tiene perfil
+    // HU-3.4 Radio actual del donador; el de un PerfilClinico nuevo si aún no tiene perfil
     public int obtenerRadio(Usuario u) {
         PerfilClinico perfil = u.getId() == null ? null : perfilF.find(u.getId());
         if (perfil == null) {
@@ -151,8 +147,8 @@ public class LnCuentas {
         return perfil.getRadioNotificacion();
     }
 
-    // HU-3.4 Configurar radio. p trae radioNotificacion y p.usuario. Regresa false si el radio no es
-    // 3, 5 o 10, o si el usuario todavía no tiene perfil clínico.
+    // HU-3.4 Configurar radio. p trae radioNotificacion y p.usuario. false si el radio no es 3, 5 o 10,
+    // o si el usuario todavía no tiene perfil clínico.
     public boolean configurarRadio(PerfilClinico p) {
         boolean valido = validarRadio(p.getRadioNotificacion())
                 && p.getUsuario() != null && p.getUsuario().getId() != null;

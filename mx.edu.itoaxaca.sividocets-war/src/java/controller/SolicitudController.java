@@ -16,8 +16,7 @@ import modelo.SolicitudReposicion;
 
 /**
  * Controller del paquete solicitudes (ControlSolicitud → LnSolicitud).
- * Vistas: solicitudes/capturarSolicitud (HU-2.1, HU-2.4), solicitudes/misSolicitudes (HU-2.3)
- * y publico/publicacion (HU-2.2, HU-1.4).
+ * Vistas: capturarSolicitud (HU-2.1, HU-2.4), misSolicitudes (HU-2.3) y publicacion (HU-2.2, HU-1.4).
  * La vista llena la entidad: #{solicitudController.solicitud.campo}.
  *
  * @author Galilea
@@ -91,7 +90,7 @@ public class SolicitudController implements Serializable {
 
     // HU-2.3 (2) listarMisSolicitudes (f:viewAction al abrir misSolicitudes)
     public void listarMisSolicitudes() throws IOException {
-        // verificar() redirige si no hay sesión o si el rol no es "usuario" (por ejemplo, personal CETS)
+        // verificar() redirige si no hay sesión o si el rol no es "usuario" (p. ej. personal CETS)
         sesion.verificar();
         if (FacesContext.getCurrentInstance().getResponseComplete()) {
             return;

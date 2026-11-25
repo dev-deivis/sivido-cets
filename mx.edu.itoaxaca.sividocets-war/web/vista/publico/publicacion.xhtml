@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- Publicación de solicitud con código QR — HU-2.2 (ficha pública, sin datos personales del creador) -->
+<!-- Publicación con código QR — HU-2.2 (ficha pública, sin datos personales del creador) -->
 <!DOCTYPE html>
 <ui:composition xmlns="http://www.w3.org/1999/xhtml"
                 xmlns:h="jakarta.faces.html"
@@ -31,7 +31,7 @@
                     <p:button outcome="/vista/publico/index" value="Ir al inicio" icon="pi pi-home"/>
                 </h:panelGroup>
 
-                <!-- #25: solicitud atendida, cerrada o cancelada: no se muestran folio, hospital, descripción ni QR -->
+                <!-- #25: solicitud no Activa: no se muestran folio, hospital, descripción ni QR -->
                 <h:panelGroup rendered="#{not empty solicitudController.solicitud and solicitudController.solicitud.estatus ne 'Activa'}" layout="block"
                               styleClass="tarjeta texto-centro" style="padding:2.5rem 1.5rem">
                     <span class="icono-caja" style="width:56px;height:56px"><i class="pi pi-lock" style="font-size:24px"></i></span>
@@ -111,7 +111,7 @@
                             <input id="urlPublicacion" type="text" readonly="readonly" aria-label="Enlace de la publicación"
                                    class="ui-inputfield ui-inputtext ui-widget ui-state-default mono texto-chico"
                                    value="#{solicitudController.urlPublicacion}" style="width:100%;margin-bottom:.5rem"/>
-                            <!-- Botones de PrimeFaces solo del lado del cliente (type="button": no envían el formulario) -->
+                            <!-- Botones solo de cliente (type="button": no envían el formulario) -->
                             <h:form id="formCompartir" styleClass="columna no-imprimir">
                                 <p:commandButton type="button" value="Copiar enlace" icon="pi pi-copy" styleClass="boton-suave boton-bloque"
                                                  onclick="navigator.clipboard.writeText(document.getElementById('urlPublicacion').value);this.querySelector('.ui-button-text').textContent='Enlace copiado';"/>

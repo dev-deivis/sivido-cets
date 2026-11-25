@@ -1,8 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- Criterios de exclusión — HU-4.3 (panel institucional CETS). La vista llena la entidad completa
-     #{cuestionarioController.criterio}. Los valores coinciden con la BD (D11): tipoRespuesta SiNo /
-     SeleccionSimple y tipoExclusion Temporal / Permanente. No se borra: un criterio en uso se desactiva.
-     La sesión CETS la verifica plantillaInstitucional y, antes de consultar la BD, cuestionarioController.cargarCatalogo. -->
+<!-- Criterios de exclusión — HU-4.3 (CETS). La vista llena la entidad #{cuestionarioController.criterio};
+     valores como en la BD (D11): SiNo / SeleccionSimple y Temporal / Permanente. No se borra: se desactiva.
+     Sesión CETS: plantillaInstitucional y, antes de consultar la BD, cuestionarioController.cargarCatalogo. -->
 <!DOCTYPE html>
 <ui:composition xmlns="http://www.w3.org/1999/xhtml"
                 xmlns:h="jakarta.faces.html"
@@ -45,7 +44,7 @@
                 <h:form id="formCatalogo">
                     <div class="tabla-contenedor">
                         <div style="padding:.75rem 1rem;border-bottom:1px solid var(--borde)">
-                            <!-- Sin respaldo en los diagramas (la HU-4.3 no filtra): se deja deshabilitado -->
+                            <!-- Sin respaldo en los diagramas (HU-4.3 no filtra): deshabilitado -->
                             <p:inputText placeholder="Filtrar por palabra clave (próximamente)" style="width:100%" disabled="true"/>
                         </div>
                         <table class="tabla">

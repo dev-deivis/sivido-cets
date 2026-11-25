@@ -22,7 +22,7 @@ import modelo.Usuario;
 /**
  * Controller del paquete donaciones (ControlDonacion → LnDonacion).
  * Vistas: cets/capturarDonacion (HU-5.1) y cets/donadores (HU-5.4, HU-7.3).
- * La vista llena las entidades: #{donacionController.registro.campo} y #{donacionController.criterio.nombreCompleto}.
+ * La vista llena las entidades: #{donacionController.registro.campo} y .criterio.nombreCompleto.
  *
  * @author Galilea
  */
@@ -44,7 +44,7 @@ public class DonacionController implements Serializable {
     // HU-5.1 Entidad que llena capturarDonacion (?donador= llena registro.usuarioid.id)
     private RegistroDonacion registro;
 
-    // HU-5.4 Criterio de búsqueda (nombreCompleto = texto) y donador seleccionado (?id= llena donador.id)
+    // HU-5.4 Búsqueda (criterio.nombreCompleto = texto) y donador seleccionado (?id= llena donador.id)
     private Usuario criterio;
     private Usuario donador;
 
@@ -52,7 +52,7 @@ public class DonacionController implements Serializable {
     private List<HistorialExterno> historialExterno;
     private List<SolicitudReposicion> solicitudesActivas;
 
-    // HU-5.4 (3 y 4): historial y elegibilidad del donador seleccionado (métodos de LnDonacion, HU-5.2 / 5.3)
+    // HU-5.4 (3 y 4): historial y elegibilidad del donador seleccionado (LnDonacion, HU-5.2 / 5.3)
     private List<RegistroDonacion> historial;
     private RegistroDonacion ultimaDonacion;
     private Date proximaFecha;
@@ -62,7 +62,7 @@ public class DonacionController implements Serializable {
     // D18: por qué no se puede registrar la donación (null = se puede). Lo decide LnDonacion.
     private String motivoRechazo;
 
-    // #13: la vista llena exclusion.diagnostico (el motivo); exclusionRegistrada es el registro ya guardado (motivo y fecha)
+    // #13: la vista llena exclusion.diagnostico (motivo); exclusionRegistrada = registro ya guardado
     private HistorialClinico exclusion;
     private HistorialClinico exclusionRegistrada;
 
@@ -112,8 +112,8 @@ public class DonacionController implements Serializable {
         exclusionRegistrada = lnDonacion.obtenerExclusion(donador);          // #13: motivo y fecha de la exclusión
     }
 
-    // #13 Marcar exclusión permanente (botón del diálogo de la ficha). La vista llena exclusion.diagnostico (el motivo);
-    // aquí se agregan el donador de la ficha y el personal en sesión, y todo viaja como la entidad completa.
+    // #13 Marcar exclusión permanente (diálogo de la ficha). La vista llena exclusion.diagnostico (motivo);
+    // aquí se agregan el donador de la ficha y el personal en sesión.
     public void marcarExclusion() throws IOException {
         if (!sesionCETSValida()) {
             return;
@@ -147,7 +147,7 @@ public class DonacionController implements Serializable {
         }
     }
 
-    // D18: recalcula el motivo de rechazo con el donador y la solicitud elegidos (también lo llama el p:ajax del combo)
+    // D18: recalcula el motivo de rechazo del donador y la solicitud elegidos (también lo llama el p:ajax)
     public void actualizarMotivo() {
         motivoRechazo = registro.getUsuarioid().getId() == null ? null
                 : lnDonacion.motivoRechazoDonacion(registro.getUsuarioid(), registro.getSolicitudReposicionid());
@@ -161,7 +161,7 @@ public class DonacionController implements Serializable {
         actualizarMotivo();
     }
 
-    // HU-5.1 (1.1) registrarDonacion. Navegación: capturarDonacion → donadores (con la ficha del donador)
+    // HU-5.1 (1.1) registrarDonacion. Navega de capturarDonacion a donadores (con la ficha del donador)
     public String registrarDonacion() throws IOException {
         if (!sesionCETSValida()) {
             return null;
@@ -216,8 +216,8 @@ public class DonacionController implements Serializable {
         return "••• ••• ••" + tel.substring(tel.length() - 2);
     }
 
-    // Los f:viewAction corren antes que el preRenderView de plantillaInstitucional: se verifica la sesión CETS aquí
-    // para no consultar la BD sin ella (verificarCETS redirige al login institucional), igual que PanelCetsController.
+    // f:viewAction corre antes que el preRenderView de plantillaInstitucional: se verifica la sesión CETS aquí
+    // para no consultar la BD sin ella (verificarCETS redirige al login institucional), como PanelCetsController.
     private boolean sesionCETSValida() throws IOException {
         sesion.verificarCETS();
         return !FacesContext.getCurrentInstance().getResponseComplete();

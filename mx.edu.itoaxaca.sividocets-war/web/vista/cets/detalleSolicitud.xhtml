@@ -1,8 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- Detalle de solicitud — panel institucional CETS (HU-6.3 detalle y HU-6.4 actualizar estatus).
+<!-- Detalle de solicitud — panel CETS (HU-6.3 detalle y HU-6.4 actualizar estatus).
      Entrada: solicitudesActivas → detalleSolicitud?id=N (f:viewParam → panelCetsController.solicitud.id).
-     La sesión CETS la verifica plantillaInstitucional (preRenderView → sesionController.verificarCETS)
-     y, antes de consultar la BD, el propio panelCetsController.obtenerDetalle. -->
+     Sesión CETS: plantillaInstitucional (preRenderView → verificarCETS) y panelCetsController.obtenerDetalle. -->
 <!DOCTYPE html>
 <ui:composition xmlns="http://www.w3.org/1999/xhtml"
                 xmlns:h="jakarta.faces.html"
@@ -70,12 +69,13 @@
                             </div>
                             <span class="etiqueta azul"><i class="pi pi-lock"></i> Sin ubicación ni contacto</span>
                         </div>
-                        <!-- HU-6.3 (obtenerCantidadInteresados). El diagrama no define lista de donadores: se retiró la tabla de ejemplo (ver TASKS.md, inconsistencia 17) -->
+                        <!-- HU-6.3 (obtenerCantidadInteresados): contador de quienes confirmaron interés.
+                             La lista de abajo (#17) muestra solo su nombre y tipo de sangre. -->
                         <div class="tarjeta-plana fila mb-0">
                             <span class="numero-grande">#{panelCetsController.cantidadInteresados}</span>
                             <span class="texto-sec">#{panelCetsController.cantidadInteresados eq 1 ? 'donador confirmó' : 'donadores confirmaron'} interés en esta solicitud</span>
                         </div>
-                        <!-- #17: solo quienes confirmaron interés (Interes); nombre y grupo, nada más del donador -->
+                        <!-- #17: solo quienes confirmaron interés (Interes); únicamente nombre y grupo -->
                         <ui:fragment rendered="#{not empty panelCetsController.donadoresInteresados}">
                             <div class="tabla-contenedor mt-2">
                                 <table class="tabla">
@@ -127,7 +127,7 @@
                 </div>
 
                 <div class="columna">
-                    <!-- HU-6.4: la vista llena solicitud.estatus (entidad completa); la acción la valida el Ln -->
+                    <!-- HU-6.4: la vista llena solicitud.estatus; el Ln valida la acción -->
                     <div class="tarjeta tarjeta-borde-rojo">
                         <h2><i class="pi pi-arrow-right-arrow-left texto-rojo"></i> Actualizar estatus</h2>
                         <h:form id="formEstatus">

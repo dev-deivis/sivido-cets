@@ -1,8 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- Mi perfil — HU-1.3 (perfil clínico), HU-3.4 (radio de notificación), "Usar mi ubicación" (D1) y
-     consentimiento de contacto (D8). La vista llena la entidad completa #{perfilController.perfil}.
-     La sesión de usuario la verifica plantillaUsuario (preRenderView → sesionController.verificar)
-     y, antes de consultar la BD, perfilController.cargarPerfil. -->
+<!-- Mi perfil — HU-1.3 (perfil clínico), HU-3.4 (radio), "Usar mi ubicación" (D1) y consentimiento (D8).
+     La vista llena la entidad #{perfilController.perfil}. Sesión de usuario: plantillaUsuario
+     (preRenderView → verificar) y, antes de consultar la BD, perfilController.cargarPerfil. -->
 <!DOCTYPE html>
 <ui:composition xmlns="http://www.w3.org/1999/xhtml"
                 xmlns:h="jakarta.faces.html"
@@ -79,7 +78,7 @@
                         <span class="ayuda"><i class="pi pi-mobile"></i> Solo se comparte si activas el permiso de contacto y confirmas interés en una solicitud.</span>
                     </div>
 
-                    <!-- Ubicación (D1). Sin coordenadas no se te notifica. Reemplaza al combo "Región". -->
+                    <!-- Ubicación (D1): sin coordenadas no se notifica. Reemplaza al combo "Región". -->
                     <div class="campo mb-0">
                         <label>Tu ubicación</label>
                         <div class="fila">
@@ -193,8 +192,8 @@
             </h:form>
         </div>
 
-        <!-- "Usar mi ubicación": Geolocation API del navegador, sin librerías externas.
-             Llena los campos ocultos formPerfil:lat y formPerfil:lng; se guardan con "Guardar cambios". -->
+        <!-- "Usar mi ubicación": Geolocation API del navegador (sin librerías); llena los campos ocultos
+             formPerfil:lat y formPerfil:lng, que se guardan con "Guardar cambios". -->
         <script type="text/javascript">
             //<![CDATA[
             function usarMiUbicacion() {

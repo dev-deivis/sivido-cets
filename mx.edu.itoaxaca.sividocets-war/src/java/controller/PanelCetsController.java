@@ -21,10 +21,8 @@ import modelo.Usuario;
 
 /**
  * Controller del paquete panelCETS (ControlPanelCETS → LnPanelCETS).
- * La vista llena la entidad:
- *   login   → #{panelCetsController.personal.correoInstitucional} y .personal.usuario.passwordHash
- *   filtros → #{panelCetsController.filtro.estatus / tipoSanguineo / factorRh}
- *   detalle → #{panelCetsController.solicitud.id} (f:viewParam)
+ * La vista llena la entidad: personal.correoInstitucional y personal.usuario.passwordHash (login),
+ * filtro.estatus / tipoSanguineo / factorRh y solicitud.id (f:viewParam del detalle).
  *
  * @author eldeivis
  */
@@ -101,10 +99,8 @@ public class PanelCetsController implements Serializable {
         cargarDetalle();
     }
 
-    // HU-6.4 Actualizar estatus (botón "Guardar cambio de estatus"). La vista llena solicitud.estatus con el
-    // nuevo estatus; aquí se agrega el personal en sesión y todo viaja como la entidad completa.
-    // Se queda en el detalle: tras el intento se vuelve a leer la solicitud de la BD, así la vista siempre
-    // muestra el estatus real (si el Ln rechaza el cambio, no queda el valor elegido).
+    // HU-6.4 Actualizar estatus. La vista llena solicitud.estatus; aquí se agrega el personal en sesión.
+    // Se queda en el detalle y relee la BD: si el Ln rechaza el cambio, no se muestra el valor elegido.
     public void actualizarEstatus() throws IOException {
         if (!sesionCETSValida()) {
             return;
@@ -143,8 +139,8 @@ public class PanelCetsController implements Serializable {
         }
     }
 
-    // Los f:viewAction corren antes que el preRenderView de la plantilla: se verifica la sesión aquí
-    // para no consultar la BD si no es personal CETS (verificarCETS redirige al login institucional).
+    // f:viewAction corre antes que el preRenderView de la plantilla: se verifica aquí para no consultar
+    // la BD si no es personal CETS (verificarCETS redirige al login institucional).
     private boolean sesionCETSValida() throws IOException {
         sesion.verificarCETS();
         return !FacesContext.getCurrentInstance().getResponseComplete();
