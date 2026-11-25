@@ -46,7 +46,7 @@ public class LnPanelCETS {
     @EJB
     private LnCuentas lnCuentas;
 
-    // [David] #13: marcar la exclusión permanente (HistorialClinico + Usuario.exclusionPermanente)
+    // #13: marcar la exclusión permanente (HistorialClinico + Usuario.exclusionPermanente)
     @EJB
     private UsuarioFacade usuarioF;
 
