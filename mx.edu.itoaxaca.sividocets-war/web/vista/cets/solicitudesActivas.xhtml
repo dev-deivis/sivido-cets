@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- Solicitudes activas — panel institucional CETS (HU-6.2).
-     La sesión CETS la verifica plantillaInstitucional (f:event preRenderView → sesionController.verificarCETS)
-     y, antes de consultar la BD, el propio panelCetsController.listarSolicitudesActivas. -->
+<!-- Solicitudes activas — panel CETS (HU-6.2). Sesión CETS: plantillaInstitucional (preRenderView →
+     sesionController.verificarCETS) y, antes de consultar la BD, panelCetsController.listarSolicitudesActivas. -->
 <!DOCTYPE html>
 <ui:composition xmlns="http://www.w3.org/1999/xhtml"
                 xmlns:h="jakarta.faces.html"
@@ -58,7 +57,7 @@
                 <div class="grid" style="grid-template-columns:2fr 1fr 1fr 1fr auto;align-items:end">
                     <div class="campo mb-0">
                         <p:outputLabel for="buscar">Buscar por folio u hospital</p:outputLabel>
-                        <!-- Sin función en HU-6.2: el diagrama solo filtra por estatus, tipo y Rh (ver TASKS.md, inconsistencia 20) -->
+                        <!-- Sin función en HU-6.2 (solo filtra por estatus, tipo y Rh; TASKS.md, inconsistencia 20) -->
                         <p:inputText id="buscar" disabled="true" placeholder="Ej. CETS-OAX-2026-0901 o Hospital Civil..."/>
                     </div>
                     <div class="campo mb-0">
@@ -153,7 +152,7 @@
                         </ui:fragment>
                     </p:column>
                     <p:column headerText="Acciones" style="text-align:right">
-                        <!-- HU-6.3: la solicitud seleccionada viaja como ?id= (f:viewParam en detalleSolicitud) -->
+                        <!-- HU-6.3: la solicitud viaja como ?id= (f:viewParam en detalleSolicitud) -->
                         <p:button outcome="/vista/cets/detalleSolicitud" value="Ver solicitud"
                                   styleClass="#{s.estatus eq 'Activa' and panelCetsController.interesados[s.id] eq 0 ? '' : 'boton-suave'}">
                             <f:param name="id" value="#{s.id}"/>

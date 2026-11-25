@@ -24,10 +24,8 @@ import modelo.Usuario;
 
 /**
  * Lógica de negocio del paquete donaciones (ControlDonacion → LnDonacion).
- *
- * Bloque [Galilea]: registro y búsqueda (HU-5.1, HU-5.4) e historial externo (HU-7.3).
- * Bloque [Diego]: métodos de consulta obtenerHistorial, obtenerElegibilidad, verificarExclusion y esElegible
- * (HU-5.2, HU-5.3). Van al final del archivo para no editar las mismas líneas.
+ * Galilea: registro y búsqueda (HU-5.1, HU-5.4) e historial externo (HU-7.3).
+ * Diego: obtenerHistorial, obtenerElegibilidad, verificarExclusion y esElegible (HU-5.2, HU-5.3).
  */
 @Stateless
 @LocalBean
@@ -56,24 +54,22 @@ public class LnDonacion {
     @EJB
     private HistorialClinicoFacade historialClinicoF;
 
-    // [David] HU-5.1: perfil del donador y tabla de compatibilidad ABO/Rh (LnCuentas.receptoresCompatibles, la misma
-    // que usa LnNotificacion; LnCuentas solo depende de facades, así que no hay dependencia circular)
+    // HU-5.1 Perfil y compatibilidad ABO/Rh vía LnCuentas (solo usa facades: sin ciclo)
     @EJB
     private PerfilClinicoFacade perfilF;
 
     @EJB
     private LnCuentas lnCuentas;
 
-    // [David] #12: la donación ligada pasa la solicitud a Atendida con su renglón de bitácora (LnPanelCETS no
-    // depende de LnDonacion, así que no hay dependencia circular)
+    // #12: la donación ligada pasa la solicitud a Atendida con su renglón de bitácora
+    // (LnPanelCETS no depende de LnDonacion: sin ciclo).
     @EJB
     private LnPanelCETS lnPanelCETS;
 
 
-    // HU-5.1 (1.1) registrarDonacion. r trae usuarioid (id del donador), personalCETSUsuarioid (personal en
-    // sesión), fechaDonacion y, opcional, solicitudReposicionid (id o vacío = donación general; si viene, debe estar Activa).
+    // HU-5.1 (1.1) registrarDonacion. r trae usuarioid, personalCETSUsuarioid (sesión), fechaDonacion y,
+    // opcional, solicitudReposicionid (vacío = donación general; si viene, debe estar Activa).
     public boolean registrarDonacion(RegistroDonacion r) {
-        // Sin donador, sin personal o sin fecha no se puede registrar (regresa false, sin excepción)
         if (r.getUsuarioid() == null || r.getUsuarioid().getId() == null
                 || r.getPersonalCETSUsuarioid() == null || r.getPersonalCETSUsuarioid().getUsuarioid() == null
                 || r.getFechaDonacion() == null || aLocalDate(r.getFechaDonacion()).isAfter(LocalDate.now(ZONA))) {
@@ -84,7 +80,7 @@ public class LnDonacion {
         if (donador == null || personal == null || !personal.getActivo()) {
             return false;                                  // solo el personal CETS activo registra donaciones
         }
-        // [David] D18: exclusión permanente, mismo día, intervalo de 56 días y compatibilidad con la solicitud
+        // D18: exclusión permanente, mismo día, intervalo de 56 días y compatibilidad con la solicitud
         if (motivoRechazoDonacion(r) != null) {
             return false;
         }
@@ -115,7 +111,7 @@ public class LnDonacion {
         return true;
     }
 
-    // [David] Constancia de donación: la donación solo si es del usuario en sesión; null si no existe o es ajena.
+    // Constancia de donación: solo si es del usuario en sesión; null si no existe o es ajena.
     public RegistroDonacion obtenerConstancia(RegistroDonacion r, Usuario u) {
         if (r == null || r.getId() == null || u == null || u.getId() == null) {
             return null;
@@ -125,16 +121,14 @@ public class LnDonacion {
         return propia ? donacion : null;
     }
 
-    // [David] D18 / #42: ¿se puede registrar una donación de este donador para esta solicitud (null = donación
-    // general)? null si sí; si no, el motivo en texto para la vista. donador y solicitud traen su id. No revisa
-    // el "mismo día" porque no conoce la fecha: para eso está motivoRechazoDonacion(RegistroDonacion).
+    // D18 / #42: ¿se puede registrar una donación de este donador para esta solicitud (null = general)? null si
+    // sí; si no, el motivo. No revisa el mismo día (sin fecha): para eso, motivoRechazoDonacion(RegistroDonacion).
     public String motivoRechazoDonacion(Usuario donador, SolicitudReposicion solicitud) {
         return motivoRechazo(donador, solicitud, null);
     }
 
-    // [David] D18 / #42: igual, pero validando contra la fechaDonacion del registro (no contra hoy): la fecha no puede ser
-    // futura, no puede repetir un día con donación y debe quedar a 56 días o más de CUALQUIER donación existente del
-    // donador (antes o después de esa fecha, para cubrir donaciones con fecha pasada).
+    // D18 / #42: igual, contra la fechaDonacion del registro: no puede ser futura ni repetir un día con donación,
+    // y debe quedar a 56 días o más de CUALQUIER donación del donador (antes o después, por fechas pasadas).
     public String motivoRechazoDonacion(RegistroDonacion r) {
         return motivoRechazo(r.getUsuarioid(), r.getSolicitudReposicionid(), r.getFechaDonacion());
     }
@@ -183,7 +177,7 @@ public class LnDonacion {
         return null;
     }
 
-    // [David] #13: " (motivo: …, desde dd/MM/yyyy)" de la exclusión permanente, o "" si no hay registro clínico
+    // #13: " (motivo: …, desde dd/MM/yyyy)" de la exclusión permanente; "" si no hay registro clínico
     private String detalleExclusion(Usuario donador) {
         HistorialClinico exclusion = obtenerExclusion(donador);
         if (exclusion == null || exclusion.getDiagnostico() == null) {
@@ -194,8 +188,8 @@ public class LnDonacion {
         return " (motivo: " + exclusion.getDiagnostico() + desde + ")";
     }
 
-    // [David] #13: el registro clínico que explica la exclusión permanente (motivo, fecha y personal que la marcó).
-    // null si el usuario no está excluido o no tiene registro (por ejemplo, se marcó por SQL).
+    // #13: registro clínico que explica la exclusión permanente (motivo, fecha, personal); null si no está
+    // excluido o no hay registro (p. ej. se marcó por SQL).
     public HistorialClinico obtenerExclusion(Usuario u) {
         if (u == null || u.getId() == null) {
             return null;
@@ -207,8 +201,8 @@ public class LnDonacion {
         return historialClinicoF.buscarUltimoPorUsuario(donador);
     }
 
-    // [David] #42: motivo por el que la fecha no respeta el intervalo con las donaciones existentes (null si sí lo respeta).
-    // Primero el mismo día; después, 56 días de diferencia como mínimo en ambos sentidos.
+    // #42: motivo por el que la fecha no respeta el intervalo con las donaciones existentes (null si lo respeta):
+    // primero el mismo día; después, mínimo 56 días de diferencia en ambos sentidos.
     private String motivoIntervalo(Usuario donador, Date fecha) {
         LocalDate nueva = aLocalDate(fecha);
         List<RegistroDonacion> previas = registroF.buscarPorDonador(donador);     // más reciente primero

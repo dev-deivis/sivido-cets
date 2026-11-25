@@ -56,13 +56,11 @@ public class LnPanelCETS {
     // Longitud máxima del motivo: HistorialClinico.diagnostico es VARCHAR(200)
     private static final int MAX_MOTIVO = 200;
 
-    // HU-6.4: estatus que el personal del CETS puede asignar. Fuente: diagrama de clases, nota del atributo
-    // SolicitudReposicion.estatus: "Activa al crearse; el personal del CETS la pasa a Atendida, Cerrada o Cancelada".
+    // HU-6.4: estatus asignables por el CETS (nota de SolicitudReposicion.estatus en el diagrama de clases)
     private static final List<String> ESTATUS_ASIGNABLES = List.of("Atendida", "Cerrada", "Cancelada");
 
-    // HU-6.1 Iniciar sesión como personal institucional.
-    // p trae correoInstitucional y usuario.passwordHash (texto plano) desde la vista.
-    // Regresa el PersonalCETS autenticado o null.
+    // HU-6.1 Inicia sesión como personal institucional. p trae correoInstitucional y usuario.passwordHash
+    // (texto plano). Regresa el PersonalCETS autenticado o null.
     public PersonalCETS iniciarSesionInstitucional(PersonalCETS p) {
         PersonalCETS personal = personalF.buscarPorCorreoInstitucional(p.getCorreoInstitucional());
         boolean autenticado = autenticarse(personal, p.getUsuario().getPasswordHash());
@@ -108,8 +106,8 @@ public class LnPanelCETS {
         return interesF.contarPorSolicitud(s);
     }
 
-    // #17 Donadores que confirmaron interés en la solicitud, el más reciente primero. La vista solo muestra
-    // nombre y grupo sanguíneo de cada uno: nunca ubicación ni datos de contacto.
+    // #17 Donadores que confirmaron interés, el más reciente primero. La vista solo muestra nombre y
+    // grupo sanguíneo: nunca ubicación ni contacto.
     public List<Interes> obtenerInteresados(SolicitudReposicion s) {
         if (s == null || s.getId() == null) {
             return List.of();
@@ -117,11 +115,8 @@ public class LnPanelCETS {
         return interesF.buscarPorSolicitud(s);
     }
 
-    // #13 Marcar exclusión permanente. h trae usuarioid.id (el donador), personalCETSUsuarioid.usuarioid (el
-    // personal en sesión, lo pone el controller) y diagnostico (el motivo, obligatorio, máximo 200 caracteres).
-    // Regresa false (sin excepción) si falta algo, el personal no está activo o el donador ya está excluido.
-    // En una sola transacción: crea el HistorialClinico y pone Usuario.exclusionPermanente = true. No toca las
-    // solicitudes ni los avisos del donador; solo se bloquean donaciones nuevas (D18). No hay reversa.
+    // #13 h trae usuarioid.id, personalCETSUsuarioid (controller) y diagnostico (motivo, máx. 200). false si
+    // falta algo, el personal está inactivo o ya está excluido. Una transacción; no toca solicitudes (D18); sin reversa.
     public boolean marcarExclusionPermanente(HistorialClinico h) {
         String motivo = h == null || h.getDiagnostico() == null ? "" : h.getDiagnostico().trim();
         boolean completo = h != null && h.getUsuarioid() != null && h.getUsuarioid().getId() != null
@@ -152,9 +147,8 @@ public class LnPanelCETS {
         return true;
     }
 
-    // HU-6.4 Actualizar estatus. s trae el id, el nuevo estatus y el personal CETS en sesión
-    // (s.personalCETSUsuarioid, lo pone el controller). Regresa false si no se puede cambiar.
-    // La solicitud y su bitácora se guardan en la misma transacción.
+    // HU-6.4 Actualiza estatus. s trae el id, el nuevo estatus y el personal en sesión (lo pone el controller).
+    // false si no se puede cambiar. Solicitud y bitácora se guardan en la misma transacción.
     public boolean actualizarEstatus(SolicitudReposicion s) {
         if (s.getId() == null || s.getPersonalCETSUsuarioid() == null
                 || s.getPersonalCETSUsuarioid().getUsuarioid() == null) {
@@ -174,9 +168,8 @@ public class LnPanelCETS {
         return true;
     }
 
-    // Cambio de estatus + renglón de bitácora, en la transacción de quien lo llame. Lo usan actualizarEstatus
-    // (HU-6.4) y LnDonacion.registrarDonacion (#12: la donación ligada pasa la solicitud a Atendida).
-    // solicitud y personal ya son las entidades administradas; no valida (eso lo hace quien llama).
+    // Cambio de estatus + bitácora en la transacción de quien llame (actualizarEstatus, HU-6.4, y
+    // LnDonacion.registrarDonacion, #12). Recibe entidades administradas; no valida.
     public void cambiarEstatus(SolicitudReposicion solicitud, PersonalCETS personal, String nuevoEstatus) {
         HistorialEstatusSolicitud historial = new HistorialEstatusSolicitud();
         historial.setSolicitudReposicionid(solicitud);
@@ -206,8 +199,7 @@ public class LnPanelCETS {
         return historialEstatusF.buscarPorSolicitud(s);
     }
 
-    // El nuevo estatus debe ser uno de los asignables (nunca "Activa": solo es el estado al crearse)
-    // y distinto del actual.
+    // Debe ser asignable (nunca "Activa", solo es el estado al crearse) y distinto del actual.
     private boolean validarEstatus(String actual, String nuevo) {
         return nuevo != null && ESTATUS_ASIGNABLES.contains(nuevo) && !nuevo.equals(actual);
     }

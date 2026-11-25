@@ -16,12 +16,10 @@ import modelo.PerfilClinico;
 import modelo.Usuario;
 
 /**
- * Controller de la vista cuentas/miPerfil (HU-1.3, HU-3.4 y consentimiento de contacto, HU-1.4).
- * Usa LnCuentas (ControlCuentas del diagrama). Es @ViewScoped y no parte de CuentasController
- * (@RequestScoped) porque el perfil debe conservarse entre los clics de la vista.
- * La vista llena la entidad completa:
- *   #{perfilController.perfil.tipoSanguineo / factorRh / radioNotificacion / latitud / longitud}
- *   #{perfilController.perfil.usuario.consentimientoContacto}
+ * Controller de cuentas/miPerfil (HU-1.3, HU-3.4 y consentimiento de contacto, HU-1.4). Usa LnCuentas.
+ * Es @ViewScoped (no parte de CuentasController, @RequestScoped): el perfil se conserva entre clics.
+ * La vista llena perfil.* (tipoSanguineo, factorRh, radioNotificacion, latitud, longitud) y
+ * perfil.usuario.consentimientoContacto.
  *
  * @author eldeivis
  */
@@ -106,8 +104,8 @@ public class PerfilController implements Serializable {
         usuario.setPerfilClinico(perfil.getUsuarioid() == null ? null : perfil);
     }
 
-    // Los f:viewAction corren antes que el preRenderView de plantillaUsuario: se verifica aquí para no
-    // consultar la BD si no hay sesión de usuario (verificar redirige a iniciarSesion).
+    // f:viewAction corre antes que el preRenderView de plantillaUsuario: se verifica aquí para no
+    // consultar la BD sin sesión de usuario (verificar redirige a iniciarSesion).
     private boolean sesionValida() throws IOException {
         sesion.verificar();
         return !FacesContext.getCurrentInstance().getResponseComplete();

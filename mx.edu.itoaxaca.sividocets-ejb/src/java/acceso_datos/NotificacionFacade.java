@@ -39,7 +39,7 @@ public class NotificacionFacade extends AbstractFacade<Notificacion> {
                 .getResultList();
     }
 
-    // HU-3.1 / HU-3.3: el aviso de ese donador para esa solicitud (la BD solo permite uno por par), o null
+    // HU-3.1 / HU-3.3: aviso de ese donador para esa solicitud (la BD permite uno por par), o null
     public Notificacion buscarPorUsuarioYSolicitud(Usuario u, SolicitudReposicion s) {
         List<Notificacion> r = getEntityManager()
                 .createQuery("SELECT n FROM Notificacion n WHERE n.usuarioid = :u AND n.solicitudReposicionid = :s", Notificacion.class)

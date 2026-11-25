@@ -28,8 +28,8 @@ public class CuestionarioRespuestaFacade extends AbstractFacade<CuestionarioResp
         super(CuestionarioRespuesta.class);
     }
 
-    // HU-4.1: guarda el cuestionario (con sus respuestas, por cascade) y regresa su id. La llave es IDENTITY,
-    // así que el id no existe hasta que se hace el INSERT: por eso el flush.
+    // HU-4.1: guarda el cuestionario (con respuestas, por cascade) y regresa su id; el flush es necesario
+    // porque la llave es IDENTITY y el id no existe hasta el INSERT.
     public int crearYObtenerId(CuestionarioRespuesta c) {
         create(c);
         getEntityManager().flush();

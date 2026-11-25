@@ -27,8 +27,7 @@ import modelo.SolicitudReposicion;
 import modelo.Usuario;
 
 /**
- * ControlNotificacion del diagrama: HU-3.1 (notificar a donadores cercanos), HU-3.2 (radio de cercanía)
- * y HU-3.3 (confirmar interés).
+ * ControlNotificacion: HU-3.1 (notificar a donadores cercanos), HU-3.2 (radio) y HU-3.3 (interés).
  *
  * @author Alex Torres
  */
@@ -51,8 +50,8 @@ public class LnNotificacion {
     @EJB
     private UsuarioFacade usuarioF;
 
-    // Tabla de compatibilidad ABO/Rh (donador → receptores). Vive en LnCuentas (receptoresCompatibles),
-    // que ya la usa miPerfil: aquí se reutiliza para no repetirla (TASKS.md, inconsistencia 28).
+    // Compatibilidad ABO/Rh (donador → receptores): reutiliza LnCuentas.receptoresCompatibles
+    // en vez de repetir la tabla (TASKS.md, inconsistencia 28).
     @EJB
     private LnCuentas lnCuentas;
 
@@ -61,19 +60,17 @@ public class LnNotificacion {
     private LnDonacion lnDonacion;
 
     private static final double RADIO_TIERRA_KM = 6371.0;
-    // La distancia se guarda en pasos de 0.5 km: es una distancia aproximada, nunca la ubicación exacta (HU-3.2)
+    // Distancia en pasos de 0.5 km: aproximada, nunca la ubicación exacta (HU-3.2)
     private static final double PASO_DISTANCIA_KM = 0.5;
 
-    // HU-3.1 Buscar donadores cercanos. La llama LnSolicitud.registrarSolicitud al crear una solicitud.
-    // s trae el id de la solicitud ya guardada. Crea un aviso por cada donador compatible y dentro de su radio.
-    // No avisa si la solicitud no existe o ya no está Activa, al propio solicitante, ni dos veces al mismo
-    // donador (la BD tiene UNIQUE Usuarioid + SolicitudReposicionid).
+    // HU-3.1 Avisa a donadores compatibles dentro de su radio (la llama LnSolicitud.registrarSolicitud).
+    // Omite: solicitud inexistente o no Activa, el solicitante y repetidos (UNIQUE usuario + solicitud).
     public void buscarDonadoresCercanos(SolicitudReposicion s) {
         try {
             avisarDonadores(s);
         } catch (RuntimeException e) {
-            // Un fallo al avisar no debe tumbar el registro de la solicitud que lo disparó (LnSolicitud);
-            // se captura aquí dentro para que el contenedor no marque la transacción para rollback.
+            // Un fallo al avisar no debe tumbar el registro de la solicitud (LnSolicitud): se captura aquí
+            // para que el contenedor no marque rollback.
             Logger.getLogger(LnNotificacion.class.getName()).log(Level.WARNING,
                     "No se pudieron crear los avisos de la solicitud", e);
         }
@@ -104,7 +101,7 @@ public class LnNotificacion {
                 n.setFechaEnvio(new Date());
                 n.setEstatus("Enviada");
                 notificacionF.create(n);
-                // Referencias inversas (#35): sin esto el caché compartido deja las listas desactualizadas
+                // Referencias inversas (#35): evitan listas desactualizadas en el caché compartido
                 agregar(donador.getNotificacionList(), n);
                 agregar(solicitud.getNotificacionList(), n);
             }
@@ -112,8 +109,8 @@ public class LnNotificacion {
         }
     }
 
-    // HU-3.1 Obtener un aviso. Se busca por n.id o, si no viene, por el par n.usuarioid + n.solicitudReposicionid.
-    // n.usuarioid es obligatorio y el aviso debe ser de ese usuario (nadie lee avisos ajenos). null si no existe.
+    // HU-3.1 Obtiene un aviso por n.id o por n.usuarioid + n.solicitudReposicionid. usuarioid es obligatorio
+    // y el aviso debe ser suyo (nadie lee avisos ajenos); null si no existe.
     public Notificacion obtenerNotificacion(Notificacion n) {
         boolean traeUsuario = n != null && n.getUsuarioid() != null && n.getUsuarioid().getId() != null;
         if (!traeUsuario) {
@@ -133,8 +130,8 @@ public class LnNotificacion {
         return ajena ? null : encontrada;
     }
 
-    // HU-3.1 Avisos del donador (no está en el diagrama; lo necesita la vista notificaciones).
-    // #25: solo los de solicitudes Activas; los de una solicitud atendida, cerrada o cancelada ya no se muestran.
+    // HU-3.1 Avisos del donador (lo necesita la vista notificaciones; no está en el diagrama).
+    // #25: solo los de solicitudes Activas.
     public List<Notificacion> listarMisNotificaciones(Usuario u) {
         if (u == null || u.getId() == null) {
             return List.of();
@@ -144,8 +141,8 @@ public class LnNotificacion {
                 .toList();
     }
 
-    // HU-3.3 Datos de la solicitud a la que se quiere confirmar interés (no está en el diagrama; lo necesita
-    // la vista confirmarInteres). s trae el id; regresa la solicitud o null.
+    // HU-3.3 Solicitud a la que se quiere confirmar interés (lo necesita confirmarInteres; no está en
+    // el diagrama). s trae el id; regresa la solicitud o null.
     public SolicitudReposicion obtenerSolicitud(SolicitudReposicion s) {
         if (s == null || s.getId() == null) {
             return null;
@@ -153,9 +150,8 @@ public class LnNotificacion {
         return solicitudF.find(s.getId());
     }
 
-    // HU-3.3 ¿Puede este donador confirmar interés en esta solicitud? null si sí; si no, el motivo en
-    // texto para la vista. Lo usa registrarInteres y el controller (para avisar y deshabilitar el botón).
-    // u y s traen su id (se vuelven a leer de la BD).
+    // HU-3.3 ¿Puede el donador confirmar interés en la solicitud? null si sí; si no, el motivo en texto.
+    // Lo usan registrarInteres y el controller (avisar y deshabilitar el botón); u y s traen su id.
     public String motivoRechazoInteres(Usuario u, SolicitudReposicion s) {
         Usuario usuario = u == null || u.getId() == null ? null : usuarioF.find(u.getId());
         SolicitudReposicion solicitud = s == null || s.getId() == null ? null : solicitudF.find(s.getId());
@@ -183,11 +179,8 @@ public class LnNotificacion {
         return null;
     }
 
-    // HU-3.3 Confirmar interés. i.usuario es el usuario en sesión (lo pone el controller) e
-    // i.solicitudReposicion trae el id de la solicitud. Regresa la solicitud si el interés quedó registrado
-    // y null si no se pudo (ver motivoRechazoInteres: solicitud inexistente o no Activa, solicitante,
-    // grupo/Rh incompatible o donador no elegible).
-    // Confirmar dos veces es inofensivo: no se duplica el renglón (PK compartida Usuarioid + SolicitudReposicionid).
+    // HU-3.3 Confirmar interés: i.usuario (sesión) e i.solicitudReposicion.id. Regresa la solicitud o
+    // null si no procede (motivoRechazoInteres); repetirlo no duplica el renglón (PK usuario + solicitud).
     public SolicitudReposicion registrarInteres(Interes i) {
         boolean completo = i.getUsuario() != null && i.getUsuario().getId() != null
                 && i.getSolicitudReposicion() != null && i.getSolicitudReposicion().getId() != null;
@@ -217,16 +210,14 @@ public class LnNotificacion {
         }
     }
 
-    // HU-3.1 PerfilClinico.validarCompatibilidad (el diagrama la pone en la entidad; aquí va en el Ln):
-    // ¿la sangre del donador puede darse al receptor de la solicitud?
+    // HU-3.1 PerfilClinico.validarCompatibilidad (va en el Ln, no en la entidad): ¿la sangre del
+    // donador puede darse al receptor de la solicitud?
     private boolean validarCompatibilidad(PerfilClinico donador, SolicitudReposicion s) {
         return lnCuentas.receptoresCompatibles(donador).contains(s.getTipoSanguineo() + s.getFactorRh());
     }
 
-    // HU-3.2 Notificacion.calcularRadioCercania (también va en el Ln). Distancia entre el donador y el hospital
-    // de la solicitud (la solicitud no tiene coordenadas propias, Inconsistencias 8). Se guarda en n solo una
-    // distancia aproximada, redondeada hacia arriba a 0.5 km: jamás las coordenadas. Como los radios son 3, 5
-    // y 10, "aproximada <= radio" equivale a "distancia real <= radio".
+    // HU-3.2 Notificacion.calcularRadioCercania (va en el Ln): distancia donador-hospital (la solicitud
+    // no tiene coordenadas, Inconsistencias 8), hacia arriba a 0.5 km; con radios 3/5/10 equivale a la real.
     private boolean calcularRadioCercania(Notificacion n, PerfilClinico donador, SolicitudReposicion s) {
         Hospital hospital = s.getHospitalid();
         double km = distanciaKm(donador.getLatitud().doubleValue(), donador.getLongitud().doubleValue(),

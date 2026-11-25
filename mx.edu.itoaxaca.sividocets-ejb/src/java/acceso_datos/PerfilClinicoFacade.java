@@ -29,8 +29,8 @@ public class PerfilClinicoFacade extends AbstractFacade<PerfilClinico> {
         super(PerfilClinico.class);
     }
 
-    // HU-3.1: donadores a quienes se puede avisar. Necesitan grupo y Rh capturados, ubicación (D1: sin
-    // coordenadas no se notifica) y no tener exclusión permanente (D10).
+    // HU-3.1: donadores a quienes se puede avisar: con grupo, Rh y ubicación (D1: sin coordenadas
+    // no se notifica) y sin exclusión permanente (D10).
     public List<PerfilClinico> buscarDonadoresActivos() {
         return getEntityManager()
                 .createQuery("SELECT p FROM PerfilClinico p "

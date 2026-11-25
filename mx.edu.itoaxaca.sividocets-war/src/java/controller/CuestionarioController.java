@@ -19,13 +19,10 @@ import modelo.SolicitudReposicion;
 import modelo.Usuario;
 
 /**
- * Controller de las vistas notificaciones/cuestionario (HU-4.1), notificaciones/resultado (HU-4.2) y
+ * Controller de notificaciones/cuestionario (HU-4.1), notificaciones/resultado (HU-4.2) y
  * cets/criteriosExclusion (HU-4.3). Usa LnCuestionario (ControlCuestionario del diagrama).
- * La vista llena la entidad completa:
- *   cuestionario:      #{cuestionarioController.cuestionario.solicitudReposicionid.id} (f:viewParam "solicitud")
- *                      y una RespuestaCriterio por criterio en #{cuestionarioController.respuestas}
- *   resultado:         #{cuestionarioController.cuestionario.id} (f:viewParam "id")
- *   criteriosExclusion: #{cuestionarioController.criterio.*}
+ * La vista llena la entidad: cuestionario.solicitudReposicionid.id (f:viewParam "solicitud") y una
+ * RespuestaCriterio por criterio en respuestas; cuestionario.id ("id" en resultado); criterio.* (catálogo).
  *
  * @author Alex Torres
  */
@@ -62,9 +59,9 @@ public class CuestionarioController implements Serializable {
         criterio.setTipoExclusion("Temporal");
     }
 
-    // ---------------------------------------------------------------- HU-4.1 Responder cuestionario
+    // ------------------------------------ HU-4.1 Responder cuestionario
 
-    // Se ejecuta al abrir cuestionario (f:viewAction). Arma una respuesta vacía por cada criterio activo.
+    // Al abrir cuestionario (f:viewAction): arma una respuesta vacía por cada criterio activo.
     public void cargarCuestionario() throws IOException {
         if (!sesionValida()) {
             return;
@@ -110,7 +107,7 @@ public class CuestionarioController implements Serializable {
         }
     }
 
-    // ---------------------------------------------------------------- HU-4.3 Catálogo de criterios (CETS)
+    // ------------------------------------ HU-4.3 Catálogo de criterios (CETS)
 
     // Se ejecuta al abrir criteriosExclusion (f:viewAction)
     public void cargarCatalogo() throws IOException {
@@ -180,8 +177,8 @@ public class CuestionarioController implements Serializable {
 
     // ---------------------------------------------------------------- Sesión y mensajes
 
-    // Los f:viewAction corren antes que el preRenderView de las plantillas: se verifica aquí para no
-    // consultar la BD si no hay sesión (verificar / verificarCETS redirigen al login).
+    // f:viewAction corre antes que el preRenderView: se verifica aquí para no consultar la BD sin sesión
+    // (verificar / verificarCETS redirigen al login).
     private boolean sesionValida() throws IOException {
         sesion.verificar();
         return !FacesContext.getCurrentInstance().getResponseComplete();
