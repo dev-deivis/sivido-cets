@@ -42,7 +42,7 @@ public class LnSolicitud {
     @EJB
     private UsuarioFacade usuarioF;
 
-    // [David] HU-3.1: avisa a los donadores compatibles y cercanos al registrar la solicitud
+    // HU-3.1: avisa a los donadores compatibles y cercanos al registrar la solicitud
     @EJB
     private LnNotificacion lnNotificacion;
 
@@ -85,7 +85,7 @@ public class LnSolicitud {
         s.setUuidPublico(UUID.randomUUID().toString());                  // 2.1.2.1.1 generarUuidPublico
         s.setFechaHoraRegistro(new Date());
         solicitudF.crearYObtenerId(s);                                   // 2.1.3 guardarSolicitud
-        lnNotificacion.buscarDonadoresCercanos(s);                       // [David] HU-3.1 (no lanza excepción)
+        lnNotificacion.buscarDonadoresCercanos(s);                       // HU-3.1 (no lanza excepción)
         return true;
     }
 

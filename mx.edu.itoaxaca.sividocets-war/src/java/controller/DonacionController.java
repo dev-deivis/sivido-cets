@@ -36,7 +36,7 @@ public class DonacionController implements Serializable {
     private LnDonacion lnDonacion;
 
     @EJB
-    private LnPanelCETS lnPanelCETS;          // HU-5.1: combo de solicitudes activas ([DAVID] HU-6.2)
+    private LnPanelCETS lnPanelCETS;          // HU-5.1: combo de solicitudes activas (HU-6.2)
 
     @Inject
     private SesionController sesion;

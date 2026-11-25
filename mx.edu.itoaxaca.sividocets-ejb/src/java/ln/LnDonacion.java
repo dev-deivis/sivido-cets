@@ -50,7 +50,7 @@ public class LnDonacion {
     @EJB
     private HistorialExternoFacade historialExternoF;
 
-    // [David] #13: motivo y fecha de la exclusión permanente (HistorialClinico)
+    // #13: motivo y fecha de la exclusión permanente (HistorialClinico)
     @EJB
     private HistorialClinicoFacade historialClinicoF;
 
@@ -100,13 +100,13 @@ public class LnDonacion {
         registroF.create(r);                                                     // 1.1.2
         donador.getRegistroDonacionList().add(r);        // relación bidireccional al día (caché de JPA)
         if (solicitud != null && solicitud.getRegistroDonacionList() != null) {
-            solicitud.getRegistroDonacionList().add(r);  // [David] #35: el otro lado de la solicitud
+            solicitud.getRegistroDonacionList().add(r);  // #35: el otro lado de la solicitud
         }
         if (personal.getRegistroDonacionList() != null) {
-            personal.getRegistroDonacionList().add(r);   // [David] #35: el personal que la registró
+            personal.getRegistroDonacionList().add(r);   // #35: el personal que la registró
         }
         if (solicitud != null) {
-            lnPanelCETS.cambiarEstatus(solicitud, personal, "Atendida");   // [David] #12: misma transacción
+            lnPanelCETS.cambiarEstatus(solicitud, personal, "Atendida");   // #12: misma transacción
         }
         return true;
     }

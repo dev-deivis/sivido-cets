@@ -2110,25 +2110,25 @@ Todos corren esto antes de mezclar su rama a `main` y otra vez **después** del 
       botones (destacado el institucional si estabas en una vista CETS), sin pantalla de error.
 - [x] La raíz `http://localhost:8080/mx.edu.itoaxaca.sividocets-war/` carga `publico/index`.
 - [x] Las HU de tu módulo siguen pasando sus "Terminado cuando".
-- [ ] **Donación ligada → Atendida (#12):** el CETS registra una donación del donador 903 (O−) para la solicitud 901 (O−): el mensaje dice
+- [x] **Donación ligada → Atendida (#12):** el CETS registra una donación del donador 903 (O−) para la solicitud 901 (O−): el mensaje dice
       "La solicitud … pasó a Atendida", la solicitud sale de `solicitudesActivas` y el combo de `capturarDonacion` ya no la ofrece.
       Una donación general no cambia ningún estatus.
-- [ ] **Bitácora:** en `detalleSolicitud` de esa solicitud, "Historial de cambios" muestra Activa → Atendida con el nombre del
+- [x] **Bitácora:** en `detalleSolicitud` de esa solicitud, "Historial de cambios" muestra Activa → Atendida con el nombre del
       personal y la hora de México; una solicitud sin cambios dice "Sin cambios de estatus". Tras "Guardar cambio de estatus" aparece
       el renglón nuevo sin recargar a mano.
-- [ ] **Solicitud no Activa (#25):** `publicacion?uuid=` de la solicitud Atendida muestra "Esta solicitud ya no está activa" sin folio ni
+- [x] **Solicitud no Activa (#25):** `publicacion?uuid=` de la solicitud Atendida muestra "Esta solicitud ya no está activa" sin folio ni
       hospital ni QR; la de una Activa se ve completa; un uuid inexistente conserva "Publicación no encontrada". `notificaciones` del
       donador ya no lista avisos de solicitudes no Activas; `misSolicitudes` del familiar sigue listando todas.
-- [ ] **Constancia:** en `miHistorial`, "Descargar" abre `historial/constancia?id=` con los datos de esa donación; con el id de una
+- [x] **Constancia:** en `miHistorial`, "Descargar" abre `historial/constancia?id=` con los datos de esa donación; con el id de una
       donación de otro usuario, o inexistente, muestra "Constancia no disponible"; sin sesión redirige al login.
-- [ ] **Impresión:** "Imprimir / guardar como PDF" (constancia) e "Imprimir ficha" (`publicacion`) imprimen solo el contenido, sin
+- [x] **Impresión:** "Imprimir / guardar como PDF" (constancia) e "Imprimir ficha" (`publicacion`) imprimen solo el contenido, sin
       encabezado, menú, pie ni botones.
-- [ ] **Exclusión permanente (#13):** en `cets/donadores?id=903` aparece "Marcar exclusión permanente" (en el 904, ya excluido, no). El diálogo
+- [x] **Exclusión permanente (#13):** en `cets/donadores?id=903` aparece "Marcar exclusión permanente" (en el 904, ya excluido, no). El diálogo
       avisa que el motivo será visible y que no se puede deshacer; sin motivo, o con más de 200 caracteres, no guarda. Con motivo válido: mensaje de
       éxito, la ficha muestra motivo y fecha de hoy y el botón desaparece. SQL: una fila nueva en `HistorialClinico` (Usuarioid 903, PersonalCETS 901)
       y `exclusionPermanente = 1`; repetirlo no crea otra fila. `capturarDonacion?donador=903` muestra el motivo y la fecha en el aviso y deshabilita el
       botón; el 903 ve el aviso en `miPerfil`; sus solicitudes y avisos siguen igual.
-- [ ] **Lista de interesados (#17):** el 903 confirma interés en la 901: `detalleSolicitud?id=901` lista su nombre y `O−`; sin intereses solo el
+- [x] **Lista de interesados (#17):** el 903 confirma interés en la 901: `detalleSolicitud?id=901` lista su nombre y `O−`; sin intereses solo el
       contador en 0; en el HTML (Ctrl+U) no hay latitud, longitud, teléfono ni correo; un donador solo notificado no aparece.
 
 ### Limitaciones conocidas al 2026-11-19
