@@ -51,7 +51,7 @@ captura si falta un dato o el correo tiene formato inválido.
 
 ---
 
-## Tarea 2 — Revelar contacto del donador al familiar (HU-1.4 y HU-3.3) — LA LARGA — [DAVID]
+## Tarea 2 — Revelar contacto del donador al familiar (HU-1.4 y HU-3.3) — [DAVID]
 
 **La HU pide:**
 - HU-3.3: "La identidad y datos de contacto del donador se revelan al familiar únicamente tras esta confirmación voluntaria."
