@@ -175,4 +175,4 @@ HU-2.2 y HU-6.4.) Borradores en el formato del PDF; las iteraciones y puntos son
 ## Orden sugerido
 
 1 → 4 → 5/6 (rápidos) → 2 (la más larga) → 3 (según A o B). Después de cada tarea: Clean and Build, Run, casillas de la
-sección 8 de `TASKS.md`, y los comandos git uno por línea. Al terminar, volver a comparar contra el PDF.
+sección 8 de `TASKS.md`, y abrir el PR. Al terminar, volver a comparar contra el PDF.
