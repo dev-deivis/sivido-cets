@@ -1,7 +1,7 @@
 # SIVIDO — Correcciones para que las HU coincidan con el sistema
 
 Origen: comparación del PDF `Espec_Epicas_HU_Cronograma_Eq.GatitosLinuxeros.pdf` contra el código y las vistas de `main`
-(2026-11-26). El profe va a verificar en la entrega que las historias de usuario coincidan con lo implementado.
+(2026-11-26). Se va a verificar en la entrega que las historias de usuario coincidan con lo implementado.
 
 Reglas de siempre: rama nueva desde `main` actualizada, `Ln` delgado (el controller solo llama al Ln), la entidad viaja
 completa, Claude Code en **Plan Mode** y sin `git add`/`commit`/`push` (los comandos los corre David). Tras cualquier script
