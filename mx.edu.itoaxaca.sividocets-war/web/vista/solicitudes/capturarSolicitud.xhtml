@@ -31,7 +31,7 @@
         </div>
 
         <h:form id="formSolicitud">
-            <p:messages id="mensajes" closable="true"/>
+            <p:messages id="mensajes" globalOnly="true" closable="true"/>
 
             <div class="grid grid-principal">
                 <!-- Formulario -->
@@ -48,22 +48,16 @@
                             <span class="ayuda mono">#{solicitudController.formatoFolio}</span>
                         </div>
                         <p:inputText id="folio" value="#{solicitudController.solicitud.folioCETS}" maxlength="30"
+                                     validator="#{solicitudController.vFolio}"
                                      placeholder="Ej: CETS-OAX-2026-0582" styleClass="mono">
-                            <p:ajax event="keyup" delay="300" listener="#{solicitudController.validarFolio}"
-                                    update="estadoFolio btnPublicar vistaPrevia"/>
+                            <p:ajax event="keyup" delay="300" process="@this" listener="#{solicitudController.validarFolio}"
+                                    update="msgFolio estadoFolio btnPublicar vistaPrevia"/>
                         </p:inputText>
+                        <p:message id="msgFolio" for="folio"/>
                         <h:panelGroup id="estadoFolio" layout="block">
                             <h:panelGroup rendered="#{solicitudController.estadoFolio eq 'valido'}"
                                           styleClass="ayuda" style="color:var(--verde)">
                                 <i class="pi pi-check-circle"></i> Formato de folio válido
-                            </h:panelGroup>
-                            <h:panelGroup rendered="#{solicitudController.estadoFolio eq 'formato'}"
-                                          styleClass="ayuda" style="color:var(--rojo)">
-                                <i class="pi pi-times-circle"></i> El folio debe tener el formato #{solicitudController.formatoFolio}
-                            </h:panelGroup>
-                            <h:panelGroup rendered="#{solicitudController.estadoFolio eq 'duplicado'}"
-                                          styleClass="ayuda" style="color:var(--rojo)">
-                                <i class="pi pi-exclamation-circle"></i> Ya existe una solicitud activa con este folio
                             </h:panelGroup>
                         </h:panelGroup>
                     </div>
@@ -114,10 +108,12 @@
                         </div>
                         <p:inputTextarea id="descripcion" rows="4" maxlength="250" autoResize="false"
                                          value="#{solicitudController.solicitud.descripcion}"
+                                         validator="#{solicitudController.vDescripcion}"
                                          counter="contador" counterTemplate="Quedan {0} de 250"
                                          placeholder="Observaciones para los donadores (ej. cirugía programada)...">
-                            <p:ajax event="blur" update="vistaPrevia"/>
+                            <p:ajax event="blur" update="vistaPrevia msgDescripcion"/>
                         </p:inputTextarea>
+                        <p:message id="msgDescripcion" for="descripcion"/>
                         <span class="ayuda"><i class="pi pi-exclamation-circle"></i> Evita incluir nombres de pacientes o datos de contacto.</span>
                     </div>
 

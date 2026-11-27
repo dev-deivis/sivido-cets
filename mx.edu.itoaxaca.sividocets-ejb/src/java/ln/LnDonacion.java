@@ -72,7 +72,7 @@ public class LnDonacion {
     public boolean registrarDonacion(RegistroDonacion r) {
         if (r.getUsuarioid() == null || r.getUsuarioid().getId() == null
                 || r.getPersonalCETSUsuarioid() == null || r.getPersonalCETSUsuarioid().getUsuarioid() == null
-                || r.getFechaDonacion() == null || aLocalDate(r.getFechaDonacion()).isAfter(LocalDate.now(ZONA))) {
+                || !fechaDonacionValida(r.getFechaDonacion())) {
             return false;
         }
         Usuario donador = usuarioF.find(r.getUsuarioid().getId());
@@ -111,6 +111,12 @@ public class LnDonacion {
         return true;
     }
 
+    // D20 La fecha de la donación existe y no es posterior a hoy; se compara por día en America/Mexico_City
+    // (una donación de hoy nunca es futura, sin importar la hora).
+    public boolean fechaDonacionValida(Date fecha) {
+        return fecha != null && !aLocalDate(fecha).isAfter(LocalDate.now(ZONA));
+    }
+
     // Constancia de donación: solo si es del usuario en sesión; null si no existe o es ajena.
     public RegistroDonacion obtenerConstancia(RegistroDonacion r, Usuario u) {
         if (r == null || r.getId() == null || u == null || u.getId() == null) {
@@ -138,7 +144,7 @@ public class LnDonacion {
         if (donador == null) {
             return "El donador no existe.";
         }
-        if (fecha != null && aLocalDate(fecha).isAfter(LocalDate.now(ZONA))) {
+        if (fecha != null && !fechaDonacionValida(fecha)) {
             return "La fecha de la donación no puede ser futura.";
         }
         if (verificarExclusion(donador)) {

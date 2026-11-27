@@ -115,13 +115,18 @@ public class LnPanelCETS {
         return interesF.buscarPorSolicitud(s);
     }
 
+    // D20 Motivo de la exclusión permanente: no vacío (sin contar espacios en los extremos) y de máximo 200 caracteres
+    public boolean motivoExclusionValido(String motivo) {
+        return motivo != null && !motivo.trim().isEmpty() && motivo.trim().length() <= MAX_MOTIVO;
+    }
+
     // #13 h trae usuarioid.id, personalCETSUsuarioid (controller) y diagnostico (motivo, máx. 200). false si
     // falta algo, el personal está inactivo o ya está excluido. Una transacción; no toca solicitudes (D18); sin reversa.
     public boolean marcarExclusionPermanente(HistorialClinico h) {
         String motivo = h == null || h.getDiagnostico() == null ? "" : h.getDiagnostico().trim();
         boolean completo = h != null && h.getUsuarioid() != null && h.getUsuarioid().getId() != null
                 && h.getPersonalCETSUsuarioid() != null && h.getPersonalCETSUsuarioid().getUsuarioid() != null;
-        if (!completo || motivo.isEmpty() || motivo.length() > MAX_MOTIVO) {
+        if (!completo || !motivoExclusionValido(motivo)) {
             return false;
         }
         Usuario donador = usuarioF.find(h.getUsuarioid().getId());

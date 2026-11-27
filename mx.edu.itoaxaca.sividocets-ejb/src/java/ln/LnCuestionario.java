@@ -157,6 +157,11 @@ public class LnCuestionario {
         return true;
     }
 
+    // D20 Regla de los días de espera: Temporal ⇒ obligatorios y mayores que 0; otro tipo ⇒ no se exigen
+    public boolean duracionValida(String tipoExclusion, Integer dias) {
+        return !TEMPORAL.equals(tipoExclusion) || (dias != null && dias > 0);
+    }
+
     // HU-4.3 validarCriterio (el diagrama lo deja en el Control): texto no vacío, tipoRespuesta SiNo o
     // SeleccionSimple, Temporal ⇒ duracionDias > 0, Permanente ⇒ sin duración (si viene, se descarta).
     private boolean validarCriterio(CriterioExclusion c) {
@@ -167,7 +172,7 @@ public class LnCuestionario {
             return false;
         }
         if (TEMPORAL.equals(c.getTipoExclusion())) {
-            return c.getDuracionDias() != null && c.getDuracionDias() > 0;
+            return duracionValida(c.getTipoExclusion(), c.getDuracionDias());
         }
         if (PERMANENTE.equals(c.getTipoExclusion())) {
             c.setDuracionDias(null);
