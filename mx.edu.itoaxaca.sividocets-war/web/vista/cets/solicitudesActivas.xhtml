@@ -57,8 +57,8 @@
                 <div class="grid" style="grid-template-columns:2fr 1fr 1fr 1fr auto;align-items:end">
                     <div class="campo mb-0">
                         <p:outputLabel for="buscar">Buscar por folio u hospital</p:outputLabel>
-                        <!-- Sin función en HU-6.2 (solo filtra por estatus, tipo y Rh; TASKS.md, inconsistencia 20) -->
-                        <p:inputText id="buscar" disabled="true" placeholder="Ej. CETS-OAX-2026-0901 o Hospital Civil..."/>
+                        <!-- Filtra en el controller la lista del Ln (TASKS.md, inconsistencia 20); Enter envía "Refrescar" -->
+                        <p:inputText id="buscar" value="#{panelCetsController.busqueda}" placeholder="Ej. CETS-OAX-2026-0901 o Hospital Civil..."/>
                     </div>
                     <div class="campo mb-0">
                         <p:outputLabel for="estatus">Estatus</p:outputLabel>
@@ -94,6 +94,9 @@
             </h:form>
             <div class="fila mt-2 texto-chico">
                 <span class="negrita texto-sec">FILTROS APLICADOS:</span>
+                <ui:fragment rendered="#{not empty panelCetsController.busqueda}">
+                    <span class="pildora">Búsqueda: <strong>#{panelCetsController.busqueda}</strong></span>
+                </ui:fragment>
                 <ui:fragment rendered="#{not empty panelCetsController.filtro.estatus}">
                     <span class="pildora">Estatus: <strong>#{panelCetsController.filtro.estatus}</strong></span>
                 </ui:fragment>
