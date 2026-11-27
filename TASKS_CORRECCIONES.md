@@ -79,7 +79,7 @@ otra vista. Ninguna pantalla del familiar muestra datos del donador, así que la
       `LnNotificacion`/`LnPanelCETS` para no crear una dependencia circular).
 - [x] `SolicitudController`: cargar los interesados de la solicitud seleccionada y exponer solo lo necesario.
 - [x] Vista del familiar: tarjeta "Donadores que confirmaron interés" con la regla de consentimiento.
-- [ ] Tests con el donador 903 (O−) en la solicitud 901, con el consentimiento apagado y encendido.
+- [x] Tests con el donador 903 (O−) en la solicitud 901, con el consentimiento apagado y encendido.
 - [x] Actualizar `TASKS.md` (HU-1.4, HU-3.3, casillas de la sección 8) y anotar el método nuevo como pendiente del `.vpp`.
 
 **Terminado cuando:**
