@@ -23,7 +23,7 @@ Ramas (una por tarea, para que no choquen entre sí):
 | 3 | Envío de historial a la institución externa con log | HU-7.2 | Mediano (o documentar) | [Alex] |
 | 4 | Enlace a la publicación en la notificación | HU-3.1 | Chico | [Diego] |
 | 5 | HU nuevas para el PDF (constancia, exclusión permanente) | — | Documento | |
-| 6 | Ajustes de redacción del PDF (estatus, login) | HU-1.2, HU-2.3, HU-6.4 | Documento | |
+| 6 | Ajustes de redacción del PDF (estatus, login) (hecha) | HU-1.2, HU-2.3, HU-6.4 | Documento | |
 
 ---
 
@@ -172,15 +172,22 @@ HU-2.2 y HU-6.4.) Borradores en el formato del PDF; las iteraciones y puntos son
 
 ## Tarea 6 — Ajustes de redacción del PDF (documento)
 
-- [ ] **HU-6.4:** la descripción dice "(activa, atendida, cerrada)". El sistema permite Atendida, Cerrada y Cancelada, y
+**Estado:** hecha en el Google Doc (2026-11-27). Textos nuevos:
+- HU-6.4, descripción: "(de activa a atendida, cerrada o cancelada)".
+- HU-2.3, criterio: "(Activa, Atendida, Cerrada, Cancelada)".
+- HU-1.2, criterio: "El sistema redirige al usuario a su panel de usuario. El personal del CETS tiene su propio inicio de sesión institucional (HU-6.1), que lo lleva a su panel administrativo."
+- HU-3.3, criterio: "Al confirmar interés, el estatus de la solicitud no cambia; el panel del CETS muestra al donador en el contador y en la lista de interesados de la solicitud."
+- HU-6.3, criterio: "...se muestra la cantidad de donadores que confirmaron interés y la lista con su nombre y tipo de sangre."
+
+- [x] **HU-6.4:** la descripción dice "(activa, atendida, cerrada)". El sistema permite Atendida, Cerrada y Cancelada, y
       nunca regresar a Activa. Alinear la redacción con la regla actual.
-- [ ] **HU-2.3:** su criterio lista "Activa, Atendida, Cancelada". Incluir también Cerrada para que coincida con HU-6.4 y la BD.
-- [ ] **HU-1.2:** el criterio dice que el sistema redirige a personal del CETS a su panel desde el mismo login. Hoy el CETS usa
+- [x] **HU-2.3:** su criterio lista "Activa, Atendida, Cancelada". Incluir también Cerrada para que coincida con HU-6.4 y la BD.
+- [x] **HU-1.2:** el criterio dice que el sistema redirige a personal del CETS a su panel desde el mismo login. Hoy el CETS usa
       un login institucional aparte (coherente con HU-6.1). Redactar el criterio como "el personal del CETS accede por el
       login institucional y es redirigido a su panel administrativo".
-- [ ] **HU-3.3:** aclarar que el estatus de la solicitud no cambia al confirmar interés; el CETS lo ve reflejado en el contador
+- [x] **HU-3.3:** aclarar que el estatus de la solicitud no cambia al confirmar interés; el CETS lo ve reflejado en el contador
       de interesados.
-- [ ] **HU-6.3:** el criterio habla de la cantidad; la lista con nombre y tipo de sangre (#17) coincide con la descripción
+- [x] **HU-6.3:** el criterio habla de la cantidad; la lista con nombre y tipo de sangre (#17) coincide con la descripción
       ("ver qué donadores han confirmado interés"). Agregarlo al criterio.
 
 ---
