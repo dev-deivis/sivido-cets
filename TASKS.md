@@ -2170,7 +2170,7 @@ Lo que sigue **no** es un fallo de esa pasada: son límites aceptados.
 `historial/constancia`), **Descargar QR** e **Imprimir ficha** (`publicacion`), **Marcar exclusión permanente** (`cets/donadores`) y la
 **lista de interesados** de HU-6.3 (`obtenerInteresados`, que el `.vpp` no tiene).
 - **Diagramas (`SIVIDO_CETS_U4.vpp`), pendientes:** dudas 6a–6d de las secuencias (mensajes que no coinciden con el código, solo anotados); HU-2.1 sin `buscarDonadoresCercanos`; falta la dependencia `ControlPanelCETS` → `ControlCuentas` en el diagrama de clases; HU-6.1 sin la comprobación de `activo`; 36 métodos de entidades sin tocar; `generarQR` y `contarRegistros` (#15); `Interes` sin ligar al ORM.
-- [ ] **HU-1.4 / HU-3.3 Contacto del donador al familiar (D19):**
+- [x] **HU-1.4 / HU-3.3 Contacto del donador al familiar (D19):**
   - 903 (O−) confirma interés en la solicitud 901 con el consentimiento apagado → 902 en `misSolicitudes` → "Ver donadores interesados": ve nombre, tipo de sangre y fecha, y "Este donador no compartió su contacto".
   - 903 enciende el toggle en `miPerfil` y guarda → 902 recarga y ve teléfono y correo; al apagarlo, vuelve el aviso.
   - Otro familiar abre `interesados?id=<id>` a mano → "Solicitud no disponible". Sin sesión → login.
@@ -2357,8 +2357,8 @@ Siguen **abiertas**: necesitan una decisión del equipo o del profe. Lo ya resue
     - Enviar coordenadas vacías **no borra** la ubicación guardada, así que hoy el donador no puede quitarla (ninguna HU
       lo pide). Decidir si hace falta un "Quitar mi ubicación".
     - `guardarPerfilClinico` también guarda `Usuario.consentimientoContacto` (no está en la secuencia, ver #6 y D8).
-30. **Dos toggles de contacto en miPerfil:** el activo (`consentimientoContacto`) y el deshabilitado "solo cuando yo
-    confirme interés" dicen casi lo mismo. Decidir si el segundo se elimina o si es otro concepto que necesita columna.
+30. **Dos toggles de contacto en miPerfil (cerrada, D19):** quedó un solo toggle, "Compartir mi contacto solo cuando yo
+    confirme interés", ligado a `consentimientoContacto`; se eliminó el deshabilitado.
 31. **Precisión de la ubicación:** se guardan las coordenadas exactas del dispositivo (6 decimales, ~0.1 m). La maqueta
     decía "tu dirección exacta nunca se guarda ni se muestra"; se cambió la nota porque ya no es cierto del todo (nunca se
     muestra ni se comparte; solo se informa una distancia aproximada, HU-3.2). Decidir si conviene guardarlas con menos
