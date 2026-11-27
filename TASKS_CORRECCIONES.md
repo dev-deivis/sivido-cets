@@ -73,14 +73,14 @@ otra vista. Ninguna pantalla del familiar muestra datos del donador, así que la
   habilita usando `consentimientoContacto` o si se deja el texto actual y se aclara en el aviso.
 
 **Qué hacer:**
-- [ ] Decidir el diseño de arriba con el equipo y anotarlo en la sección 9 de `TASKS.md` (D19).
-- [ ] `LnSolicitud`: método nuevo `obtenerInteresados(SolicitudReposicion s, Usuario familiar)` que valida que el familiar es
+- [x] Decidir el diseño de arriba con el equipo y anotarlo en la sección 9 de `TASKS.md` (D19).
+- [x] `LnSolicitud`: método nuevo `obtenerInteresados(SolicitudReposicion s, Usuario familiar)` que valida que el familiar es
       el creador y regresa los `Interes` de la solicitud. Usar `InteresFacade.buscarPorSolicitud` directamente (no inyectar
       `LnNotificacion`/`LnPanelCETS` para no crear una dependencia circular).
-- [ ] `SolicitudController`: cargar los interesados de la solicitud seleccionada y exponer solo lo necesario.
-- [ ] Vista del familiar: tarjeta "Donadores que confirmaron interés" con la regla de consentimiento.
+- [x] `SolicitudController`: cargar los interesados de la solicitud seleccionada y exponer solo lo necesario.
+- [x] Vista del familiar: tarjeta "Donadores que confirmaron interés" con la regla de consentimiento.
 - [ ] Tests con el donador 903 (O−) en la solicitud 901, con el consentimiento apagado y encendido.
-- [ ] Actualizar `TASKS.md` (HU-1.4, HU-3.3, casillas de la sección 8) y anotar el método nuevo como pendiente del `.vpp`.
+- [x] Actualizar `TASKS.md` (HU-1.4, HU-3.3, casillas de la sección 8) y anotar el método nuevo como pendiente del `.vpp`.
 
 **Terminado cuando:**
 - Con el consentimiento apagado, el familiar ve nombre y tipo de sangre y el aviso de que no compartió su contacto.
