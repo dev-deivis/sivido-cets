@@ -60,6 +60,22 @@ public class LnSolicitud {
         return !solicitudF.existeFolioActivo(s.getFolioCETS());   // 1.1.2 verificarFolioUnico
     }
 
+    // D20 Validadores de la vista: formato del folio (sin espacios y en mayúsculas); no toca la entidad
+    public boolean folioConFormatoValido(String folio) {
+        return folio != null && folio.trim().toUpperCase().matches(FORMATO_FOLIO);
+    }
+
+    // D20 Folio sin otra solicitud Activa con el mismo valor (se normaliza igual que el formato)
+    public boolean folioDisponible(String folio) {
+        return folio != null && !solicitudF.existeFolioActivo(folio.trim().toUpperCase());
+    }
+
+    // D20 Descripción opcional: una vez limpia (sin etiquetas HTML ni caracteres de control) mide máximo 250
+    public boolean descripcionValida(String texto) {
+        String limpio = sanitizar(texto);
+        return limpio == null || limpio.length() <= MAX_DESCRIPCION;
+    }
+
     // HU-2.4 (1.1.1) validarFormatoFolio: regla del diagrama en la entidad, implementada en el Ln.
     // Normaliza el folio (sin espacios y en mayúsculas) antes de validarlo.
     public boolean validarFormatoFolio(SolicitudReposicion s) {
@@ -74,8 +90,8 @@ public class LnSolicitud {
     // el controller pone el usuario de la sesión. estatus = "Activa" ya viene del constructor.
     public boolean registrarSolicitud(SolicitudReposicion s) {
         boolean valido = validarFolio(s);                                  // 2.1.1
-        if (!valido || !validarTipoSangre(s)) {
-            return false;
+        if (!valido || !validarTipoSangre(s) || !descripcionValida(s.getDescripcion())) {
+            return false;                                                  // D20: la descripción se rechaza, no se trunca
         }
         // El hospital y el usuario deben existir (id nulo o inexistente: regresa false, sin excepción)
         Hospital hospital = s.getHospitalid() == null || s.getHospitalid().getId() == null
@@ -144,7 +160,7 @@ public class LnSolicitud {
                 && s.getFactorRh() != null && FACTORES_RH.contains(s.getFactorRh());
     }
 
-    // HU-2.1 Descripción opcional: sin etiquetas HTML ni caracteres de control, máximo 250
+    // HU-2.1 Descripción opcional: sin etiquetas HTML ni caracteres de control (el máximo lo valida descripcionValida)
     private String sanitizar(String texto) {
         if (texto == null) {
             return null;
@@ -152,9 +168,6 @@ public class LnSolicitud {
         String limpio = texto.replaceAll("<[^>]*>", "")
                 .replaceAll("[\\p{Cntrl}&&[^\\n]]", "")
                 .trim();
-        if (limpio.length() > MAX_DESCRIPCION) {
-            limpio = limpio.substring(0, MAX_DESCRIPCION);
-        }
         return limpio.isEmpty() ? null : limpio;
     }
 }

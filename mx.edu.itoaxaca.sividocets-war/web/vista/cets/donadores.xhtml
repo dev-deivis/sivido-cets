@@ -240,7 +240,7 @@
         <p:dialog header="Marcar exclusión permanente" widgetVar="dlgExclusion" modal="true" resizable="false"
                   draggable="false" width="520" visible="#{facesContext.validationFailed}">
             <h:form id="formExclusion">
-                <p:messages id="mensajesExclusion" closable="true"/>
+                <p:messages id="mensajesExclusion" globalOnly="true" closable="true"/>
                 <div class="aviso rojo mb-2">
                     <i class="pi pi-exclamation-triangle"></i>
                     <p class="texto-chico mb-0">Este motivo será visible para el donador. Esta acción no se puede deshacer desde la app.</p>
@@ -251,9 +251,10 @@
                     <p:outputLabel for="motivo">Motivo <span class="requerido">*</span></p:outputLabel>
                     <p:inputTextarea id="motivo" value="#{donacionController.exclusion.diagnostico}" required="true"
                                      requiredMessage="Escribe el motivo de la exclusión" rows="4" maxlength="200"
+                                     validator="#{donacionController.vMotivo}"
                                      counter="contadorMotivo" counterTemplate="{0} caracteres restantes" style="width:100%">
-                        <f:validateLength maximum="200"/>
                     </p:inputTextarea>
+                    <p:message for="motivo"/>
                     <span class="ayuda"><h:outputText id="contadorMotivo"/></span>
                 </div>
                 <div class="acciones-formulario">

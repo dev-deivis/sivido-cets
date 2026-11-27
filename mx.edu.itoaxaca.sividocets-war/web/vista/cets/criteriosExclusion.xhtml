@@ -26,7 +26,7 @@
             <p>Preguntas del cuestionario de elegibilidad que responde el donador antes de confirmar su interés.</p>
         </div>
 
-        <p:messages id="mensajes" closable="true"/>
+        <p:messages id="mensajes" globalOnly="true" closable="true"/>
 
         <div class="grid grid-principal">
             <!-- Catálogo -->
@@ -104,7 +104,9 @@
                             <p:outputLabel for="pregunta">Texto de la pregunta <span class="requerido">*</span></p:outputLabel>
                             <p:inputTextarea id="pregunta" rows="3" autoResize="false"
                                              value="#{cuestionarioController.criterio.criterio}"
+                                             required="true" requiredMessage="Escribe la pregunta"
                                              placeholder="Ej: ¿Has tenido contacto sexual de riesgo en los últimos 12 meses?"/>
+                            <p:message for="pregunta"/>
                             <span class="ayuda">Redáctala en lenguaje claro para el donador.</span>
                         </div>
                         <div class="campo">
@@ -123,7 +125,12 @@
                         </div>
                         <div class="campo">
                             <p:outputLabel for="dias">Días de espera</p:outputLabel>
-                            <p:inputText id="dias" value="#{cuestionarioController.criterio.duracionDias}"/>
+                            <p:inputText id="dias" value="#{cuestionarioController.criterio.duracionDias}"
+                                         required="#{param['formNuevoCriterio:tipoExclusion'] eq 'Temporal'}"
+                                         requiredMessage="Indica los días de espera (mayor que 0) para una exclusión temporal"
+                                         converterMessage="Los días deben ser un número entero"
+                                         validator="#{cuestionarioController.vDias}"/>
+                            <p:message for="dias"/>
                             <span class="ayuda">Obligatorio y mayor que 0 si la exclusión es temporal. En las permanentes se ignora.</span>
                         </div>
                         <div class="preferencia">
