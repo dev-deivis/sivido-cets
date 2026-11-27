@@ -251,8 +251,8 @@
                     <p:outputLabel for="motivo">Motivo <span class="requerido">*</span></p:outputLabel>
                     <p:inputTextarea id="motivo" value="#{donacionController.exclusion.diagnostico}" required="true"
                                      requiredMessage="Escribe el motivo de la exclusión" rows="4" maxlength="200"
-                                     validator="#{donacionController.vMotivo}"
                                      counter="contadorMotivo" counterTemplate="{0} caracteres restantes" style="width:100%">
+                        <f:validator validatorId="motivoExclusionValidator"/>
                     </p:inputTextarea>
                     <p:message for="motivo"/>
                     <span class="ayuda"><h:outputText id="contadorMotivo"/></span>

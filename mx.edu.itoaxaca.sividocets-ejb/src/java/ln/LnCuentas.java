@@ -51,6 +51,11 @@ public class LnCuentas {
             "AB-", List.of("AB-", "AB+"),
             "AB+", List.of("AB+"));
 
+    // D20 Solo el formato del correo (no revisa si ya está registrado): algo@dominio.ext sin espacios
+    public boolean correoValido(String correo) {
+        return correo != null && correo.trim().matches("^[^@\\s]+@[^@\\s]+\\.[^@\\s]+$");
+    }
+
     // HU-1.1 Alta inicial: la vista llena el Usuario completo;
     // passwordHash llega en texto plano y aquí se reemplaza por su hash.
     public boolean registrarUsuario(Usuario u) {

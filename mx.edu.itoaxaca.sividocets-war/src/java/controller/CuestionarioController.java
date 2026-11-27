@@ -2,8 +2,6 @@ package controller;
 
 import jakarta.ejb.EJB;
 import jakarta.faces.application.FacesMessage;
-import jakarta.faces.component.UIComponent;
-import jakarta.faces.component.UIInput;
 import jakarta.faces.context.FacesContext;
 import jakarta.faces.view.ViewScoped;
 import jakarta.inject.Inject;
@@ -118,28 +116,6 @@ public class CuestionarioController implements Serializable {
             return;
         }
         catalogo = lnCuestionario.obtenerCatalogo();
-    }
-
-    // D20 Validador de los días de espera: la regla es de LnCuestionario. El tipo se toma del radio "tipoExclusion"
-    // (ya validado, aún sin pasar al modelo). Un valor que no sea número cuenta como vacío.
-    public void vDias(FacesContext contexto, UIComponent comp, Object valor) {
-        UIInput radio = (UIInput) comp.findComponent("tipoExclusion");
-        Object tipo = radio == null ? null : (radio.getSubmittedValue() != null ? radio.getSubmittedValue() : radio.getValue());
-        Integer dias = null;
-        try {
-            if (valor instanceof Number) {
-                dias = ((Number) valor).intValue();
-            } else if (valor != null && !valor.toString().isBlank()) {
-                dias = Integer.valueOf(valor.toString().trim());
-            }
-        } catch (NumberFormatException e) {
-            dias = null;
-        }
-        if (!lnCuestionario.duracionValida(tipo == null ? null : tipo.toString(), dias)) {
-            ((UIInput) comp).setValid(false);
-            String texto = "Indica los días de espera (mayor que 0) para una exclusión temporal";
-            contexto.addMessage(comp.getClientId(contexto), new FacesMessage(FacesMessage.SEVERITY_ERROR, texto, texto));
-        }
     }
 
     // Agregar (criterio.id vacío) o guardar la edición (criterio.id lleno)

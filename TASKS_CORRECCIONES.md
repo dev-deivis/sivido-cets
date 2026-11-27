@@ -33,6 +33,9 @@ captura si falta un dato o el correo tiene formato inválido.
 `CuentasController.registrarUsuario()` solo revisa que las dos contraseñas coincidan y el aviso de privacidad;
 `LnCuentas.registrarUsuario(Usuario)` solo revisa que el correo no exista. Con la contraseña `a` se crea la cuenta.
 
+**Nota (D20):** `LnCuentas.correoValido(String)` y `correoValidator` ya existen y `crearCuenta` los usa; falta `contrasenaValida` y un
+`ContrasenaValidator` (mismo patrón que `CorreoValidator`, paquete `validadores`). Al fusionar `LnCuentas` cuidado con `correoValido` duplicado.
+
 **Qué hacer:**
 - [ ] `LnCuentas`: agregar `contrasenaValida(String)` y `correoValido(String)` (métodos públicos y sin excepciones, regresan
       `boolean`). Contraseña: `^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^A-Za-z0-9]).{8,}$`. Correo: formato simple

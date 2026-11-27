@@ -3,6 +3,7 @@
 <!DOCTYPE html>
 <ui:composition xmlns="http://www.w3.org/1999/xhtml"
                 xmlns:h="jakarta.faces.html"
+                xmlns:f="jakarta.faces.core"
                 xmlns:ui="jakarta.faces.facelets"
                 xmlns:p="primefaces"
                 template="/plantillas/plantillaAcceso.xhtml">
@@ -46,7 +47,9 @@
                             <p:outputLabel for="correo">Correo electrónico <span class="requerido">*</span></p:outputLabel>
                             <p:inputText id="correo" type="email" value="#{cuentasController.usuario.correo}" required="true"
                                          requiredMessage="Escribe tu correo"
-                                         placeholder="ejemplo@correo.com"/>
+                                         placeholder="ejemplo@correo.com">
+                                <f:validator validatorId="correoValidator"/>
+                            </p:inputText>
                         </div>
                     </div>
                     <div class="grid grid-2" style="gap:0 1rem">
