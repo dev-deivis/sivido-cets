@@ -2,8 +2,6 @@ package controller;
 
 import jakarta.ejb.EJB;
 import jakarta.faces.application.FacesMessage;
-import jakarta.faces.component.UIComponent;
-import jakarta.faces.component.UIInput;
 import jakarta.faces.context.FacesContext;
 import jakarta.faces.view.ViewScoped;
 import jakarta.inject.Inject;
@@ -223,25 +221,6 @@ public class DonacionController implements Serializable {
     private boolean sesionCETSValida() throws IOException {
         sesion.verificarCETS();
         return !FacesContext.getCurrentInstance().getResponseComplete();
-    }
-
-    // D20 Validador de la fecha de la donación: la regla es de LnDonacion (por día, America/Mexico_City)
-    public void vFecha(FacesContext contexto, UIComponent comp, Object valor) {
-        if (valor instanceof Date && !lnDonacion.fechaDonacionValida((Date) valor)) {
-            rechazar(contexto, comp, "La fecha de la donación no puede ser futura");
-        }
-    }
-
-    // D20 Validador del motivo de la exclusión permanente (#13): la regla es de LnPanelCETS
-    public void vMotivo(FacesContext contexto, UIComponent comp, Object valor) {
-        if (!lnPanelCETS.motivoExclusionValido(valor == null ? "" : valor.toString())) {
-            rechazar(contexto, comp, "El motivo debe tener entre 1 y 200 caracteres");
-        }
-    }
-
-    private void rechazar(FacesContext contexto, UIComponent comp, String texto) {
-        ((UIInput) comp).setValid(false);
-        contexto.addMessage(comp.getClientId(contexto), new FacesMessage(FacesMessage.SEVERITY_ERROR, texto, texto));
     }
 
     private void error(String texto) {

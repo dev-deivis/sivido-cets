@@ -3,6 +3,7 @@
 <!DOCTYPE html>
 <ui:composition xmlns="http://www.w3.org/1999/xhtml"
                 xmlns:h="jakarta.faces.html"
+                xmlns:f="jakarta.faces.core"
                 xmlns:ui="jakarta.faces.facelets"
                 xmlns:p="primefaces"
                 template="/plantillas/plantillaAcceso.xhtml">
@@ -47,7 +48,9 @@
                             <p:outputLabel for="correo">Correo electrónico institucional <span class="requerido">*</span></p:outputLabel>
                             <p:inputText id="correo" type="email" value="#{panelCetsController.personal.correoInstitucional}"
                                          required="true" requiredMessage="Escribe tu correo institucional"
-                                         placeholder="usuario@cets-oaxaca.gob.mx"/>
+                                         placeholder="usuario@cets-oaxaca.gob.mx">
+                                <f:validator validatorId="correoValidator"/>
+                            </p:inputText>
                             <span class="ayuda"><i class="pi pi-info-circle"></i> Usa la cuenta asignada por el CETS.</span>
                         </div>
                         <div class="campo">

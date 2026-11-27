@@ -2,8 +2,6 @@ package controller;
 
 import jakarta.ejb.EJB;
 import jakarta.faces.application.FacesMessage;
-import jakarta.faces.component.UIComponent;
-import jakarta.faces.component.UIInput;
 import jakarta.faces.context.ExternalContext;
 import jakarta.faces.context.FacesContext;
 import jakarta.faces.view.ViewScoped;
@@ -65,35 +63,6 @@ public class SolicitudController implements Serializable {
         } else {
             estadoFolio = "duplicado";
         }
-    }
-
-    // D20 Validador del folio (la regla es de LnSolicitud). También fija estadoFolio, que usa el botón Publicar:
-    // si la validación falla, el listener ajax de validarFolio no corre.
-    public void vFolio(FacesContext contexto, UIComponent comp, Object valor) {
-        String folio = valor == null ? "" : valor.toString();
-        if (folio.isBlank()) {
-            estadoFolio = "";
-        } else if (!lnSolicitud.folioConFormatoValido(folio)) {
-            estadoFolio = "formato";
-            rechazar(contexto, comp, "El folio debe tener el formato " + getFormatoFolio());
-        } else if (!lnSolicitud.folioDisponible(folio)) {
-            estadoFolio = "duplicado";
-            rechazar(contexto, comp, "Ya existe una solicitud activa con ese folio");
-        } else {
-            estadoFolio = "valido";
-        }
-    }
-
-    // D20 Validador de la descripción (opcional): la regla es de LnSolicitud
-    public void vDescripcion(FacesContext contexto, UIComponent comp, Object valor) {
-        if (!lnSolicitud.descripcionValida(valor == null ? null : valor.toString())) {
-            rechazar(contexto, comp, "La descripción no puede pasar de 250 caracteres");
-        }
-    }
-
-    private void rechazar(FacesContext contexto, UIComponent comp, String texto) {
-        ((UIInput) comp).setValid(false);
-        contexto.addMessage(comp.getClientId(contexto), new FacesMessage(FacesMessage.SEVERITY_ERROR, texto, texto));
     }
 
     // HU-2.1 El botón "Publicar" se habilita solo con los obligatorios completos

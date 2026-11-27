@@ -92,9 +92,10 @@
                         </div>
                         <p:datePicker id="fecha" value="#{donacionController.registro.fechaDonacion}" required="true"
                                       requiredMessage="Indica la fecha de la donación"
-                                      validator="#{donacionController.vFecha}"
                                       maxdate="#{donacionController.hoy}" pattern="dd/MM/yyyy" locale="es"
-                                      timeZone="America/Mexico_City" showIcon="true"/>
+                                      timeZone="America/Mexico_City" showIcon="true">
+                            <f:validator validatorId="fechaNoFuturaValidator"/>
+                        </p:datePicker>
                         <p:message for="fecha"/>
                         <span class="ayuda">Fecha en que se realizó la extracción. La próxima fecha para donar se calcula
                             sumando 56 días (8 semanas).</span>

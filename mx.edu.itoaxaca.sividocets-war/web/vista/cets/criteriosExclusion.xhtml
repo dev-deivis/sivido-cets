@@ -118,7 +118,8 @@
                         </div>
                         <div class="campo">
                             <span class="etiqueta-campo">Tipo de exclusión <span class="requerido">*</span></span>
-                            <p:selectOneRadio id="tipoExclusion" value="#{cuestionarioController.criterio.tipoExclusion}" layout="lineDirection">
+                            <p:selectOneRadio id="tipoExclusion" value="#{cuestionarioController.criterio.tipoExclusion}" layout="lineDirection"
+                                              binding="#{tipoExclusionComp}">
                                 <f:selectItem itemLabel="Temporal" itemValue="Temporal"/>
                                 <f:selectItem itemLabel="Permanente" itemValue="Permanente"/>
                             </p:selectOneRadio>
@@ -126,10 +127,13 @@
                         <div class="campo">
                             <p:outputLabel for="dias">Días de espera</p:outputLabel>
                             <p:inputText id="dias" value="#{cuestionarioController.criterio.duracionDias}"
-                                         required="#{param['formNuevoCriterio:tipoExclusion'] eq 'Temporal'}"
+                                         required="#{tipoExclusionComp.value eq 'Temporal'}"
                                          requiredMessage="Indica los días de espera (mayor que 0) para una exclusión temporal"
                                          converterMessage="Los días deben ser un número entero"
-                                         validator="#{cuestionarioController.vDias}"/>
+                                         >
+                                <f:attribute name="tipo" value="#{tipoExclusionComp}"/>
+                                <f:validator validatorId="diasEsperaValidator"/>
+                            </p:inputText>
                             <p:message for="dias"/>
                             <span class="ayuda">Obligatorio y mayor que 0 si la exclusión es temporal. En las permanentes se ignora.</span>
                         </div>

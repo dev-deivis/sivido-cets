@@ -48,14 +48,15 @@
                             <span class="ayuda mono">#{solicitudController.formatoFolio}</span>
                         </div>
                         <p:inputText id="folio" value="#{solicitudController.solicitud.folioCETS}" maxlength="30"
-                                     validator="#{solicitudController.vFolio}"
                                      placeholder="Ej: CETS-OAX-2026-0582" styleClass="mono">
+                            <f:validator validatorId="folioValidator"/>
+                            <f:validator validatorId="folioDisponibleValidator"/>
                             <p:ajax event="keyup" delay="300" process="@this" listener="#{solicitudController.validarFolio}"
                                     update="msgFolio estadoFolio btnPublicar vistaPrevia"/>
                         </p:inputText>
                         <p:message id="msgFolio" for="folio"/>
                         <h:panelGroup id="estadoFolio" layout="block">
-                            <h:panelGroup rendered="#{solicitudController.estadoFolio eq 'valido'}"
+                            <h:panelGroup rendered="#{solicitudController.estadoFolio eq 'valido' and view.findComponent('formSolicitud:folio').valid}"
                                           styleClass="ayuda" style="color:var(--verde)">
                                 <i class="pi pi-check-circle"></i> Formato de folio válido
                             </h:panelGroup>
@@ -108,9 +109,9 @@
                         </div>
                         <p:inputTextarea id="descripcion" rows="4" maxlength="250" autoResize="false"
                                          value="#{solicitudController.solicitud.descripcion}"
-                                         validator="#{solicitudController.vDescripcion}"
                                          counter="contador" counterTemplate="Quedan {0} de 250"
                                          placeholder="Observaciones para los donadores (ej. cirugía programada)...">
+                            <f:validator validatorId="descripcionValidator"/>
                             <p:ajax event="blur" update="vistaPrevia msgDescripcion"/>
                         </p:inputTextarea>
                         <p:message id="msgDescripcion" for="descripcion"/>
@@ -122,7 +123,7 @@
                         <!-- HU-2.1 Publicar deshabilitado hasta completar los obligatorios -->
                         <p:commandButton id="btnPublicar" value="Publicar solicitud" icon="pi pi-megaphone"
                                          action="#{solicitudController.registrarSolicitud}" update="@form"
-                                         disabled="#{not solicitudController.completo}"/>
+                                         disabled="#{not solicitudController.completo or not view.findComponent('formSolicitud:folio').valid}"/>
                     </div>
                 </div>
 
@@ -144,7 +145,7 @@
                             <div>
                                 <span class="texto-chico texto-tenue">Folio CETS</span><br/>
                                 <strong class="mono texto-rojo">#{empty solicitudController.solicitud.folioCETS ? '—' : solicitudController.solicitud.folioCETS.toUpperCase()}</strong><br/>
-                                <h:panelGroup rendered="#{solicitudController.estadoFolio eq 'valido'}" styleClass="texto-chico" style="color:var(--verde)">
+                                <h:panelGroup rendered="#{solicitudController.estadoFolio eq 'valido' and view.findComponent('formSolicitud:folio').valid}" styleClass="texto-chico" style="color:var(--verde)">
                                     <i class="pi pi-check-circle"></i> Folio en regla
                                 </h:panelGroup>
                             </div>
