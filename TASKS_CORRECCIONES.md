@@ -4,8 +4,11 @@ Origen: comparación del PDF `Espec_Epicas_HU_Cronograma_Eq.GatitosLinuxeros.pdf
 (2026-11-26). Se va a verificar en la entrega que las historias de usuario coincidan con lo implementado.
 
 Reglas de siempre: rama nueva desde `main` actualizada, `Ln` delgado (el controller solo llama al Ln), la entidad viaja
-completa. Tras cualquier script
-SQL: Run. Nunca `restart-domain`.
+completa. Tras cualquier script SQL: Run. Nunca `restart-domain`.
+
+Validaciones de captura (D20): la regla vive en el Ln como método público que regresa boolean; la vista la usa con una clase
+`@FacesValidator` del paquete `validadores` (`@Dependent` + `managed=true` + `@EJB`, hereda de `ValidadorBase`) y
+`<f:validator validatorId="..."/>` con su `p:message`. Nada de métodos `v*` ni mensajes de validación en el controller.
 
 Ramas (una por tarea, para que no choquen entre sí):
 - Tarea 1: `feature/hu-contrasena-correo`
@@ -16,7 +19,7 @@ Ramas (una por tarea, para que no choquen entre sí):
 | # | Tarea | HU | Esfuerzo | Responsable |
 |---|---|---|---|---|
 | 1 | Validar contraseña y correo al crear cuenta | HU-1.1 | Chico | [Galilea] |
-| 2 | Revelar nombre y contacto del donador al familiar tras confirmar interés | HU-1.4, HU-3.3 | **Grande** | [DAVID] |
+| 2 | Revelar nombre y contacto del donador al familiar tras confirmar interés (hecha, D19) | HU-1.4, HU-3.3 | **Grande** | [DAVID] |
 | 3 | Envío de historial a la institución externa con log | HU-7.2 | Mediano (o documentar) | [Alex] |
 | 4 | Enlace a la publicación en la notificación | HU-3.1 | Chico | [Diego] |
 | 5 | HU nuevas para el PDF (constancia, exclusión permanente) | — | Documento | |
@@ -29,32 +32,39 @@ Ramas (una por tarea, para que no choquen entre sí):
 **La HU pide:** contraseña de mínimo 8 caracteres con mayúsculas, minúsculas, números y símbolos; el sistema impide la
 captura si falta un dato o el correo tiene formato inválido.
 
-**Hoy:** `crearCuenta.xhtml` muestra la lista de reglas (sin "símbolo") pero no las valida.
+**Hoy:** `crearCuenta.xhtml` ya valida el correo con `correoValidator` (existe `LnCuentas.correoValido`). La contraseña, su
+confirmación y el teléfono siguen sin validar, y la lista de reglas no menciona el símbolo.
 `CuentasController.registrarUsuario()` solo revisa que las dos contraseñas coincidan y el aviso de privacidad;
 `LnCuentas.registrarUsuario(Usuario)` solo revisa que el correo no exista. Con la contraseña `a` se crea la cuenta.
 
-**Nota (D20):** `LnCuentas.correoValido(String)` y `correoValidator` ya existen y `crearCuenta` los usa; falta `contrasenaValida` y un
-`ContrasenaValidator` (mismo patrón que `CorreoValidator`, paquete `validadores`). Al fusionar `LnCuentas` cuidado con `correoValido` duplicado.
-
 **Qué hacer:**
-- [ ] `LnCuentas`: agregar `contrasenaValida(String)` y `correoValido(String)` (métodos públicos y sin excepciones, regresan
-      `boolean`). Contraseña: `^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^A-Za-z0-9]).{8,}$`. Correo: formato simple
-      `^[^@\s]+@[^@\s]+\.[^@\s]+$`.
-- [ ] `LnCuentas.registrarUsuario`: regresar `false` si alguna falla (validación en el backend, no solo en la vista).
-- [ ] `CuentasController.registrarUsuario()`: antes de guardar, llamar a esos métodos y mostrar un mensaje específico
-      ("La contraseña no cumple las reglas", "El correo no tiene un formato válido"). Mantener "Ese correo ya está registrado".
-- [ ] `crearCuenta.xhtml`: agregar "Al menos un símbolo" a la lista de reglas y mantener los textos alineados con la regex.
-- [ ] No cambiar el login: las cuentas de prueba (`Donador2026!`, `Cets2026!`) ya cumplen la regla y la validación solo
-      aplica al registrar.
+- [ ] `LnCuentas`: agregar solo `contrasenaValida(String)` con la regex `^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^A-Za-z0-9]).{8,}$`.
+      `correoValido` ya existe: no lo dupliques.
+- [ ] `LnCuentas.registrarUsuario`: regresar `false` si `correoValido` o `contrasenaValida` fallan (el backend valida aunque la vista se salte).
+- [ ] `validadores/ContrasenaValidator` (`"contrasenaValidator"`): llama a `lnCuentas.contrasenaValida`. Mensaje: "La contraseña
+      debe tener al menos 8 caracteres, con mayúscula, minúscula, número y símbolo".
+- [ ] `validadores/ConfirmacionContrasenaValidator`: compara con el campo contraseña recibido por `binding` + `<f:attribute name="contrasena" .../>`,
+      igual que `DiasEsperaValidator` con el tipo. Mensaje: "Las contraseñas no coinciden". Quitar esa comparación de `CuentasController.registrarUsuario`.
+- [ ] Teléfono (decidir con el equipo): si la regla es 10 dígitos, `LnCuentas.telefonoValido` + `TelefonoValidator` con el mismo patrón;
+      anotarlo en `TASKS.md` sección 9.
+- [ ] `crearCuenta.xhtml`: `f:validator` en contraseña, confirmación (y teléfono si aplica), cada uno con su `p:message`; agregar
+      "Al menos un símbolo" a la lista de reglas.
+- [ ] `CuentasController`: no agregar métodos `v*`; solo muestra el mensaje general si el Ln regresa `false`. Mantener "Ese correo
+      ya está registrado" y el aviso de privacidad.
+- [ ] No cambiar el login: las cuentas de prueba ya cumplen la regla y la validación solo aplica al registrar.
 
 **Terminado cuando:**
 - Contraseña `abc` → no crea la cuenta y dice por qué. `Abcdefg1` (sin símbolo) → no. `Abcdef1!` → sí.
+- Contraseñas distintas → "Las contraseñas no coinciden" junto al campo de confirmación.
+- Los mensajes salen junto a cada campo, no arriba.
 - Correo `juan@` → no. Correo repetido → "Ese correo ya está registrado".
 - SQL: la cuenta nueva guarda hash de 64 caracteres.
 
 ---
 
 ## Tarea 2 — Revelar contacto del donador al familiar (HU-1.4 y HU-3.3) — [DAVID]
+
+**Estado:** hecha (D19). Vista `solicitudes/interesados?id=N` con `LnSolicitud.obtenerInteresados` y `obtenerSolicitudPropia`; en miPerfil queda un solo toggle, "Compartir mi contacto solo cuando yo confirme interés", ligado a `consentimientoContacto`. Lo de abajo describe el estado antes de implementarla.
 
 **La HU pide:**
 - HU-3.3: "La identidad y datos de contacto del donador se revelan al familiar únicamente tras esta confirmación voluntaria."
@@ -72,7 +82,7 @@ otra vista. Ninguna pantalla del familiar muestra datos del donador, así que la
 - Solo el familiar creador de la solicitud lo ve (comparar el id del usuario en sesión con el creador, como en `obtenerConstancia`).
 - Nunca ubicación, y nunca mostrar `passwordHash` ni la entidad completa en la vista: pintar solo los campos que se necesitan
   (cuidado con lo que ya anotamos en la inconsistencia #40).
-- El toggle de `miPerfil` "Compartir mi contacto solo cuando yo confirme interés" (hoy deshabilitado, D14): decidir si se
+- El toggle de `miPerfil` "Compartir mi contacto solo cuando yo confirme interés" (se quitó el deshabilitado; quedó uno solo, D19): decidir si se
   habilita usando `consentimientoContacto` o si se deja el texto actual y se aclara en el aviso.
 
 **Qué hacer:**
