@@ -50,6 +50,7 @@ public class CuestionarioController implements Serializable {
     // HU-4.3
     private CriterioExclusion criterio;
     private List<CriterioExclusion> catalogo = new ArrayList<>();
+    private String filtroCatalogo = "Todos";     // HU-4.3: píldoras de filtro del catálogo
 
     public CuestionarioController() {   // sin @PostConstruct: jakarta.annotation no está en el classpath del war
         cuestionario = new CuestionarioRespuesta();
@@ -215,20 +216,28 @@ public class CuestionarioController implements Serializable {
         return catalogo.size();
     }
 
-    public long getTotalTemporales() {
-        return catalogo.stream().filter(c -> "Temporal".equals(c.getTipoExclusion())).count();
+    // HU-4.3 El filtro solo afecta a la tabla; los contadores cuentan siempre el catálogo completo
+    public List<CriterioExclusion> getCatalogoFiltrado() {
+        return catalogo.stream().filter(c -> cumple(c, filtroCatalogo)).toList();
     }
 
-    public long getTotalPermanentes() {
-        return catalogo.stream().filter(c -> "Permanente".equals(c.getTipoExclusion())).count();
+    public long contar(String filtro) {
+        return catalogo.stream().filter(c -> cumple(c, filtro)).count();
     }
 
-    public long getTotalActivos() {
-        return catalogo.stream().filter(CriterioExclusion::getActivo).count();
-    }
-
-    public long getTotalInactivos() {
-        return catalogo.stream().filter(c -> !c.getActivo()).count();
+    // Un valor desconocido (distinto de los 4 filtros) equivale a "Todos"
+    private boolean cumple(CriterioExclusion c, String filtro) {
+        switch (filtro) {
+            case "Temporal":
+            case "Permanente":
+                return filtro.equals(c.getTipoExclusion());
+            case "Activos":
+                return c.getActivo();
+            case "Inactivos":
+                return !c.getActivo();
+            default:
+                return true;
+        }
     }
 
     public CuestionarioRespuesta getCuestionario() {
@@ -261,5 +270,13 @@ public class CuestionarioController implements Serializable {
 
     public List<CriterioExclusion> getCatalogo() {
         return catalogo;
+    }
+
+    public String getFiltroCatalogo() {
+        return filtroCatalogo;
+    }
+
+    public void setFiltroCatalogo(String filtroCatalogo) {
+        this.filtroCatalogo = filtroCatalogo;
     }
 }

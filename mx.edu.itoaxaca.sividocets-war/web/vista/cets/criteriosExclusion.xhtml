@@ -31,17 +31,18 @@
         <div class="grid grid-principal">
             <!-- Catálogo -->
             <div class="columna">
-                <div class="fila-entre">
-                    <div class="pildoras pildoras-info">
-                        <span class="pildora">Todos (#{cuestionarioController.totalCatalogo})</span>
-                        <span class="pildora">Temporal (#{cuestionarioController.totalTemporales})</span>
-                        <span class="pildora">Permanente (#{cuestionarioController.totalPermanentes})</span>
-                        <span class="pildora">Activos (#{cuestionarioController.totalActivos})</span>
-                        <span class="pildora">Inactivos (#{cuestionarioController.totalInactivos})</span>
-                    </div>
-                </div>
-
                 <h:form id="formCatalogo">
+                    <div class="fila-entre mb-2">
+                        <div class="pildoras">
+                            <!-- HU-4.3: filtro de la tabla; los contadores son del catálogo completo -->
+                            <ui:repeat value="#{['Todos','Temporal','Permanente','Activos','Inactivos']}" var="fl">
+                                <p:commandLink update="@form" styleClass="pildora #{cuestionarioController.filtroCatalogo eq fl ? 'activa' : ''}">
+                                    <f:setPropertyActionListener target="#{cuestionarioController.filtroCatalogo}" value="#{fl}"/>
+                                    #{fl} (#{cuestionarioController.contar(fl)})
+                                </p:commandLink>
+                            </ui:repeat>
+                        </div>
+                    </div>
                     <div class="tabla-contenedor">
                         <table class="tabla">
                             <thead>
@@ -55,7 +56,7 @@
                                 </tr>
                             </thead>
                             <tbody>
-                                <ui:repeat value="#{cuestionarioController.catalogo}" var="c">
+                                <ui:repeat value="#{cuestionarioController.catalogoFiltrado}" var="c">
                                     <tr>
                                         <td><strong>#{c.criterio}</strong></td>
                                         <td>#{c.tipoRespuesta == 'SiNo' ? 'Sí / No' : 'Selección simple'}</td>
@@ -80,10 +81,16 @@
                                         </td>
                                     </tr>
                                 </ui:repeat>
+                                <ui:fragment rendered="#{empty cuestionarioController.catalogoFiltrado}">
+                                    <tr><td colspan="6" class="texto-tenue">Sin criterios en este filtro.</td></tr>
+                                </ui:fragment>
                             </tbody>
                         </table>
                         <div class="pie-tabla">
-                            <span>#{cuestionarioController.totalCatalogo} criterios en el catálogo</span>
+                            <h:outputText value="#{cuestionarioController.totalCatalogo} criterios en el catálogo"
+                                          rendered="#{cuestionarioController.filtroCatalogo eq 'Todos'}"/>
+                            <h:outputText value="#{cuestionarioController.catalogoFiltrado.size()} de #{cuestionarioController.totalCatalogo} criterios (filtro: #{cuestionarioController.filtroCatalogo})"
+                                          rendered="#{cuestionarioController.filtroCatalogo ne 'Todos'}"/>
                         </div>
                     </div>
                 </h:form>
