@@ -12,6 +12,7 @@ import java.io.Serializable;
 import java.util.List;
 import ln.LnSolicitud;
 import modelo.Hospital;
+import modelo.Interes;
 import modelo.SolicitudReposicion;
 
 /**
@@ -43,6 +44,8 @@ public class SolicitudController implements Serializable {
 
     private List<Hospital> hospitales;
     private List<SolicitudReposicion> misSolicitudes;
+    private List<Interes> interesados;          // D19: donadores que confirmaron interés
+    private boolean accesoDenegado;             // D19: solicitud inexistente o de otro familiar
 
     public SolicitudController() {
         solicitud = new SolicitudReposicion();
@@ -96,6 +99,18 @@ public class SolicitudController implements Serializable {
             return;
         }
         misSolicitudes = lnSolicitud.listarMisSolicitudes(sesion.getUsuario());
+    }
+
+    // D19 / HU-3.3 obtenerInteresados (f:viewAction al abrir interesados?id=N): solo el creador de la solicitud
+    public void cargarInteresados() throws IOException {
+        sesion.verificar();
+        if (FacesContext.getCurrentInstance().getResponseComplete()) {
+            return;
+        }
+        SolicitudReposicion propia = lnSolicitud.obtenerSolicitudPropia(solicitud, sesion.getUsuario());
+        accesoDenegado = propia == null;
+        interesados = accesoDenegado ? null : lnSolicitud.obtenerInteresados(propia, sesion.getUsuario());
+        solicitud = accesoDenegado ? new SolicitudReposicion() : propia;
     }
 
     // HU-2.2 / HU-1.4 obtenerPublicacion (f:viewAction al abrir publicacion?uuid=)
@@ -178,6 +193,14 @@ public class SolicitudController implements Serializable {
 
     public String getUrlPublicacion() {
         return urlPublicacion;
+    }
+
+    public List<Interes> getInteresados() {
+        return interesados;
+    }
+
+    public boolean isAccesoDenegado() {
+        return accesoDenegado;
     }
 
     public List<SolicitudReposicion> getMisSolicitudes() {

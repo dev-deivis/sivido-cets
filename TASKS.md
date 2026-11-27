@@ -1026,6 +1026,11 @@ interés confirmado.
 
 La parte de `Usuario.consentimientoContacto` (checkbox en miPerfil) la hace [DAVID] en HU-1.3.
 
+**D19 (contacto del donador al familiar):** `LnSolicitud.obtenerSolicitudPropia` y `obtenerInteresados(SolicitudReposicion, Usuario)`,
+`SolicitudController.cargarInteresados` y la vista `solicitudes/interesados?id=N` (también HU-3.3). **Pendiente del `.vpp`:**
+agregar `ControlSolicitud.obtenerInteresados` / `LnSolicitud.obtenerInteresados`, la vista `InteresadosSolicitud` y reemplazar
+`PublicacionSolicitud.mostrarContactoDonador(int)`.
+
 **Secuencia (`.vpp`)**
 
 | # | Mensaje en el diagrama | Equivalente en código |
@@ -2165,6 +2170,11 @@ Lo que sigue **no** es un fallo de esa pasada: son límites aceptados.
 `historial/constancia`), **Descargar QR** e **Imprimir ficha** (`publicacion`), **Marcar exclusión permanente** (`cets/donadores`) y la
 **lista de interesados** de HU-6.3 (`obtenerInteresados`, que el `.vpp` no tiene).
 - **Diagramas (`SIVIDO_CETS_U4.vpp`), pendientes:** dudas 6a–6d de las secuencias (mensajes que no coinciden con el código, solo anotados); HU-2.1 sin `buscarDonadoresCercanos`; falta la dependencia `ControlPanelCETS` → `ControlCuentas` en el diagrama de clases; HU-6.1 sin la comprobación de `activo`; 36 métodos de entidades sin tocar; `generarQR` y `contarRegistros` (#15); `Interes` sin ligar al ORM.
+- [ ] **HU-1.4 / HU-3.3 Contacto del donador al familiar (D19):**
+  - 903 (O−) confirma interés en la solicitud 901 con el consentimiento apagado → 902 en `misSolicitudes` → "Ver donadores interesados": ve nombre, tipo de sangre y fecha, y "Este donador no compartió su contacto".
+  - 903 enciende el toggle en `miPerfil` y guarda → 902 recarga y ve teléfono y correo; al apagarlo, vuelve el aviso.
+  - Otro familiar abre `interesados?id=<id>` a mano → "Solicitud no disponible". Sin sesión → login.
+  - Ctrl+U: sin `passwordHash`, ubicación ni teléfono/correo con el consentimiento apagado. `publicacion` y el detalle CETS (#17) no cambian.
 
 ---
 
@@ -2188,11 +2198,12 @@ quedó el trabajo en este documento.
 | D11 | Valores de `criteriosExclusion` | Solo `SiNo` / `SeleccionSimple`; se quita "Selección múltiple". `tipoExclusion` va como `Temporal` / `Permanente` (sin minúsculas). | [Alex] HU-4.3 |
 | D12 | Diagrama desactualizado | Actualizar el diagrama de clases y las secuencias: firmas con entidad completa, `Interes`, `SesionController`, `iniciarSesion` devuelve `Usuario`, métodos de entidades movidos a los Controls y mensajes del Ln delgado. | [DAVID] T-final |
 | D13 | `consentimientoContacto` | **Opt-in: apagado por defecto** (manda el `DEFAULT FALSE` de la BD). Se activa solo si el donador lo elige en miPerfil. | [DAVID] HU-1.3 (hecho) |
-| D14 | Toggles sin columna | "Compartir mi contacto solo cuando yo confirme interés" y "Recibir avisos de solicitudes compatibles" quedan **deshabilitados** en miPerfil, con una nota, sin conectarlos a nada. | [DAVID] HU-1.3 (hecho) |
+| D14 | Toggles sin columna | "Recibir avisos de solicitudes compatibles" queda **deshabilitado** en miPerfil, con una nota, sin conectarlos a nada. | [DAVID] HU-1.3 (hecho) |
 | D15 | Combo "Región" | Se **elimina**: no existe columna y la ubicación (D1) lo reemplaza. | [DAVID] HU-1.3 (hecho) |
 | D16 | Controller de miPerfil | `PerfilController` (`@ViewScoped`) y no `CuentasController` (`@RequestScoped`): el perfil debe conservarse entre los clics de la vista. Los dos usan `LnCuentas`. | [DAVID] HU-1.3 / HU-3.4 (hecho) |
 | D17 | Cuestionario Apto y confirmar interés | El resultado **Apto** del cuestionario es **orientativo, no obligatorio**: `registrarInteres` no lo exige. Sí exige solicitud Activa, que el donador no sea el solicitante, compatibilidad tipo/Rh y `esElegible` (56 días y exclusión permanente). | [Alex] HU-3.3 / HU-4.2 — **decidida** |
 | D18 | Cuándo no se registra una donación | **No se puede registrar una donación si el donador tiene exclusión permanente, la fecha es futura, ya donó ese día, la fecha queda a menos de 56 días de cualquier donación suya (antes o después) o, cuando hay solicitud, la solicitud no está Activa o su grupo/Rh es incompatible: la compatibilidad bloquea la donación cuando hay solicitud.** Lo valida `LnDonacion.registrarDonacion` (vía `motivoRechazoDonacion`); la vista muestra el motivo y deshabilita el botón. La donación general (sin solicitud) no revisa compatibilidad. | [DAVID] HU-5.1 — **decidida** |
+| D19 | Contacto del donador al familiar | El familiar **creador** de la solicitud ve en `solicitudes/interesados?id=N` a los donadores que confirmaron interés (`Interes`): **siempre** nombre, tipo de sangre y fecha; **teléfono y correo solo si** `Usuario.consentimientoContacto = true` al mostrar (si no: "Este donador no compartió su contacto"). Nunca ubicación ni `passwordHash`; no se muestra en `publicacion` ni al CETS (#17 sigue solo con nombre y tipo de sangre). Lo valida `LnSolicitud.obtenerInteresados`/`obtenerSolicitudPropia` (creador = usuario en sesión). En miPerfil queda **un solo** toggle, "Compartir mi contacto solo cuando yo confirme interés", ligado a `consentimientoContacto`. | [DAVID] HU-1.4 / HU-3.3 — **decidida** |
 
 ---
 
@@ -2224,9 +2235,9 @@ Siguen **abiertas**: necesitan una decisión del equipo o del profe. Lo ya resue
 4. **HU-1.3:** `PerfilClinico.marcarElegibilidadPreliminar(): boolean` regresa `elegible`, pero **no hay columna**
    para guardarlo. **No se implementó** (tampoco hay regla definida).
 5. **HU-1.3, miPerfil:** el toggle "Recibir avisos" no tiene columna en la BD, y la edición de datos personales
-   (nombre/teléfono) no tiene HU. Los toggles sin columna quedaron deshabilitados (D14) y los datos personales son de
+   (nombre/teléfono) no tiene HU. El toggle sin columna quedó deshabilitado (D14) y los datos personales son de
    solo lectura.
-6. **HU-1.4 / HU-3.3:** `PublicacionSolicitud.mostrarContactoDonador(int solicitudId)` (HU-3.3, 1.1.4) contradice la
+6. **HU-1.4 / HU-3.3 (cerrada, D19):** `PublicacionSolicitud.mostrarContactoDonador(int solicitudId)` (HU-3.3, 1.1.4) contradice la
    vista pública, que no lleva sesión. No está definido **a quién** se le muestra el contacto del donador (¿al familiar
    en misSolicitudes?) ni cómo entra `consentimientoContacto`.
 7. **HU-3.1:**
@@ -2417,7 +2428,8 @@ Siguen **abiertas**: necesitan una decisión del equipo o del profe. Lo ya resue
     base o leerla de un atributo HTML escapado.
 40. **`obtenerPublicacion` regresa la entidad completa** (con `usuarioid`: nombre, teléfono, correo y `passwordHash` del
     familiar). Hoy es seguro solo porque `publicacion.xhtml` no lo pinta; cualquier EL nuevo que lo toque lo expondría
-    (aceptado en HU-1.4 por la regla de no modificar la entidad).
+    (aceptado en HU-1.4 por la regla de no modificar la entidad). `solicitudes/interesados` (D19) también depende de pintar solo
+    campos sueltos de `Interes.usuario` (nombre, tipo de sangre y, con consentimiento, teléfono y correo).
 41. **`buscarDonadores` no escapa `%` ni `_`:** la consulta está parametrizada (sin inyección SQL), pero buscar `%` lista a
     todos los donadores con perfil. Solo lo usa el CETS. Pendiente.
 42. **Donaciones duplicadas y regla de 56 días (cerrada):** `LnDonacion.registrarDonacion` valida contra la **fecha de la donación** del

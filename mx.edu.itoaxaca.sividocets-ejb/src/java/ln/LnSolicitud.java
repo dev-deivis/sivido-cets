@@ -1,6 +1,7 @@
 package ln;
 
 import acceso_datos.HospitalFacade;
+import acceso_datos.InteresFacade;
 import acceso_datos.SolicitudReposicionFacade;
 import acceso_datos.UsuarioFacade;
 import jakarta.ejb.EJB;
@@ -10,6 +11,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.UUID;
 import modelo.Hospital;
+import modelo.Interes;
 import modelo.SolicitudReposicion;
 import modelo.Usuario;
 
@@ -41,6 +43,10 @@ public class LnSolicitud {
 
     @EJB
     private UsuarioFacade usuarioF;
+
+    // D19: lee los interesados directamente (no se inyecta LnNotificacion ni LnPanelCETS: dependencia circular)
+    @EJB
+    private InteresFacade interesF;
 
     // HU-3.1: avisa a los donadores compatibles y cercanos al registrar la solicitud
     @EJB
@@ -113,6 +119,23 @@ public class LnSolicitud {
     // HU-2.3 (2) listarMisSolicitudes
     public List<SolicitudReposicion> listarMisSolicitudes(Usuario u) {
         return solicitudF.buscarPorUsuario(u);
+    }
+
+    // D19 La solicitud solo si el familiar es su creador; null si no existe o es ajena
+    public SolicitudReposicion obtenerSolicitudPropia(SolicitudReposicion s, Usuario familiar) {
+        if (s == null || s.getId() == null || familiar == null || familiar.getId() == null) {
+            return null;
+        }
+        SolicitudReposicion solicitud = solicitudF.find(s.getId());
+        boolean propia = solicitud != null && solicitud.getUsuarioid().getId().equals(familiar.getId());
+        return propia ? solicitud : null;
+    }
+
+    // D19 / HU-1.4 / HU-3.3: donadores que confirmaron interés, solo para el creador; null si no es suya.
+    // Nombre y tipo de sangre siempre; teléfono y correo solo si Usuario.consentimientoContacto (lo decide la vista).
+    public List<Interes> obtenerInteresados(SolicitudReposicion s, Usuario familiar) {
+        SolicitudReposicion propia = obtenerSolicitudPropia(s, familiar);
+        return propia == null ? null : interesF.buscarPorSolicitud(propia);
     }
 
     // HU-2.1 tipoSanguineo ∈ {A, B, AB, O} y factorRh ∈ {+, -} (CHECK de la BD)

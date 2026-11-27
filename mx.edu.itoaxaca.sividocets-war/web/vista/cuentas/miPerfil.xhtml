@@ -142,18 +142,10 @@
                         <div class="tarjeta-cabecera"><h2><i class="pi pi-shield texto-rojo"></i> Privacidad</h2></div>
                         <div class="preferencia">
                             <div>
-                                <strong>Permitir que se revele mi contacto al confirmar interés</strong>
-                                <p>Apagado por defecto. Si lo activas, al confirmar tu interés en una solicitud se podrá revelar tu contacto; si no, nadie verá tu teléfono ni tu nombre completo.</p>
+                                <strong>Compartir mi contacto solo cuando yo confirme interés</strong>
+                                <p>Apagado por defecto. Si lo activas, el familiar que creó la solicitud donde confirmes tu interés verá tu teléfono y correo. Si no, solo verá tu nombre y tu tipo de sangre. Tu ubicación nunca se comparte.</p>
                             </div>
                             <p:toggleSwitch id="consentimientoContacto" value="#{perfilController.perfil.usuario.consentimientoContacto}"/>
-                        </div>
-                        <div class="preferencia">
-                            <div>
-                                <strong>Compartir mi contacto solo cuando yo confirme interés</strong>
-                                <p>Nadie verá tu teléfono ni tu nombre completo hasta que confirmes tu interés en una solicitud.</p>
-                                <span class="ayuda"><i class="pi pi-clock"></i> Aún no disponible: no tiene dónde guardarse en la base de datos.</span>
-                            </div>
-                            <p:toggleSwitch id="soloAlConfirmar" value="false" disabled="true"/>
                         </div>
                         <div class="preferencia mb-0">
                             <div>

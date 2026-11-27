@@ -88,6 +88,10 @@
                                             <f:param name="uuid" value="#{s.uuidPublico}"/>
                                             <i class="pi pi-qrcode"></i> Ver publicación y QR
                                         </h:link>
+                                        <h:link outcome="/vista/solicitudes/interesados" styleClass="boton suave chico">
+                                            <f:param name="id" value="#{s.id}"/>
+                                            <i class="pi pi-users"></i> Ver donadores interesados
+                                        </h:link>
                                     </td>
                                 </tr>
                             </ui:repeat>

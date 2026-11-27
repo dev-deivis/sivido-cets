@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Donadores interesados — D19 (HU-1.4, HU-3.3): solo el familiar creador de la solicitud -->
+<!DOCTYPE html>
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:h="jakarta.faces.html"
+                xmlns:f="jakarta.faces.core"
+                xmlns:ui="jakarta.faces.facelets"
+                xmlns:p="primefaces"
+                template="/plantillas/plantillaUsuario.xhtml">
+
+    <ui:param name="menuActivo" value="misSolicitudes"/>
+
+    <ui:define name="metadata">
+        <f:metadata>
+            <f:viewParam name="id" value="#{solicitudController.solicitud.id}"/>
+            <f:viewAction action="#{solicitudController.cargarInteresados}"/>
+        </f:metadata>
+    </ui:define>
+    <ui:define name="titulo">Donadores interesados · SIVIDO</ui:define>
+
+    <ui:define name="content">
+        <div class="mb-2">
+            <h:link outcome="/vista/solicitudes/misSolicitudes" styleClass="enlace-flecha"><i class="pi pi-arrow-left"></i> Volver a mis solicitudes</h:link>
+        </div>
+
+        <!-- Solicitud inexistente o de otro familiar: sin ningún dato -->
+        <h:panelGroup rendered="#{solicitudController.accesoDenegado}" layout="block"
+                      styleClass="tarjeta texto-centro" style="padding:2.5rem 1.5rem">
+            <span class="icono-caja" style="width:56px;height:56px"><i class="pi pi-lock" style="font-size:24px"></i></span>
+            <h2 class="mt-2">Solicitud no disponible</h2>
+            <p class="texto-sec">La solicitud no existe o no es tuya.</p>
+        </h:panelGroup>
+
+        <h:panelGroup rendered="#{not solicitudController.accesoDenegado}" layout="block">
+            <div class="encabezado-pagina fila-entre">
+                <div>
+                    <span class="sobretitulo"><i class="pi pi-receipt"></i> Folio</span>
+                    <h1 class="mono texto-rojo">#{solicitudController.solicitud.folioCETS}</h1>
+                    <div class="fila texto-sec texto-chico">
+                        <span><i class="pi pi-building"></i> #{solicitudController.solicitud.hospitalid.nombre}</span>
+                        <span class="estatus #{solicitudController.solicitud.estatus.toLowerCase()}">#{solicitudController.solicitud.estatus}</span>
+                    </div>
+                </div>
+                <span class="grupo-sangre grande">#{solicitudController.solicitud.tipoSanguineo}#{solicitudController.solicitud.factorRh}</span>
+            </div>
+
+            <div class="tarjeta">
+                <h2><i class="pi pi-users texto-rojo"></i> Donadores que confirmaron interés</h2>
+                <span class="texto-chico texto-tenue">Siempre ves nombre y tipo de sangre. El teléfono y el correo solo aparecen si el donador lo permitió en su perfil. Nunca se muestra su ubicación.</span>
+
+                <ui:fragment rendered="#{empty solicitudController.interesados}">
+                    <p class="texto-sec mt-2 mb-0">Aún nadie ha confirmado interés en esta solicitud.</p>
+                </ui:fragment>
+
+                <ui:fragment rendered="#{not empty solicitudController.interesados}">
+                    <div class="tabla-contenedor mt-2">
+                        <table class="tabla">
+                            <thead><tr><th>Donador</th><th>Tipo de sangre</th><th>Confirmó</th><th>Contacto</th></tr></thead>
+                            <tbody>
+                                <ui:repeat value="#{solicitudController.interesados}" var="i">
+                                    <tr>
+                                        <td><strong>#{i.usuario.nombreCompleto}</strong></td>
+                                        <td><span class="grupo-sangre">#{empty i.usuario.perfilClinico ? '—' : i.usuario.perfilClinico.tipoSanguineo.concat(i.usuario.perfilClinico.factorRh)}</span></td>
+                                        <td>
+                                            <h:outputText value="#{i.fechaInteres}">
+                                                <f:convertDateTime pattern="dd/MM/yyyy HH:mm 'hrs'" timeZone="America/Mexico_City"/>
+                                            </h:outputText>
+                                        </td>
+                                        <td>
+                                            <ui:fragment rendered="#{i.usuario.consentimientoContacto}">
+                                                <i class="pi pi-mobile"></i> #{i.usuario.telefono}<br/>
+                                                <i class="pi pi-envelope"></i> #{i.usuario.correo}
+                                            </ui:fragment>
+                                            <ui:fragment rendered="#{not i.usuario.consentimientoContacto}">
+                                                <span class="texto-tenue">Este donador no compartió su contacto</span>
+                                            </ui:fragment>
+                                        </td>
+                                    </tr>
+                                </ui:repeat>
+                            </tbody>
+                        </table>
+                    </div>
+                </ui:fragment>
+            </div>
+        </h:panelGroup>
+    </ui:define>
+</ui:composition>
