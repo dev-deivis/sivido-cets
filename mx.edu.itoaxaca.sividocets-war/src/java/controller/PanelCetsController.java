@@ -43,6 +43,8 @@ public class PanelCetsController implements Serializable {
 
     // HU-6.2: filtro (la entidad nueva ya trae estatus "Activa") y resultado
     private SolicitudReposicion filtro;
+    // Texto del buscador (folio u hospital): filtra en el controller la lista que ya regresó el Ln
+    private String busqueda;
     private List<SolicitudReposicion> solicitudes;
     // Donadores interesados por solicitud (id de solicitud → cantidad), para la tabla
     private Map<Integer, Integer> interesados = new HashMap<>();
@@ -132,11 +134,30 @@ public class PanelCetsController implements Serializable {
     }
 
     private void cargarSolicitudes(List<SolicitudReposicion> lista) {
-        solicitudes = lista;
+        solicitudes = new java.util.ArrayList<>();
         interesados = new HashMap<>();
+        String buscado = normalizar(busqueda);
         for (SolicitudReposicion s : lista) {
+            if (!buscado.isEmpty() && !coincide(s, buscado)) {
+                continue;
+            }
+            solicitudes.add(s);
             interesados.put(s.getId(), lnPanelCETS.obtenerCantidadInteresados(s));
         }
+    }
+
+    // El buscador compara el folio o el nombre del hospital, sin mayúsculas ni acentos
+    private boolean coincide(SolicitudReposicion s, String buscado) {
+        String hospital = s.getHospitalid() == null ? null : s.getHospitalid().getNombre();
+        return normalizar(s.getFolioCETS()).contains(buscado) || normalizar(hospital).contains(buscado);
+    }
+
+    private String normalizar(String texto) {
+        if (texto == null) {
+            return "";
+        }
+        return java.text.Normalizer.normalize(texto.trim(), java.text.Normalizer.Form.NFD)
+                .replaceAll("\\p{M}", "").toLowerCase();
     }
 
     // f:viewAction corre antes que el preRenderView de la plantilla: se verifica aquí para no consultar
@@ -205,6 +226,14 @@ public class PanelCetsController implements Serializable {
 
     public void setFiltro(SolicitudReposicion filtro) {
         this.filtro = filtro;
+    }
+
+    public String getBusqueda() {
+        return busqueda;
+    }
+
+    public void setBusqueda(String busqueda) {
+        this.busqueda = busqueda;
     }
 
     public List<SolicitudReposicion> getSolicitudes() {

@@ -695,8 +695,7 @@ public List<String> receptoresCompatibles(PerfilClinico p)   // "puedes donar a.
 - **Privacidad (D8, decisión D13):**
   - El toggle **"Permitir que se revele mi contacto al confirmar interés"** está ligado a
     `perfil.usuario.consentimientoContacto` y **apagado por defecto** (opt-in; manda el `DEFAULT FALSE` de la BD).
-  - "Compartir mi contacto solo cuando yo confirme interés" y "Recibir avisos de solicitudes compatibles" no tienen columna:
-    quedan **deshabilitados** con una nota (D14).
+  - "Recibir avisos de solicitudes compatibles" no tenía columna: se **quitó** de la vista (D14). Queda un solo toggle, el de contacto.
 - Tras cada guardado (con éxito o con error) la vista vuelve a leer de la BD, así siempre muestra lo realmente guardado.
   Un rechazo descarta lo que el usuario había elegido.
 - La protección de sesión es la de `plantillaUsuario`; `PerfilController` la repite antes de consultar la BD (como en
@@ -728,7 +727,7 @@ public List<String> receptoresCompatibles(PerfilClinico p)   // "puedes donar a.
 - [x] `guardarPerfilClinico`, `obtenerPerfilClinico` y `receptoresCompatibles` en `LnCuentas`
 - [x] `PerfilController` (`perfil` inicializado en el constructor; carga con `f:viewAction`)
 - [x] Vista sin datos fijos; combo "Región" reemplazado por "Usar mi ubicación" + `h:inputHidden` (D1)
-- [x] Toggle `consentimientoContacto` apagado por defecto (D8, D13); toggles sin columna deshabilitados (D14)
+- [x] Toggle `consentimientoContacto` apagado por defecto (D8, D13); toggle sin columna quitado (D14)
 - [x] `sesion.getUsuario().setPerfilClinico(...)` después de guardar (otras vistas leen el perfil de la sesión)
 - [x] Compila (`clean dist` en una copia del proyecto: `BUILD SUCCESSFUL`, 0 warnings)
 - [x] Pruebas HTTP (41 comprobaciones, todas OK; el script crea y borra su propio usuario): perfil nuevo y actualizado, tipo o
@@ -1826,7 +1825,7 @@ Valores que usa todo el equipo (los mismos en todas las variantes):
 |---|---|
 | Base de datos | `sivido` |
 | Usuario MySQL | `sivido` |
-| Contraseña MySQL | `Sivido2026!` |
+| Contraseña MySQL | `<contraseña-de-mysql>` |
 | Pool | `sividoPool` |
 | Recurso JDBC | `jdbc/sivido` |
 
@@ -1851,7 +1850,7 @@ Luego ejecuta:
 
 ```sql
 CREATE DATABASE sivido CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
-CREATE USER 'sivido'@'localhost' IDENTIFIED BY 'Sivido2026!';
+CREATE USER 'sivido'@'localhost' IDENTIFIED BY '<contraseña-de-mysql>';
 GRANT ALL ON sivido.* TO 'sivido'@'localhost';
 FLUSH PRIVILEGES;
 ```
@@ -1917,7 +1916,7 @@ cd ~/Payara_Server/bin
 ./asadmin create-jdbc-connection-pool \
   --restype javax.sql.DataSource \
   --datasourceclassname com.mysql.cj.jdbc.MysqlDataSource \
-  --property 'user=sivido:password=Sivido2026!:serverName=localhost:portNumber=3306:databaseName=sivido:useSSL=false:allowPublicKeyRetrieval=true:serverTimezone=America/Mexico_City' \
+  --property 'user=sivido:password=<contraseña-de-mysql>:serverName=localhost:portNumber=3306:databaseName=sivido:useSSL=false:allowPublicKeyRetrieval=true:serverTimezone=America/Mexico_City' \
   sividoPool
 ./asadmin create-jdbc-resource --connectionpoolid sividoPool jdbc/sivido
 ./asadmin set resources.jdbc-connection-pool.sividoPool.driver-classname=com.mysql.cj.jdbc.Driver
@@ -1935,7 +1934,7 @@ Una línea por comando, con comillas dobles:
 
 ```bat
 cd C:\<ruta-payara>\bin
-asadmin create-jdbc-connection-pool --restype javax.sql.DataSource --datasourceclassname com.mysql.cj.jdbc.MysqlDataSource --property "user=sivido:password=Sivido2026!:serverName=localhost:portNumber=3306:databaseName=sivido:useSSL=false:allowPublicKeyRetrieval=true:serverTimezone=America/Mexico_City" sividoPool
+asadmin create-jdbc-connection-pool --restype javax.sql.DataSource --datasourceclassname com.mysql.cj.jdbc.MysqlDataSource --property "user=sivido:password=<contraseña-de-mysql>:serverName=localhost:portNumber=3306:databaseName=sivido:useSSL=false:allowPublicKeyRetrieval=true:serverTimezone=America/Mexico_City" sividoPool
 asadmin create-jdbc-resource --connectionpoolid sividoPool jdbc/sivido
 asadmin set resources.jdbc-connection-pool.sividoPool.driver-classname=com.mysql.cj.jdbc.Driver
 asadmin set "resources.jdbc-connection-pool.sividoPool.property.URL=jdbc:mysql://localhost:3306/sivido?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=America/Mexico_City"
@@ -1961,7 +1960,7 @@ asadmin ping-connection-pool sividoPool
    | Name | Value |
    |---|---|
    | `user` | `sivido` |
-   | `password` | `Sivido2026!` |
+   | `password` | `<contraseña-de-mysql>` |
    | `serverName` | `localhost` |
    | `portNumber` | `3306` |
    | `databaseName` | `sivido` |
@@ -2175,13 +2174,16 @@ Lo que sigue **no** es un fallo de esa pasada: son límites aceptados.
   - 903 enciende el toggle en `miPerfil` y guarda → 902 recarga y ve teléfono y correo; al apagarlo, vuelve el aviso.
   - Otro familiar abre `interesados?id=<id>` a mano → "Solicitud no disponible". Sin sesión → login.
   - Ctrl+U: sin `passwordHash`, ubicación ni teléfono/correo con el consentimiento apagado. `publicacion` y el detalle CETS (#17) no cambian.
-- [ ] **D20 Validadores JSF reutilizables (paquete `validadores`):**
+- [x] **D20 Validadores JSF reutilizables (paquete `validadores`):**
   - `capturarSolicitud`: folio `CETS-OAX-2026-0582` (válido: "Formato de folio válido", "Folio en regla" y Publicar habilitado); `abc` (mensaje de formato junto al campo, **sin** verde y Publicar deshabilitado); corregirlo (vuelven el verde y el botón); folio de una Activa (mensaje de duplicado); vacío (sin mensaje, botón deshabilitado). Descripción de 250 (pasa), 300 pegados (mensaje junto al campo), vacía (pasa) y una de ~249 caracteres con varios saltos de línea (pasa; el Ln cuenta limpio).
   - `capturarDonacion`: fecha de hoy y de ayer (pasan); futura forzada (mensaje junto al campo); vacía ("Indica la fecha de la donación").
   - `criteriosExclusion`: **crear** y **editar** un Temporal con 365 (guarda); Temporal con 0, -5, `abc` y vacío, tanto al crear como al editar (mensaje junto a "Días de espera", no guarda); Permanente con días vacíos (guarda); Temporal→Permanente con días vacíos (guarda); pregunta vacía.
   - `cets/donadores` (#13): motivo válido (marca); vacío, solo espacios y 201 caracteres (mensaje dentro del diálogo, que se reabre).
   - Correo inválido (`juan@prueba`, `juan`, `juan@`) en `crearCuenta`, `iniciarSesion` y `loginInstitucional`: "El correo no tiene un formato válido"; válidos (`donador1@prueba.mx`, `admin@cets.oaxaca.gob.mx`) siguen entrando; vacío: "Escribe tu correo".
   - Ningún mensaje duplicado.
+- [ ] **Limpieza previa a la revisión (buscador de `solicitudesActivas`, miPerfil):**
+  - Buscador: `0901` encuentra la 901; `civil` (minúsculas) encuentra las del hospital; `xyz` muestra "No hay solicitudes con esos filtros" y contadores en 0; vacío muestra todas; combinado con Estatus/Grupo/Rh; píldora "Búsqueda"; "Limpiar todos" la borra; Enter envía "Refrescar"; el paginador sigue funcionando.
+  - `miPerfil` del donador: ya no sale "Recibir avisos"; el toggle de contacto se ve bien y se guarda encendido y apagado.
 ---
 
 ## 9. Decisiones tomadas
@@ -2204,7 +2206,7 @@ quedó el trabajo en este documento.
 | D11 | Valores de `criteriosExclusion` | Solo `SiNo` / `SeleccionSimple`; se quita "Selección múltiple". `tipoExclusion` va como `Temporal` / `Permanente` (sin minúsculas). | [Alex] HU-4.3 |
 | D12 | Diagrama desactualizado | Actualizar el diagrama de clases y las secuencias: firmas con entidad completa, `Interes`, `SesionController`, `iniciarSesion` devuelve `Usuario`, métodos de entidades movidos a los Controls y mensajes del Ln delgado. | [DAVID] T-final |
 | D13 | `consentimientoContacto` | **Opt-in: apagado por defecto** (manda el `DEFAULT FALSE` de la BD). Se activa solo si el donador lo elige en miPerfil. | [DAVID] HU-1.3 (hecho) |
-| D14 | Toggles sin columna | "Recibir avisos de solicitudes compatibles" queda **deshabilitado** en miPerfil, con una nota, sin conectarlos a nada. | [DAVID] HU-1.3 (hecho) |
+| D14 | Toggles sin columna | El toggle "Recibir avisos de solicitudes compatibles" se **quitó** de miPerfil (no tiene columna y los avisos ya dependen de la ubicación y el radio). | [DAVID] HU-1.3 (hecho) |
 | D15 | Combo "Región" | Se **elimina**: no existe columna y la ubicación (D1) lo reemplaza. | [DAVID] HU-1.3 (hecho) |
 | D16 | Controller de miPerfil | `PerfilController` (`@ViewScoped`) y no `CuentasController` (`@RequestScoped`): el perfil debe conservarse entre los clics de la vista. Los dos usan `LnCuentas`. | [DAVID] HU-1.3 / HU-3.4 (hecho) |
 | D17 | Cuestionario Apto y confirmar interés | El resultado **Apto** del cuestionario es **orientativo, no obligatorio**: `registrarInteres` no lo exige. Sí exige solicitud Activa, que el donador no sea el solicitante, compatibilidad tipo/Rh y `esElegible` (56 días y exclusión permanente). | [Alex] HU-3.3 / HU-4.2 — **decidida** |
@@ -2241,8 +2243,8 @@ Siguen **abiertas**: necesitan una decisión del equipo o del profe. Lo ya resue
 
 4. **HU-1.3:** `PerfilClinico.marcarElegibilidadPreliminar(): boolean` regresa `elegible`, pero **no hay columna**
    para guardarlo. **No se implementó** (tampoco hay regla definida).
-5. **HU-1.3, miPerfil:** el toggle "Recibir avisos" no tiene columna en la BD, y la edición de datos personales
-   (nombre/teléfono) no tiene HU. El toggle sin columna quedó deshabilitado (D14) y los datos personales son de
+5. **HU-1.3, miPerfil (cerrada, D14):** el toggle "Recibir avisos" no tenía columna en la BD y se **quitó** de la vista. Sigue abierto
+   que la edición de datos personales (nombre/teléfono) no tiene HU. Los datos personales son de
    solo lectura.
 6. **HU-1.4 / HU-3.3 (cerrada, D19):** `PublicacionSolicitud.mostrarContactoDonador(int solicitudId)` (HU-3.3, 1.1.4) contradice la
    vista pública, que no lleva sesión. No está definido **a quién** se le muestra el contacto del donador (¿al familiar
@@ -2261,7 +2263,7 @@ Siguen **abiertas**: necesitan una decisión del equipo o del profe. Lo ya resue
    `alt[elegible == false] → UIMiHistorial` de la secuencia; decidir si se quita del diagrama.
 10. **HU-4.2:** no está definido qué tiempo de espera mostrar cuando el criterio es **Permanente** (`duracionDias`
     NULL), ni si el diagrama renombra `tiempoEspera` a `tiempoEsperaDias`.
-11. **HU-4.3:** la vista tiene el campo "Referencia" sin columna en la BD. Desactivar un criterio no tiene mensaje
+11. **HU-4.3 (parcial):** ~~la vista tiene el campo "Referencia" sin columna en la BD~~ (el campo se quitó de la vista). Sigue abierto: desactivar un criterio no tiene mensaje
     propio en la secuencia (se usa `modificarCriterio` con `activo = false`).
 12. **HU-5.1:**
     - `calcularProximaFecha()` no define la regla. El comentario del script dice
@@ -2298,8 +2300,9 @@ Siguen **abiertas**: necesitan una decisión del equipo o del profe. Lo ya resue
     - El *Diagrama de navegación* no tiene transiciones para `donadores → capturarDonacion`, ni para
       `misSolicitudes → capturarSolicitud`, aunque las vistas tienen esos botones.
     - El botón "Descargar" de miHistorial y "Descargar imagen"/"Imprimir ficha" de publicación no tienen HU.
-20. **HU-6.2 (vista `solicitudesActivas`) tiene elementos que el diagrama no define:**
-    - El buscador "Buscar por folio u hospital": el diagrama solo filtra por estatus, tipo y Rh. Quedó deshabilitado.
+20. **HU-6.2 (vista `solicitudesActivas`, cerrada) tiene elementos que el diagrama no define:**
+    - El buscador "Buscar por folio u hospital": el diagrama solo filtra por estatus, tipo y Rh. **Quedó funcionando:** `PanelCetsController`
+      filtra por folio u hospital (sin mayúsculas ni acentos) la lista que ya regresó el Ln, combinable con estatus, tipo y Rh; no toca Ln ni BD.
     - Las tarjetas de resumen: "Solicitudes activas", "Donadores interesados" y "Sin donador interesado" se calculan
       sobre las solicitudes mostradas. La maqueta decía "interesados hoy" y "14% vs ayer"; se cambió el texto porque no
       hay dato que lo respalde.

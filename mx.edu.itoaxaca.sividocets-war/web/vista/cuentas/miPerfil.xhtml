@@ -140,20 +140,12 @@
                     <!-- Privacidad (D8) -->
                     <div class="tarjeta">
                         <div class="tarjeta-cabecera"><h2><i class="pi pi-shield texto-rojo"></i> Privacidad</h2></div>
-                        <div class="preferencia">
+                        <div class="preferencia mb-0">
                             <div>
                                 <strong>Compartir mi contacto solo cuando yo confirme interés</strong>
                                 <p>Apagado por defecto. Si lo activas, el familiar que creó la solicitud donde confirmes tu interés verá tu teléfono y correo. Si no, solo verá tu nombre y tu tipo de sangre. Tu ubicación nunca se comparte.</p>
                             </div>
                             <p:toggleSwitch id="consentimientoContacto" value="#{perfilController.perfil.usuario.consentimientoContacto}"/>
-                        </div>
-                        <div class="preferencia mb-0">
-                            <div>
-                                <strong>Recibir avisos de solicitudes compatibles</strong>
-                                <p>Te avisamos cuando un hospital dentro de tu radio requiera tu grupo sanguíneo.</p>
-                                <span class="ayuda"><i class="pi pi-clock"></i> Aún no disponible: no tiene dónde guardarse en la base de datos.</span>
-                            </div>
-                            <p:toggleSwitch id="recibirAvisos" value="false" disabled="true"/>
                         </div>
                     </div>
                 </div>
