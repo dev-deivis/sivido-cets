@@ -21,7 +21,7 @@
                     <p:messages id="mensajes" closable="true"/>
 
                     <div class="campo">
-                        <p:outputLabel for="correo">Correo electrónico <span class="requerido">*</span></p:outputLabel>
+                        <p:outputLabel for="correo" indicateRequired="false">Correo electrónico <span class="requerido">*</span></p:outputLabel>
                         <p:inputText id="correo" type="email" value="#{cuentasController.usuario.correo}" required="true"
                                      requiredMessage="Escribe tu correo"
                                      placeholder="ejemplo@correo.com">
@@ -30,7 +30,7 @@
                     </div>
                     <div class="campo">
                         <div class="fila-campo">
-                            <p:outputLabel for="contrasena">Contraseña <span class="requerido">*</span></p:outputLabel>
+                            <p:outputLabel for="contrasena" indicateRequired="false">Contraseña <span class="requerido">*</span></p:outputLabel>
                             <h:link outcome="/vista/cuentas/iniciarSesion" value="¿Olvidaste tu contraseña?" styleClass="texto-chico"/>
                         </div>
                         <p:password id="contrasena" value="#{cuentasController.usuario.passwordHash}" required="true"

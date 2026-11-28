@@ -248,7 +248,7 @@
                 <p>El donador <strong>#{donacionController.donador.nombreCompleto}</strong> ya no podrá registrar donaciones.
                     Sus solicitudes y avisos activos no cambian.</p>
                 <div class="campo">
-                    <p:outputLabel for="motivo">Motivo <span class="requerido">*</span></p:outputLabel>
+                    <p:outputLabel for="motivo" indicateRequired="false">Motivo <span class="requerido">*</span></p:outputLabel>
                     <p:inputTextarea id="motivo" value="#{donacionController.exclusion.diagnostico}" required="true"
                                      requiredMessage="Escribe el motivo de la exclusión" rows="4" maxlength="200"
                                      counter="contadorMotivo" counterTemplate="{0} caracteres restantes" style="width:100%">
