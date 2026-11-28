@@ -101,7 +101,7 @@
                 <p:panel header="#{empty cuestionarioController.criterio.id ? 'Nuevo criterio de exclusión' : 'Editar criterio de exclusión'}">
                     <h:form id="formNuevoCriterio">
                         <div class="campo">
-                            <p:outputLabel for="pregunta">Texto de la pregunta <span class="requerido">*</span></p:outputLabel>
+                            <p:outputLabel for="pregunta" indicateRequired="false">Texto de la pregunta <span class="requerido">*</span></p:outputLabel>
                             <p:inputTextarea id="pregunta" rows="3" autoResize="false"
                                              value="#{cuestionarioController.criterio.criterio}"
                                              required="true" requiredMessage="Escribe la pregunta"

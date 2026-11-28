@@ -29,7 +29,7 @@
                     <p:messages id="mensajes" closable="true"/>
 
                     <div class="campo">
-                        <p:outputLabel for="nombre">Nombre completo <span class="requerido">*</span></p:outputLabel>
+                        <p:outputLabel for="nombre" indicateRequired="false">Nombre completo <span class="requerido">*</span></p:outputLabel>
                         <p:inputText id="nombre" value="#{cuentasController.usuario.nombreCompleto}" required="true"
                                      requiredMessage="Escribe tu nombre completo"
                                      placeholder="Ej. María Elena Jiménez Bautista"/>
@@ -37,14 +37,14 @@
                     </div>
                     <div class="grid grid-2" style="gap:0 1rem">
                         <div class="campo">
-                            <p:outputLabel for="telefono">Teléfono de contacto <span class="requerido">*</span></p:outputLabel>
+                            <p:outputLabel for="telefono" indicateRequired="false">Teléfono de contacto <span class="requerido">*</span></p:outputLabel>
                             <p:inputText id="telefono" value="#{cuentasController.usuario.telefono}" required="true"
                                          requiredMessage="Escribe tu teléfono"
                                          placeholder="951 123 4567" maxlength="10"/>
                             <span class="ayuda">10 dígitos</span>
                         </div>
                         <div class="campo">
-                            <p:outputLabel for="correo">Correo electrónico <span class="requerido">*</span></p:outputLabel>
+                            <p:outputLabel for="correo" indicateRequired="false">Correo electrónico <span class="requerido">*</span></p:outputLabel>
                             <p:inputText id="correo" type="email" value="#{cuentasController.usuario.correo}" required="true"
                                          requiredMessage="Escribe tu correo"
                                          placeholder="ejemplo@correo.com">
@@ -54,13 +54,13 @@
                     </div>
                     <div class="grid grid-2" style="gap:0 1rem">
                         <div class="campo">
-                            <p:outputLabel for="contrasena">Contraseña <span class="requerido">*</span></p:outputLabel>
+                            <p:outputLabel for="contrasena" indicateRequired="false">Contraseña <span class="requerido">*</span></p:outputLabel>
                             <p:password id="contrasena" value="#{cuentasController.usuario.passwordHash}" required="true"
                                         requiredMessage="Escribe una contraseña"
                                         placeholder="••••••••" toggleMask="true"/>
                         </div>
                         <div class="campo">
-                            <p:outputLabel for="confirmar">Confirmar contraseña <span class="requerido">*</span></p:outputLabel>
+                            <p:outputLabel for="confirmar" indicateRequired="false">Confirmar contraseña <span class="requerido">*</span></p:outputLabel>
                             <p:password id="confirmar" value="#{cuentasController.confirmacion}" required="true"
                                         requiredMessage="Confirma tu contraseña"
                                         placeholder="••••••••" toggleMask="true"/>
